@@ -109,14 +109,6 @@ const seq = window.__seq = STATIC ? null : createSequence($('#seq'), {
   src: (i) => `media/v3/seq/${mobile() ? 'm' : 'd'}/${String(i + 1).padStart(3, '0')}.webp`,
 });
 if (!STATIC) {
-  // Pointer parallax on the exhibition pieces (on the inner image, so the zoom owns the figure)
-  const floats = [['.hero__oval .oval__wood', 12], ['.hero__oval .oval__shot', 12], ['.hero__float--a', -28], ['.hero__float--b', 34]].map(([s, d]) => ({ d, x: gsap.quickTo($(s), 'x', { duration: 1.2, ease: 'power3' }), y: gsap.quickTo($(s), 'y', { duration: 1.2, ease: 'power3' }) }));
-  addEventListener('pointermove', (e) => {
-    if (scrollY > innerHeight * .4) return;
-    const nx = e.clientX / innerWidth - .5, ny = e.clientY / innerHeight - .5;
-    floats.forEach((f) => { f.x(nx * f.d); f.y(ny * f.d); });
-  }, { passive: true });
-
   // The push-in lands exactly on the film's first frame: the oval's window already holds
   // that frame (a 16:9 box, 79.14% × 67% of the oval, centred at 50.2% / 50.4%), so we
   // scale it until it covers the viewport — then the canvas takes over with identical pixels.
@@ -183,7 +175,6 @@ if (!STATIC) {
     .to(oval, { scale: zoom, x: toX, y: toY, duration: .19, ease: 'power2.inOut' }, .02)
     .to('.oval__wood', { opacity: 0, duration: .05, ease: 'power1.in' }, .15)
     .to('.oval__shot', { clipPath: 'ellipse(100% 100% at 50% 50%)', duration: .05 }, .15)
-    .to('.oval__wood, .oval__shot', { x: 0, y: 0, duration: .03 }, .12)
   // 3 · the painting comes alive — cross-dissolve into the film's first frame
     .to('.cinema__seq', { opacity: 1, duration: .005 }, .205)
     .to('.hero__wall', { opacity: 0, duration: .005 }, .21)
@@ -331,30 +322,6 @@ $('#menu-open').addEventListener('click', openMenu);
 $('#menu-open-2').addEventListener('click', openMenu);
 $('#menu-close').addEventListener('click', closeMenu);
 addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
-
-// ───────────────────────── Cursor ─────────────────────────
-if (finePointer && !STATIC) {
-  document.documentElement.classList.add('has-cursor');
-  const cursor = $('.cursor'), label = $('.cursor__label');
-  const cx = gsap.quickTo(cursor, 'x', { duration: .25, ease: 'power3' });
-  const cy = gsap.quickTo(cursor, 'y', { duration: .25, ease: 'power3' });
-  addEventListener('pointermove', (e) => { cx(e.clientX); cy(e.clientY); cursor.classList.add('is-live'); }, { passive: true });
-  // Re-read what's under the pointer on mouse moves *and* on scroll, because content
-  // scrolls beneath a still mouse. The "Step in" label only belongs to the untouched wall.
-  let mx = -1, my = -1;
-  const sync = () => {
-    if (mx < 0) return;
-    const el = document.elementFromPoint(mx, my);
-    const t = el?.closest('[data-cursor]');
-    let text = t && !el.closest('a, button, input, select, textarea') ? t.dataset.cursor : '';
-    if (t?.classList.contains('hero__oval') && scrollY > innerHeight * .15) text = '';
-    cursor.classList.toggle('is-label', !!text);
-    cursor.classList.toggle('is-dark', !!t?.closest('.rep'));
-    if (text) label.textContent = text;
-  };
-  addEventListener('pointermove', (e) => { mx = e.clientX; my = e.clientY; sync(); }, { passive: true });
-  addEventListener('scroll', sync, { passive: true });
-}
 
 // ───────────────────────── VII · Your scene ─────────────────────────
 {

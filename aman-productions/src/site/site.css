@@ -82,14 +82,6 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 .loader__count sup { font-size: .35em; vertical-align: top; margin-left: 6px; }
 
 /* ───────────────────────── Cursor ───────────────────────── */
-.cursor { position: fixed; left: 0; top: 0; z-index: 350; pointer-events: none; display: none; opacity: 0; transition: opacity .3s; }
-.cursor.is-live { opacity: 1; }
-.has-cursor .cursor { display: block; }
-.cursor::before { content: ''; position: absolute; width: 10px; height: 10px; margin: -5px; border-radius: 50%; background: var(--red); transition: transform .35s var(--ease), opacity .3s; }
-.cursor__label { position: absolute; transform: translate(-50%, -50%) scale(0); width: 86px; height: 86px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 500; color: var(--paper); background: var(--red); transition: transform .45s var(--ease); white-space: nowrap; }
-.cursor.is-label::before { transform: scale(0); }
-.cursor.is-label .cursor__label { transform: translate(-50%, -50%) scale(1); }
-.cursor.is-dark .cursor__label { background: rgba(251, 248, 242, .92); color: var(--ink); }
 
 /* ───────────────────────── Dock & menu ───────────────────────── */
 .dock {
