@@ -131,6 +131,25 @@ if (!STATIC) {
   const toX = () => -oval.offsetWidth * .002;
   const toY = () => innerHeight / 2 - (topFrac() * innerHeight - .066 * oval.offsetHeight);
 
+  // The oval plays the real footage: the first second of the shot drifts back and forth
+  // while the visitor looks. On scroll it eases back to frame 1, where the push-in begins.
+  {
+    const LOOP = 22; // frames 1–22 of the film
+    const live = createSequence($('#oval-live'), { count: LOOP, src: (i) => `media/v3/seq/${mobile() ? 'm' : 'd'}/${String(i + 1).padStart(3, '0')}.webp` });
+    const st = { f: 0, dir: 1 };
+    const liveEl = $('#oval-live');
+    gsap.ticker.add((t, dt) => {
+      const atRest = scrollY < innerHeight * .03;
+      if (atRest) {
+        st.f += st.dir * dt * .012;                       // ≈ 12 fps, half speed: a slow glide
+        if (st.f >= LOOP - 1) { st.f = LOOP - 1; st.dir = -1; }
+        if (st.f <= 0) { st.f = 0; st.dir = 1; }
+      } else st.f += (0 - st.f) * Math.min(1, dt * .012); // settle on frame 1 as the camera moves in
+      live.draw(st.f);
+      liveEl.style.opacity = atRest || st.f > .05 ? 1 : 0; // the sharp full-size still takes over for the push-in
+    });
+  }
+
   const lines = $$('[data-line]');
   const clock = $('#clock'), tc = $('#lens-tc');
   const film = { f: 0 };

@@ -447,3 +447,4 @@ html:not(.is-static) .hero__oval { translate: none; }
   clip-path: ellipse(63.2% 74.6% at 49.7% 49.4%); }
 .oval__shot img { width: 100%; height: 100%; object-fit: cover; }
 .oval__wood { position: relative; width: 100%; }
+.oval__live { position: absolute; inset: 0; width: 100%; height: 100%; }
