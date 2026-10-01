@@ -432,3 +432,13 @@ dialog::backdrop { background: rgba(42, 14, 11, .7); backdrop-filter: blur(6px);
   .stacked { border-radius: 26px 26px 0 0; }
 }
 .your-scene { overflow-x: clip; }
+
+/* motion choice */
+.motion-note { position: fixed; left: 50%; bottom: 20px; translate: -50% 0; z-index: 380; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; width: min(640px, calc(100% - 32px)); padding: 14px 16px; border-radius: 18px; background: rgba(29, 19, 17, .9); color: var(--cream); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 20px 50px rgba(0, 0, 0, .3); font-size: 14px; }
+.motion-note p { margin: 0; flex: 1 1 260px; }
+.motion-note button { padding: 9px 14px; border-radius: 999px; font-size: 13px; border: 1px solid rgba(242, 235, 223, .35); }
+.motion-note button[data-v='full'] { background: var(--red); border-color: var(--red); }
+/* calm mode opens on the exhibition, then the lake */
+.is-static .cinema__pin { display: flex; flex-direction: column; overflow: visible; }
+.is-static .hero__wall { order: -1; position: relative; inset: auto; }
+.is-static .cinema__shade { display: none; }

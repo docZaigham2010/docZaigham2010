@@ -13,9 +13,29 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const mobile = () => matchMedia('(max-width: 860px)').matches;
 const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
-const STATIC = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Motion: the full experience plays by default. Visitors can switch to a calm, still
+// version (remembered); devices that ask for reduced motion are offered it, not forced into it.
+const MOTION_KEY = 'aman-motion';
+const motionPref = (() => { try { return localStorage.getItem(MOTION_KEY); } catch { return null; } })();
+const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const STATIC = motionPref === 'calm';
+const setMotion = (v) => { try { localStorage.setItem(MOTION_KEY, v); } catch { /* private mode */ } location.reload(); };
 if (STATIC) document.documentElement.classList.add('is-static');
 $('#year').textContent = new Date().getFullYear();
+{
+  const btn = $('#motion-toggle');
+  btn.textContent = STATIC ? 'Motion: off — play the full experience' : 'Motion: on';
+  btn.setAttribute('aria-pressed', String(!STATIC));
+  btn.addEventListener('click', () => setMotion(STATIC ? 'full' : 'calm'));
+  if (prefersReduced && !motionPref) {
+    const note = document.createElement('div');
+    note.className = 'motion-note';
+    note.setAttribute('role', 'status');
+    note.innerHTML = '<p>Your device asks for reduced motion. This site is a moving story — prefer it still?</p><button type="button" data-v="calm">Switch to calm mode</button><button type="button" data-v="full" aria-label="Keep the animations">Keep animations</button>';
+    note.addEventListener('click', (e) => { const v = e.target.closest('button')?.dataset.v; if (!v) return; if (v === 'calm') setMotion('calm'); else { try { localStorage.setItem(MOTION_KEY, 'full'); } catch {} note.remove(); } });
+    document.body.appendChild(note);
+  }
+}
 
 // ───────────────────────── Smooth scroll ─────────────────────────
 let lenis = null;
