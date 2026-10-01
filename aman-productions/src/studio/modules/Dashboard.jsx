@@ -5,7 +5,7 @@ import { Card, Stat, StatusBadge, Progress, Badge, Empty, Avatar } from '../ui.j
 import { GroupedBars, HBars } from '../charts.jsx';
 import {
   compactInr, inr, fmtDate, fmtRelative, today, rel, addDays, parse, sum, invoiceTotals, invoiceStatus, PHASES, STAGES, taskProgress,
-  projectCost, projectEstimate, timeAgo, daysBetween,
+  projectCost, projectEstimate, timeAgo, daysBetween, coverFor,
 } from '../lib.js';
 
 const greeting = () => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; };
@@ -51,26 +51,26 @@ export default function Dashboard({ alerts }) {
       <section className="hero-card">
         <div className="hero-card__text">
           <p className="eyebrow">{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })} · Control Room</p>
-          <h1>{greeting()}, {s.settings.userName}.</h1>
+          <h1>{greeting()}, <span className="chip-img"><img src="media/v3/obj-samovar.webp" alt="" /></span> {s.settings.userName}. <span className="h1-soft">Here’s <span className="chip-img chip-img--wide"><img src="media/v3/scene-dal.webp" alt="" /></span> today’s call sheet.</span></h1>
           <p className="hero-card__lede">
             {next
-              ? <>Here’s today’s call sheet. <b>{next.name.split('—')[0].trim()}</b> {daysBetween(t0, next.startDate) === 0 ? 'is happening today' : <>is <b>{daysBetween(t0, next.startDate)} days</b> away</>} — {taskProgress(next)}% of its tasks are done.</>
-              : 'Here’s today’s call sheet. The slate is clear — a good day to win new work.'}
+              ? <><b>{next.name.split('—')[0].trim()}</b> {daysBetween(t0, next.startDate) === 0 ? 'is happening today' : <>is <b>{daysBetween(t0, next.startDate)} days</b> away</>} — {taskProgress(next)}% of its tasks are done.</>
+              : 'The slate is clear — a good day to win new work.'}
             {fresh.length > 0 && <> {fresh.length} new {fresh.length > 1 ? 'enquiries are' : 'enquiry is'} waiting in the pipeline.</>}
           </p>
         </div>
         {next && (
-          <a className="countdown" href={`#/productions/${next.id}`}>
+          <a className="countdown" href={`#/productions/${next.id}`} style={{ backgroundImage: `url(${coverFor(next)})` }}>
             <span className="countdown__k">Next on set</span>
             <span className="countdown__n">{Math.max(0, daysBetween(t0, next.startDate))}<small>days</small></span>
-            <span className="countdown__t">{next.kind === 'film' ? <Film size={14} /> : <PartyPopper size={14} />}{fmtDate(next.startDate, { weekday: 'short', day: 'numeric', month: 'short' })} · {next.location}</span>
+            <span className="countdown__name">{next.name.split('—')[0].trim()}</span><span className="countdown__t">{next.kind === 'film' ? <Film size={14} /> : <PartyPopper size={14} />}{fmtDate(next.startDate, { weekday: 'short', day: 'numeric', month: 'short' })} · {next.location}</span>
           </a>
         )}
       </section>
 
       <div className="stats">
+        {!isCrew && <Stat label="Collected" value={compactInr(money.collected)} sub={`of ${compactInr(money.booked)} booked`} icon={Wallet} tone="feature" meter={money.booked ? money.collected / money.booked : 0} />}
         {!isCrew && <Stat label="Weighted pipeline" value={compactInr(weightedPipeline(s.leads))} sub={`${s.leads.filter((l) => !['Won', 'Lost'].includes(l.stage)).length} open leads`} icon={Workflow} />}
-        {!isCrew && <Stat label="Collected" value={compactInr(money.collected)} sub={`of ${compactInr(money.booked)} booked`} icon={Wallet} />}
         {!isCrew && <Stat label="Outstanding" value={compactInr(money.outstanding)} sub={money.overdue.length ? `${money.overdue.length} overdue` : 'Nothing overdue'} icon={IndianRupee} tone={money.overdue.length ? 'warn' : undefined} />}
         <Stat label="Active productions" value={active.length} sub={`${active.filter((p) => p.kind === 'event').length} events · ${active.filter((p) => p.kind === 'film').length} films`} icon={Clapperboard} />
         <Stat label="Crew on call · 7 days" value={crewOnCall} sub={`of ${s.crew.length} in the directory`} icon={Users} />

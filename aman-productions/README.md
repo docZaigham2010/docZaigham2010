@@ -9,33 +9,30 @@ npm run build      # production build → dist/
 npm run preview    # serve dist/ on http://localhost:4173
 ```
 
-## The website — "a story in five reels"
+## The website — "an exhibition of moments"
 
-The whole site is written as a film. Visitors don't browse it; they watch it unfold.
+Version 3 is art-directed after the reference set (editorial museum hero, wine-style object showcase, misty glass-UI landscapes, soft dashboard cards). It is image-led: twelve pieces of concept art were generated for it (see `SOURCES.md`).
 
-| Reel | What happens |
+| Chapter | What happens |
 |---|---|
-| **Film leader** | A 5-4-3-2-1 projector countdown while assets load. "Aman Productions *presents*". Enter with sound (a generated projector hum + ambient score) or in silence. |
-| **00 · Cold open** | Letterbox bars open on *"Every story begins in the dark."* The AP logo is assembled from ~15,000 live WebGL particles that scatter from your cursor. Scrolling: *"Then someone turns on the light."* |
-| **01 · Prologue** | A real screenplay page — `EXT. DAL LAKE, SRINAGAR — FIRST LIGHT` — that lights up word by word as you read. |
-| **02 · Two crafts** | Pinned sequence: **LIVE** (event management, "there is no second take") expands, then **FRAME** (film production, "a frame lasts forever") wipes over it, and both settle side by side. |
-| **03 · The reel** | A horizontal film strip with sprocket holes: eight services as frames, tilting through a projector "gate", with a running timecode. |
-| **04 · The method** | A clapperboard that *claps* as you scroll through Listen → Imagine → Prepare → Action → The cut. |
-| **05 · The valley** | A ridgeline relief of Kashmir with routes drawn from the studio in Abi Guzar to Dal Lake, the Mughal Gardens, Gulmarg, Pahalgam and Sonamarg — with real straight-line distances and "when the light is best" notes. |
-| **Contact sheet** | Real photos from the studio's public gallery plus clearly labelled concept imagery. |
-| **06 · Your scene** | The enquiry form is a fill-in-the-blanks screenplay. A live script page writes itself as the visitor types. **Send on WhatsApp** opens WhatsApp to +91 77809 96694 with the script pre-written; it also lands in Studio OS's pipeline. |
-| **End credits** | The footer rolls like film credits — *Starring: You. Directed by: Your imagination.* — ending in "The End — of the beginning" and a VHS-style **Rewind** to the top. |
+| **Opening** | A cream page; a rounded frame draws itself around the screen while a huge vermilion counter loads to 100%, then the curtain lifts. |
+| **I · The exhibition** | Chinar-maroon wall, cream canvas. *THE MOMENTS THAT BECOME STORIES* in giant vermilion serif, interlocked with a hand-carved Kashmiri walnut oval frame; a papier-mâché frame and a khatamband frame float across the edges and follow the pointer. |
+| **Into the frame** | Scrolling dives *into* the oval painting — the type splits away, the canvas dissolves, and the painting becomes the full-screen misty Dal Lake. |
+| **II · Prologue** | On the lake, a glass frame draws itself, a dawn clock ticks from 05:42 to 06:20, and the story arrives line by line on glass cards: *We make both of them happen.* |
+| **III · Two crafts** | Expanding image cards — **LIVE** (event management, a mandap under chinar trees) and **FRAME** (film production, a night shoot in snow). |
+| **IV · The repertoire** | A draggable dark showcase of six objects (copper samovar, cinema camera, stage spotlight, papier-mâché clapperboard, ribbon microphone, model shikara), each a service, with a giant ghost word behind it and a "Plan this with us" link that pre-fills the enquiry. |
+| **V · The method** | Five scenes as an editorial list; hovering a scene floats a preview image beside the cursor. |
+| **VI · The valley** | The ridgeline map of Kashmir, printed in ink on cream, with routes drawn from the Abi Guzar studio and real straight-line distances. |
+| **VII · Your scene** | The fill-in-the-blanks screenplay enquiry with a live script page; sends on WhatsApp to +91 77809 96694 and lands in Studio OS. |
+| **End credits** | A maroon footer with a giant italic *Aman*, rolling credits and "Back to the first frame". |
 
-One particle field is the through-line of the whole film: it re-forms into each chapter's subject — the **logo → a spark → a camera aperture → a stage with light beams → a flowing ribbon → the mountains of the valley → a portal** into "your scene" — and back to the logo in the credits.
-
-Also: camera HUD (REC timecode, reel name, film-strip progress, viewfinder corners), custom cursor with context labels, magnetic buttons, film grain, "Scene selection" menu, shutter transition into the studio.
-
-**Accessibility & performance:** semantic HTML, skip link, keyboard-operable menu/map/dialogs, `prefers-reduced-motion` → a static, fully readable layout (no pinning, no smooth scroll). WebGL pauses when the tab is hidden; particle count and pixel ratio drop on phones. If WebGL is unavailable the site still works. All fonts and libraries are bundled locally — no third-party requests.
+Also: a floating glass navigation dock that appears after the hero, a circular-reveal menu, a context cursor (Step in / Open / Drag), reduced-motion static layout, no third-party requests.
 
 ## Studio OS — the management system
 
 A control room for both sides of the business. Open `/studio.html` (or "Studio OS ↗" in the credits).
 
+- **Look** — the same cream, vermilion and saffron as the website; a floating dark rail, soft rounded cards, a saffron highlight tile with capsule meters, capsule bar charts and cover art on every production. Dark theme available.
 - **Control Room** — greeting with today's "call sheet", next-on-set countdown, KPIs (weighted pipeline, collected, outstanding, active productions, crew on call), a 10-day look-ahead, invoiced-vs-collected chart, production health (tasks & budget burn), tasks due, alerts and the studio log.
 - **Pipeline (CRM)** — drag-and-drop kanban (New → Contacted → Proposal → Negotiation → Won/Lost) with weighted forecast and win rate. Website enquiries arrive automatically with the visitor's story. Draft a quote, or **convert a won lead into a production** in one click.
 - **Productions** — grid/list, filters, event & film templates. Each production has:
@@ -61,13 +58,11 @@ To go live: connect an authenticated database (all reads/writes already go throu
 index.html                 the website (screenplay structure)
 studio.html                Studio OS entry
 src/site/main.js           scroll direction: leader, HUD, chapters, reels, form, credits
-src/site/particles.js      the WebGL particle field and its seven shapes
 src/site/valley.js         the Kashmir ridgeline map
-src/site/sound.js          generated WebAudio score & cues
 src/site/site.css          website design system
 src/shared/inbox.js        website → studio enquiry hand-off
 src/studio/                Studio OS (React): store, seed data, UI kit, charts, modules/
-public/media/              logo and photographs
+public/media/v3/           generated concept art (frames, objects, scenes)
 vercel.json                build + headers (noindex for the preview)
 ```
 

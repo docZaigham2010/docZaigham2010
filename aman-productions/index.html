@@ -3,362 +3,288 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Aman Productions — Every story begins in the dark</title>
+  <title>Aman Productions — The moments that become stories</title>
   <meta name="description" content="Aman Productions — event management and film production from Srinagar, Kashmir. We design the moments people remember and the films that keep them." />
-  <meta name="theme-color" content="#050608" />
+  <meta name="theme-color" content="#2a0e0b" />
   <meta name="robots" content="noindex, nofollow" />
   <meta property="og:title" content="Aman Productions — Events & Films, Kashmir" />
-  <meta property="og:description" content="Every story begins in the dark. We turn on the light." />
+  <meta property="og:description" content="The moments that become stories." />
   <link rel="icon" href="media/favicon.png" />
-  <link rel="preload" href="media/ap-logo.jpeg" as="image" />
+  <link rel="preload" href="media/v3/frame-oval.webp" as="image" />
 </head>
 <body class="is-loading">
-  <a class="skip" href="#prologue">Skip the opening</a>
+  <a class="skip" href="#prologue">Skip to the story</a>
 
-  <!-- ═══════════════ FILM LEADER (preloader) ═══════════════ -->
-  <div class="leader" id="leader" role="dialog" aria-modal="true" aria-label="Opening titles">
-    <div class="leader__frame" aria-hidden="true">
-      <div class="leader__cross leader__cross--h"></div>
-      <div class="leader__cross leader__cross--v"></div>
-      <div class="leader__ring leader__ring--outer"></div>
-      <div class="leader__ring leader__ring--inner"></div>
-      <div class="leader__sweep"></div>
-      <div class="leader__count" id="leader-count">5</div>
-    </div>
-    <div class="leader__titles">
-      <p class="leader__presents"><span>Aman Productions</span> <em>presents</em></p>
-      <p class="leader__note mono">A story in five reels · Running time: as long as you like</p>
-      <div class="leader__actions">
-        <button class="btn btn--light" data-enter="sound" data-cursor="Play"><span class="btn__dot"></span>Enter with sound</button>
-        <button class="btn btn--ghost" data-enter="silent">Enter in silence</button>
-      </div>
-    </div>
-    <div class="leader__meta mono" aria-hidden="true"><span>AP-2026</span><span id="leader-load">LOADING REEL 000%</span><span>SRINAGAR · KASHMIR</span></div>
+  <!-- ─────────── Opening: the frame is drawn, the house lights dim ─────────── -->
+  <div class="loader" id="loader" aria-hidden="true">
+    <svg class="loader__frame" preserveAspectRatio="none"><rect x="1" y="1" rx="26" ry="26" pathLength="100" /></svg>
+    <img class="loader__logo" src="media/ap-logo.jpeg" alt="" width="64" height="64" />
+    <p class="loader__line"><span>An exhibition of moments</span><em>Srinagar · Kashmir</em></p>
+    <p class="loader__count"><span id="loader-count">0</span><sup>%</sup></p>
   </div>
 
-  <!-- ═══════════════ PERSISTENT LAYERS ═══════════════ -->
-  <canvas id="particles" class="particles" aria-hidden="true"></canvas>
-  <div class="atmos" aria-hidden="true"><i class="atmos__leak atmos__leak--a"></i><i class="atmos__leak atmos__leak--b"></i></div>
-  <div id="grain" class="grain" aria-hidden="true"></div>
-  <div class="letterbox" aria-hidden="true"><i class="letterbox__bar letterbox__bar--top"></i><i class="letterbox__bar letterbox__bar--bottom"></i></div>
-  <div class="viewfinder" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-  <div class="cursor" aria-hidden="true"><div class="cursor__ring"><span class="cursor__label"></span></div><div class="cursor__dot"></div></div>
-  <div class="shutter" aria-hidden="true"><i></i><i></i></div>
+  <div class="cursor" aria-hidden="true"><span class="cursor__label"></span></div>
 
-  <!-- ═══════════════ HUD ═══════════════ -->
-  <header class="hud">
-    <a class="hud__brand" href="#top" aria-label="Aman Productions — back to the opening">
-      <img src="media/ap-logo.jpeg" alt="" width="44" height="44" />
-      <span><b>AMAN</b><small>PRODUCTIONS</small></span>
-    </a>
-    <div class="hud__rec mono" aria-hidden="true"><i class="rec-dot"></i>REC <span id="timecode">00:00:00:00</span></div>
-    <nav class="hud__actions" aria-label="Primary">
-      <button class="hud__sound" id="sound-toggle" aria-pressed="false" aria-label="Toggle sound" data-cursor="Sound"><span class="eq"><i></i><i></i><i></i><i></i></span><span class="mono">SOUND <b>OFF</b></span></button>
-      <a class="hud__cta" href="#your-scene" data-magnetic>Start a project</a>
-      <button class="hud__menu" id="menu-open" aria-expanded="false" aria-controls="scenes"><span class="mono">SCENES</span><i></i><i></i></button>
+  <!-- Floating navigation appears once the hero is behind you -->
+  <header class="dock" id="dock">
+    <a class="dock__brand" href="#top" aria-label="Aman Productions — top"><img src="media/ap-logo.jpeg" alt="" width="34" height="34" /><span>Aman</span></a>
+    <nav class="dock__links" aria-label="Sections">
+      <a href="#prologue">Story</a><a href="#crafts">Crafts</a><a href="#repertoire">Repertoire</a><a href="#method">Method</a><a href="#valley">Valley</a>
     </nav>
+    <a class="dock__cta" href="#your-scene">Start a project</a>
+    <button class="dock__menu" id="menu-open" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><i></i><i></i></button>
   </header>
-  <div class="hud-foot mono" aria-hidden="true">
-    <div class="hud-foot__reel"><span id="reel-num">REEL 00</span><span id="reel-name">COLD OPEN</span></div>
-    <div class="hud-foot__strip"><i id="reel-progress"></i></div>
-    <div class="hud-foot__geo">34.0837° N · 74.7973° E</div>
-  </div>
 
-  <!-- ═══════════════ SCENE SELECTION (menu) ═══════════════ -->
-  <nav class="scenes" id="scenes" aria-label="Scene selection" inert>
-    <div class="scenes__head"><span class="mono">SCENE SELECTION</span><button class="scenes__close" id="menu-close" aria-label="Close scene selection">CLOSE ✕</button></div>
-    <ol class="scenes__list">
-      <li><a href="#top"><span class="mono">00</span><b>Cold open</b><em>Every story begins in the dark</em></a></li>
-      <li><a href="#prologue"><span class="mono">01</span><b>Prologue</b><em>Ext. Dal Lake — first light</em></a></li>
-      <li><a href="#crafts"><span class="mono">02</span><b>Two crafts</b><em>Live &amp; frame</em></a></li>
-      <li><a href="#reel"><span class="mono">03</span><b>The reel</b><em>What we make</em></a></li>
-      <li><a href="#method"><span class="mono">04</span><b>The method</b><em>Scene by scene</em></a></li>
-      <li><a href="#valley"><span class="mono">05</span><b>The valley</b><em>Our set is Kashmir</em></a></li>
-      <li><a href="#your-scene"><span class="mono">06</span><b>Your scene</b><em>Write the first page</em></a></li>
+  <nav class="menu" id="menu" aria-label="Menu" inert>
+    <button class="menu__close" id="menu-close" aria-label="Close menu">Close ✕</button>
+    <ol>
+      <li><a href="#top"><span>01</span>The exhibition</a></li>
+      <li><a href="#prologue"><span>02</span>Into the frame</a></li>
+      <li><a href="#crafts"><span>03</span>Two crafts</a></li>
+      <li><a href="#repertoire"><span>04</span>The repertoire</a></li>
+      <li><a href="#method"><span>05</span>The method</a></li>
+      <li><a href="#valley"><span>06</span>The valley</a></li>
+      <li><a href="#your-scene"><span>07</span>Your scene</a></li>
     </ol>
-    <div class="scenes__foot mono"><a href="tel:+917780996694">+91 77809 96694</a><a href="https://wa.me/917780996694" target="_blank" rel="noopener">WhatsApp ↗</a><a href="studio.html" data-transition>Studio OS ↗</a></div>
+    <div class="menu__foot"><a href="tel:+917780996694">+91 77809 96694</a><a href="https://wa.me/917780996694" target="_blank" rel="noopener">WhatsApp ↗</a><a href="studio.html">Studio OS ↗</a></div>
   </nav>
 
   <main id="top">
-    <!-- ═══════════════ 00 · COLD OPEN ═══════════════ -->
-    <section class="cold" data-reel="00" data-reel-name="COLD OPEN" data-shape="logo" aria-labelledby="cold-title">
-      <div class="cold__inner">
-        <p class="cold__slug mono reveal-line"><span>SCENE 01</span><span>TAKE 01</span><span>SRINAGAR, KASHMIR</span></p>
-        <h1 class="cold__title" id="cold-title">
-          <span class="cold__line" data-split>Every story</span>
-          <span class="cold__line" data-split>begins <em class="serif" data-split>in the dark.</em></span>
-        </h1>
-        <div class="cold__bottom">
-          <p class="cold__lede">We are <b>Aman Productions</b> — events you step into, films you never forget. Made in the valley, for the moments that matter most.</p>
-          <a class="cold__scroll mono" href="#prologue" data-cursor="Roll"><span class="cold__scroll-line"></span>Roll the film</a>
-        </div>
-      </div>
-      <p class="cold__ghost" aria-hidden="true">AMAN</p>
-    </section>
+    <!-- ═════════════ I · THE EXHIBITION (hero) ═════════════ -->
+    <section class="hero" id="hero" aria-labelledby="hero-title">
+      <div class="hero__pin">
+        <div class="hero__scene" aria-hidden="true"><img src="media/v3/scene-dal.webp" alt="" /></div>
+        <div class="hero__wall">
+          <div class="hero__canvas">
+            <header class="bar">
+              <button class="bar__plus" id="menu-open-2" aria-label="Open menu" aria-controls="menu"><i></i><i></i></button>
+              <a class="bar__logo" href="#top" aria-label="Aman Productions"><img src="media/ap-logo.jpeg" alt="" width="30" height="30" /><span>Aman</span><small>Productions</small></a>
+              <a class="bar__cta" href="#your-scene">Start a project</a>
+            </header>
 
-    <section class="light-on" data-reel="00" data-reel-name="COLD OPEN" data-shape="spark" aria-label="The light comes on">
-      <p class="light-on__text"><span data-words>Then someone</span> <span data-words>turns on</span> <em class="serif" data-words>the light.</em></p>
-    </section>
+            <p class="hero__side hero__side--l">Events &amp;<br />film production</p>
+            <p class="hero__side hero__side--r">Srinagar<br />Kashmir</p>
 
-    <!-- ═══════════════ 01 · PROLOGUE (screenplay) ═══════════════ -->
-    <section class="prologue" id="prologue" data-reel="01" data-reel-name="PROLOGUE" data-shape="spark" data-dim="0.45" aria-labelledby="prologue-title">
-      <div class="script">
-        <div class="script__meta mono"><span>AMAN PRODUCTIONS</span><span>"THE VALLEY" — PAGE 1</span><span>FINAL DRAFT</span></div>
-        <h2 class="script__fade mono" id="prologue-title">FADE IN:</h2>
-        <p class="script__slug mono">EXT. DAL LAKE, SRINAGAR — FIRST LIGHT</p>
-        <p class="script__action" data-scrub>Mist rests on the water. A shikara draws a single silver line across the lake. The mountains haven't woken yet.</p>
-        <p class="script__action" data-scrub>Somewhere in this city, someone is about to have the most important day of their life.</p>
-        <p class="script__action" data-scrub>Somewhere else, a story is waiting for its very first frame.</p>
-        <p class="script__char mono">AMAN PRODUCTIONS (V.O.)</p>
-        <p class="script__paren mono">(quietly, certain)</p>
-        <p class="script__dialogue" data-scrub>We make both of them happen. One unrepeatable moment. One frame that lasts forever.</p>
-        <p class="script__trans mono">CUT TO:</p>
-      </div>
-    </section>
+            <h1 class="hero__title" id="hero-title">
+              <span class="hero__line hero__line--1"><span>The moments</span></span>
+              <span class="hero__line hero__line--2"><span>That</span><i class="hero__gap"></i><span>become</span></span>
+              <span class="hero__line hero__line--3"><span>stories.</span></span>
+            </h1>
 
-    <!-- ═══════════════ 02 · TWO CRAFTS ═══════════════ -->
-    <section class="crafts" id="crafts" data-reel="02" data-reel-name="TWO CRAFTS" data-shape="aperture" data-dim="0.25" aria-labelledby="crafts-title">
-      <div class="crafts__pin">
-        <h2 class="sr-only" id="crafts-title">Two crafts: event management and film production</h2>
-        <div class="crafts__intro">
-          <span class="kicker mono">REEL 02 — TWO CRAFTS, ONE OBSESSION</span>
-          <p class="crafts__q">What should it <em class="serif">feel</em> like?</p>
-        </div>
-        <article class="craft craft--live" data-cursor="Live">
-          <div class="craft__media"><img src="media/concert.webp" alt="Concept image: an audience under electric cyan stage lights" /></div>
-          <div class="craft__shade"></div>
-          <div class="craft__body">
-            <span class="craft__tag mono"><i class="rec-dot"></i>LIVE · EVENT MANAGEMENT</span>
-            <h3 class="craft__word">LIVE</h3>
-            <p class="craft__line serif">There is no second take.</p>
-            <p class="craft__copy">Weddings, celebrations, launches, concerts. Hundreds of guests, one evening, a thousand moving parts — planned so precisely that on the night, all anyone feels is the magic.</p>
+            <figure class="hero__oval" data-cursor="Step in">
+              <img src="media/v3/frame-oval.webp" alt="A hand-carved Kashmiri walnut frame holding a painting of a shikara on Dal Lake at dawn" width="1400" height="934" />
+            </figure>
+
+            <a class="hero__now" href="#repertoire">
+              <img src="media/v3/scene-wedding.webp" alt="" width="160" height="90" />
+              <span><b>Now <em>showing</em></b><small>Weddings, celebrations, brand films and documentaries — made in the valley.</small></span>
+              <i aria-hidden="true">⟶</i>
+            </a>
+            <p class="hero__scroll"><span>Scroll to step into the frame</span><i></i></p>
           </div>
-        </article>
-        <article class="craft craft--film" data-cursor="Frame">
-          <div class="craft__media"><img src="media/kashmir.webp" alt="Concept image: a mountain landscape at dusk" /></div>
-          <div class="craft__shade"></div>
-          <div class="craft__body">
-            <span class="craft__tag mono">◐ FRAME · FILM PRODUCTION</span>
-            <h3 class="craft__word">FRAME</h3>
-            <p class="craft__line serif">A frame lasts forever.</p>
-            <p class="craft__copy">Brand films, documentaries, music videos, event films. From the first treatment to the final grade — images with a point of view, made to be watched twice.</p>
-          </div>
-        </article>
-        <p class="crafts__outro"><span>Two crafts.</span> <em class="serif">One obsession:</em> <span>how it feels.</span></p>
-        <p class="crafts__credit mono">CONCEPT IMAGERY</p>
-      </div>
-    </section>
-
-    <!-- ═══════════════ 03 · THE REEL (services) ═══════════════ -->
-    <section class="reel" id="reel" data-reel="03" data-reel-name="THE REEL" data-shape="stage" data-dim="0.35" aria-labelledby="reel-title">
-      <div class="reel__pin">
-        <header class="reel__head">
-          <span class="kicker mono">REEL 03 — WHAT WE MAKE</span>
-          <h2 id="reel-title" class="reel__title">Eight kinds of <em class="serif">unforgettable.</em></h2>
-          <p class="reel__tc mono"><span id="reel-frame">FR 01</span> · <span id="reel-tc">00:00:01:00</span></p>
-        </header>
-        <div class="reel__strip" id="reel-strip">
-          <article class="frame">
-            <div class="frame__plate"><img src="media/celebration.webp" alt="A lavender floral celebration stage from Aman Productions' public gallery" loading="lazy" /></div>
-            <div class="frame__info"><span class="mono">FR 01 · EVENTS</span><h3>Weddings &amp; celebrations</h3><p>From the mehendi to the last dance. Décor, flow, hospitality and every family ritual held with care.</p><ul class="mono"><li>Concept &amp; décor</li><li>Venue &amp; vendors</li><li>Guest experience</li></ul></div>
-          </article>
-          <article class="frame">
-            <div class="frame__plate plate plate--keynote" aria-hidden="true"><svg viewBox="0 0 200 140"><rect x="30" y="92" width="140" height="10" /><rect x="88" y="62" width="24" height="30" /><path d="M20 20 L80 92 M180 20 L120 92" /><circle cx="100" cy="40" r="6" /></svg></div>
-            <div class="frame__info"><span class="mono">FR 02 · EVENTS</span><h3>Corporate events &amp; conferences</h3><p>Launches, summits, offsites and award nights — staged with the polish your brand deserves.</p><ul class="mono"><li>Stage &amp; AV</li><li>Registration</li><li>Run of show</li></ul></div>
-          </article>
-          <article class="frame">
-            <div class="frame__plate"><img src="media/concert.webp" alt="Concept image: a concert crowd under blue light" loading="lazy" /></div>
-            <div class="frame__info"><span class="mono">FR 03 · EVENTS</span><h3>Concerts, festivals &amp; live shows</h3><p>Sound, light and crowd choreography for nights that are louder than words.</p><ul class="mono"><li>Production design</li><li>Sound &amp; light</li><li>Artist logistics</li></ul></div>
-          </article>
-          <article class="frame">
-            <div class="frame__plate"><img src="media/shikara.webp" alt="A flower-decorated shikara from Aman Productions' public gallery" loading="lazy" /></div>
-            <div class="frame__info"><span class="mono">FR 04 · EVENTS</span><h3>Destination experiences in Kashmir</h3><p>Shikara arrivals, garden ceremonies, snow-lit evenings — we bring your guests into the valley.</p><ul class="mono"><li>Travel &amp; stays</li><li>Location permits</li><li>Local craft</li></ul></div>
-          </article>
-          <article class="frame">
-            <div class="frame__plate plate plate--brand" aria-hidden="true"><svg viewBox="0 0 200 140"><rect x="40" y="40" width="90" height="60" rx="6" /><path d="M130 58 L168 40 L168 100 L130 82 Z" /><circle cx="85" cy="70" r="16" /><circle cx="85" cy="70" r="6" /></svg></div>
-            <div class="frame__info"><span class="mono">FR 05 · FILM</span><h3>Brand films &amp; commercials</h3><p>A sixty-second story that makes people stop scrolling — with cutdowns for every screen.</p><ul class="mono"><li>Treatment &amp; script</li><li>Shoot</li><li>Social cutdowns</li></ul></div>
-          </article>
-          <article class="frame">
-            <div class="frame__plate"><img src="media/kashmir.webp" alt="Concept image: mountains at dusk" loading="lazy" /></div>
-            <div class="frame__info"><span class="mono">FR 06 · FILM</span><h3>Documentaries</h3><p>Patient, honest storytelling about people and places — the kind that changes how you see them.</p><ul class="mono"><li>Research</li><li>Interviews</li><li>Long-form edit</li></ul></div>
-          </article>
-          <article class="frame">
-            <div class="frame__plate plate plate--music" aria-hidden="true"><svg viewBox="0 0 200 140"><path d="M20 70 Q 45 20 70 70 T 120 70 T 170 70" /><path d="M20 70 Q 45 110 70 70 T 120 70 T 170 70" /><circle cx="180" cy="70" r="4" /></svg></div>
-            <div class="frame__info"><span class="mono">FR 07 · FILM</span><h3>Music videos</h3><p>Visual worlds built around a sound — bold, rhythmic and made for repeat.</p><ul class="mono"><li>Concept</li><li>Performance &amp; narrative</li><li>Colour</li></ul></div>
-          </article>
-          <article class="frame">
-            <div class="frame__plate plate plate--after" aria-hidden="true"><svg viewBox="0 0 200 140"><rect x="25" y="30" width="150" height="80" /><path d="M25 50 H175 M25 90 H175" /><path d="M85 58 L120 70 L85 82 Z" /></svg></div>
-            <div class="frame__info"><span class="mono">FR 08 · FILM × EVENTS</span><h3>Event films &amp; aftermovies</h3><p>Where both crafts meet: your event, cut into a film you'll rewatch for years.</p><ul class="mono"><li>Multi-camera</li><li>Same-day edits</li><li>Highlight films</li></ul></div>
-          </article>
-          <div class="frame frame--end"><p class="serif">Something else in mind?</p><a href="#your-scene" class="btn btn--light" data-magnetic>Pitch us your idea</a></div>
+          <img class="hero__float hero__float--a" src="media/v3/frame-wedding.webp" alt="A papier-mâché frame holding a photograph of a couple under fairy lights" width="1400" height="900" />
+          <img class="hero__float hero__float--b" src="media/v3/frame-film.webp" alt="A carved walnut frame holding a painting of a film crew in the snow" width="1000" height="1200" />
         </div>
-        <div class="reel__sprockets" aria-hidden="true"></div>
+        <div class="hero__into" aria-hidden="true"><p>Step into the frame</p></div>
       </div>
     </section>
 
-    <!-- ═══════════════ 04 · THE METHOD (clapperboard) ═══════════════ -->
-    <section class="method" id="method" data-reel="04" data-reel-name="THE METHOD" data-shape="wave" data-dim="0.22" aria-labelledby="method-title">
-      <div class="method__pin">
-        <div class="method__left">
-          <span class="kicker mono">REEL 04 — THE METHOD</span>
-          <h2 id="method-title" class="method__title">Scene by scene. <em class="serif">Nothing left to chance.</em></h2>
-          <div class="clapper" aria-hidden="true">
-            <div class="clapper__stick"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-            <div class="clapper__board">
-              <div class="clapper__base"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-              <div class="clapper__row clapper__row--prod"><span>PROD.</span><b>YOUR STORY</b></div>
-              <div class="clapper__row clapper__grid"><div><span>SCENE</span><b id="clap-scene">01</b></div><div><span>TAKE</span><b>01</b></div><div><span>ROLL</span><b>A</b></div></div>
-              <div class="clapper__row"><span>DIRECTOR</span><b>AMAN PRODUCTIONS</b></div>
-              <div class="clapper__row"><span>NOW SHOOTING</span><b id="clap-step">LISTEN</b></div>
+    <!-- ═════════════ II · INTO THE FRAME (prologue on the lake) ═════════════ -->
+    <section class="prologue" id="prologue" aria-labelledby="prologue-title">
+      <div class="prologue__pin">
+        <img class="prologue__bg" src="media/v3/scene-dal.webp" alt="Dawn mist on Dal Lake with a single shikara" />
+        <div class="prologue__shade"></div>
+        <svg class="prologue__frame" aria-hidden="true" preserveAspectRatio="none"><rect x="1" y="1" rx="28" ry="28" pathLength="100" /></svg>
+        <div class="prologue__clock" aria-hidden="true"><span class="prologue__time" id="clock">05:42</span><span class="prologue__ampm">AM · Dal Lake, Srinagar</span></div>
+        <h2 class="sr-only" id="prologue-title">Prologue</h2>
+        <div class="prologue__lines">
+          <p class="glass" data-line>Every story begins somewhere quiet.</p>
+          <p class="glass" data-line>Mist on the water. A shikara draws one silver line across the lake.</p>
+          <p class="glass" data-line>Somewhere in this city, someone is about to have the most important day of their life.</p>
+          <p class="glass" data-line>Somewhere else, a story is waiting for its very first frame.</p>
+          <p class="glass glass--big" data-line><em>We make both of them happen.</em></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═════════════ III · TWO CRAFTS ═════════════ -->
+    <section class="crafts" id="crafts" aria-labelledby="crafts-title">
+      <header class="sec-head">
+        <p class="eyebrow">Chapter three</p>
+        <h2 id="crafts-title" class="display"><span data-rise>Two crafts.</span> <em data-rise>One obsession.</em></h2>
+        <p class="sec-head__lede">How it <em>feels.</em> That's the only brief we really care about — whether it lasts one night or forever on screen.</p>
+      </header>
+      <div class="crafts__row">
+        <article class="craft is-open" tabindex="0" data-cursor="Open">
+          <img src="media/v3/scene-wedding.webp" alt="A wedding mandap under chinar trees at golden hour" loading="lazy" />
+          <div class="craft__veil"></div>
+          <p class="craft__tag glass-pill"><i class="dot dot--live"></i> Live · Event management</p>
+          <div class="craft__body">
+            <h3 class="craft__word">Live</h3>
+            <p class="craft__line">There is no second take.</p>
+            <div class="craft__more">
+              <p>Weddings, celebrations, launches and concerts. Hundreds of guests, one evening, a thousand moving parts — planned so precisely that on the night, all anyone feels is the magic.</p>
+              <ul><li>Concept &amp; décor</li><li>Venues &amp; vendors</li><li>Guest experience</li><li>Run of show</li></ul>
             </div>
-            <div class="clapper__flash"></div>
           </div>
+        </article>
+        <article class="craft" tabindex="0" data-cursor="Open">
+          <img src="media/v3/scene-film.webp" alt="A film crew shooting at night in falling snow" loading="lazy" />
+          <div class="craft__veil"></div>
+          <p class="craft__tag glass-pill"><i class="dot dot--film"></i> Frame · Film production</p>
+          <div class="craft__body">
+            <h3 class="craft__word">Frame</h3>
+            <p class="craft__line">A frame lasts forever.</p>
+            <div class="craft__more">
+              <p>Brand films, documentaries, music videos and event films. From the first treatment to the final grade — images with a point of view, made to be watched twice.</p>
+              <ul><li>Treatment &amp; script</li><li>Shoot</li><li>Edit &amp; colour</li><li>Delivery</li></ul>
+            </div>
+          </div>
+        </article>
+      </div>
+      <p class="crafts__note">Imagery on this page is concept art created for the studio’s presentation.</p>
+    </section>
+
+    <!-- ═════════════ IV · THE REPERTOIRE (showcase) ═════════════ -->
+    <section class="rep" id="repertoire" aria-labelledby="rep-title" aria-roledescription="carousel">
+      <div class="rep__panel" data-cursor="Drag">
+        <header class="rep__head">
+          <h2 id="rep-title" class="rep__title"><em>Our Repertoire</em></h2>
+          <a class="btn btn--line btn--light" href="#your-scene">Plan with us</a>
+        </header>
+        <p class="rep__ghost" id="rep-ghost" aria-hidden="true">celebrate</p>
+        <div class="rep__stage" id="rep-stage"></div>
+        <div class="rep__info" id="rep-info" aria-live="polite"></div>
+        <div class="rep__foot">
+          <p class="rep__count"><span id="rep-now">01</span><i><b id="rep-bar"></b></i><span id="rep-total">06</span></p>
+          <div class="rep__arrows"><button id="rep-prev" aria-label="Previous">←</button><button id="rep-next" aria-label="Next">→</button></div>
         </div>
-        <ol class="method__steps">
-          <li class="step"><span class="step__n mono">SC. 01</span><h3>Listen</h3><p>We start with the feeling, not the checklist. Who's in the room, what they should remember, what's non-negotiable.</p><span class="step__out mono">→ Creative brief</span></li>
-          <li class="step"><span class="step__n mono">SC. 02</span><h3>Imagine</h3><p>Concept, mood and story. A treatment you can see and feel before a single rupee is spent.</p><span class="step__out mono">→ Treatment &amp; moodboard</span></li>
-          <li class="step"><span class="step__n mono">SC. 03</span><h3>Prepare</h3><p>Budgets, vendors, crew, locations and permits — locked into one plan with a schedule to the minute.</p><span class="step__out mono">→ Budget, run of show, call sheets</span></li>
-          <li class="step"><span class="step__n mono">SC. 04</span><h3>Action</h3><p>On the day, we direct. Every cue, every camera, every guest — so you get to simply be there.</p><span class="step__out mono">→ The event / the shoot</span></li>
-          <li class="step"><span class="step__n mono">SC. 05</span><h3>The cut</h3><p>Wrap, edit, colour, sound and delivery. The moment ends; the story keeps playing.</p><span class="step__out mono">→ Final film &amp; wrap report</span></li>
-        </ol>
       </div>
     </section>
 
-    <!-- ═══════════════ 05 · THE VALLEY ═══════════════ -->
-    <section class="valley" id="valley" data-reel="05" data-reel-name="THE VALLEY" data-shape="valley" data-dim="0.55" aria-labelledby="valley-title">
-      <div class="valley__head">
-        <span class="kicker mono">REEL 05 — LOCATION</span>
-        <h2 id="valley-title" class="valley__title"><span data-split>The valley</span> <em class="serif" data-split>is our set.</em></h2>
-        <p class="valley__lede">We're from here. We know where the light falls, and when — which roads close in winter, which garden glows at four, which lake holds its mist the longest.</p>
-      </div>
+    <!-- ═════════════ V · THE METHOD ═════════════ -->
+    <section class="method" id="method" aria-labelledby="method-title">
+      <header class="sec-head sec-head--split">
+        <div>
+          <p class="eyebrow">Chapter five</p>
+          <h2 id="method-title" class="display"><span data-rise>Scene by scene.</span> <em data-rise>Nothing left to chance.</em></h2>
+        </div>
+        <p class="sec-head__lede">Five scenes, the same for a wedding of six hundred or a sixty-second film. Hover a scene to see it.</p>
+      </header>
+      <ol class="steps" id="steps">
+        <li class="step" data-img="media/v3/frame-film.webp"><span class="step__n">i</span><h3>Listen</h3><p>We start with the feeling, not the checklist. Who's in the room, what they should remember, what's non-negotiable.</p><span class="step__out">Creative brief</span></li>
+        <li class="step" data-img="media/v3/obj-clapper.webp"><span class="step__n">ii</span><h3>Imagine</h3><p>Concept, mood and story. A treatment you can see and feel before a single rupee is spent.</p><span class="step__out">Treatment &amp; moodboard</span></li>
+        <li class="step" data-img="media/v3/obj-samovar.webp"><span class="step__n">iii</span><h3>Prepare</h3><p>Budgets, vendors, crew, locations and permits — locked into one plan with a schedule to the minute.</p><span class="step__out">Budget · run of show · call sheets</span></li>
+        <li class="step" data-img="media/v3/scene-film.webp"><span class="step__n">iv</span><h3>Action</h3><p>On the day, we direct. Every cue, every camera, every guest — so you get to simply be there.</p><span class="step__out">The event · the shoot</span></li>
+        <li class="step" data-img="media/v3/frame-wedding.webp"><span class="step__n">v</span><h3>The cut</h3><p>Wrap, edit, colour, sound and delivery. The moment ends; the story keeps playing.</p><span class="step__out">Final film &amp; wrap report</span></li>
+      </ol>
+      <div class="peek" id="peek" aria-hidden="true"><img alt="" /></div>
+    </section>
+
+    <!-- ═════════════ VI · THE VALLEY ═════════════ -->
+    <section class="valley" id="valley" aria-labelledby="valley-title">
+      <header class="sec-head sec-head--split">
+        <div>
+          <p class="eyebrow">Chapter six</p>
+          <h2 id="valley-title" class="display"><span data-rise>The valley</span> <em data-rise>is our set.</em></h2>
+        </div>
+        <p class="sec-head__lede">We're from here. We know where the light falls, and when — which roads close in winter, which garden glows at four, which lake holds its mist the longest.</p>
+      </header>
       <div class="valley__map">
-        <div class="valley__scroll"><svg class="valley__svg" id="valley-svg" viewBox="0 0 1000 620" role="img" aria-label="A stylised map of locations around the Kashmir valley, measured from the studio in Abi Guzar, Srinagar"></svg>
+        <div class="valley__scroll"><svg class="valley__svg" id="valley-svg" viewBox="0 0 1000 620" role="img" aria-label="A relief map of locations around the Kashmir valley, measured from the studio in Abi Guzar, Srinagar"></svg></div>
         <div class="valley__card" id="valley-card" aria-live="polite"></div>
       </div>
       <ul class="valley__list" id="valley-list"></ul>
-      <p class="valley__note mono">Coordinates approximate · Aerial work and protected sites are subject to permits</p>
+      <p class="valley__note">Coordinates approximate · aerial work and protected sites are subject to permits</p>
     </section>
 
-    <!-- ═══════════════ BEHIND THE FRAME ═══════════════ -->
-    <section class="contact-sheet" id="frames" data-reel="05" data-reel-name="BEHIND THE FRAME" data-shape="valley" data-dim="0.2" aria-labelledby="sheet-title">
-      <header class="sheet__head">
-        <span class="kicker mono">CONTACT SHEET</span>
-        <h2 id="sheet-title" class="sheet__title">The feeling is <em class="serif">in the details.</em></h2>
-      </header>
-      <div class="sheet__grid">
-        <button class="shot shot--a" data-lightbox="0" data-cursor="View"><img src="media/celebration.webp" alt="Lavender floral celebration stage" loading="lazy" /><span class="shot__cap mono">01 · CELEBRATION DESIGN · <em>From Aman's public gallery</em></span></button>
-        <button class="shot shot--b" data-lightbox="1" data-cursor="View"><img src="media/shikara.webp" alt="Flower-decorated shikara on the water" loading="lazy" /><span class="shot__cap mono">02 · ON THE WATER · <em>From Aman's public gallery</em></span></button>
-        <button class="shot shot--c" data-lightbox="2" data-cursor="View"><img src="media/concert.webp" alt="Crowd under cyan stage lights" loading="lazy" /><span class="shot__cap mono">03 · THE ROOM · <em>Concept imagery</em></span></button>
-        <button class="shot shot--d" data-lightbox="3" data-cursor="View"><img src="media/kashmir.webp" alt="Mountain landscape" loading="lazy" /><span class="shot__cap mono">04 · THE LIGHT · <em>Concept imagery</em></span></button>
-      </div>
-      <p class="sheet__note">Full showreel and case studies arrive with the studio's next release. Until then — <a href="#your-scene">let's make the first one together.</a></p>
-    </section>
-
-    <!-- ═══════════════ 06 · YOUR SCENE ═══════════════ -->
-    <section class="your-scene" id="your-scene" data-reel="06" data-reel-name="YOUR SCENE" data-shape="portal" data-dim="0.3" aria-labelledby="scene-title">
-      <header class="ys__head">
-        <span class="kicker mono">REEL 06 — YOUR SCENE</span>
-        <h2 id="scene-title" class="ys__title"><span data-split>Now, write</span> <em class="serif" data-split>the first page.</em></h2>
-        <p class="ys__lede">Fill in the blanks. We'll turn it into a script — then into the real thing.</p>
+    <!-- ═════════════ VII · YOUR SCENE ═════════════ -->
+    <section class="your-scene" id="your-scene" aria-labelledby="scene-title">
+      <header class="sec-head">
+        <p class="eyebrow">The final chapter is yours</p>
+        <h2 id="scene-title" class="display"><span data-rise>Now, write</span> <em data-rise>the first page.</em></h2>
+        <p class="sec-head__lede">Fill in the blanks. We'll turn it into a script — then into the real thing.</p>
       </header>
       <div class="ys__grid">
         <form class="ys__form" id="scene-form" novalidate>
-          <p class="ys__sentence">
-            <span class="ys__slug mono">
-              <select name="intext" aria-label="Interior or exterior"><option>EXT.</option><option>INT.</option><option>INT./EXT.</option></select>
-              <select name="location" aria-label="Location"><option>Srinagar</option><option>Dal Lake</option><option>Mughal Gardens</option><option>Gulmarg</option><option>Pahalgam</option><option>Sonamarg</option><option>Somewhere else in India</option><option>Abroad</option></select>
-              — <input name="date" type="date" aria-label="Preferred date" />
-            </span>
+          <p class="ys__slug">
+            <select name="intext" aria-label="Interior or exterior"><option>EXT.</option><option>INT.</option><option>INT./EXT.</option></select>
+            <select name="location" aria-label="Location"><option>Srinagar</option><option>Dal Lake</option><option>Mughal Gardens</option><option>Gulmarg</option><option>Pahalgam</option><option>Sonamarg</option><option>Somewhere else in India</option><option>Abroad</option></select>
+            <span>—</span><input name="date" type="date" aria-label="Preferred date" />
           </p>
           <p class="ys__sentence">My name is <input name="name" required maxlength="80" placeholder="your name" aria-label="Your name" autocomplete="name" />, and I'm planning
             <select name="type" aria-label="What you're planning">
               <option value="Wedding">a wedding</option><option value="Celebration">a celebration</option><option value="Corporate event">a corporate event</option><option value="Concert / festival">a concert or festival</option><option value="Destination experience">a destination experience</option><option value="Brand film">a brand film</option><option value="Documentary">a documentary</option><option value="Music video">a music video</option><option value="Event film">an event film</option><option value="Something new">something new</option>
-            </select>
-            <span class="ys__guests"> for about <input name="guests" type="number" min="1" max="20000" inputmode="numeric" placeholder="150" aria-label="Number of guests" class="ys__num" /> people</span>.
+            </select><span class="ys__guests"> for about <input name="guests" type="number" min="1" max="20000" inputmode="numeric" placeholder="150" aria-label="Number of guests" class="ys__num" /> people</span>.
           </p>
           <p class="ys__sentence">When it's over, everyone should feel
             <select name="feeling" aria-label="The feeling"><option>moved</option><option>amazed</option><option>at home</option><option>inspired</option><option>like they were in a film</option><option>like dancing until sunrise</option></select>.
           </p>
           <p class="ys__sentence">The budget is around
-            <select name="budget" aria-label="Budget">
-              <option value="0">let's discuss</option><option value="100000">under ₹1 lakh</option><option value="300000">₹1–3 lakh</option><option value="1000000">₹3–10 lakh</option><option value="2500000">₹10–25 lakh</option><option value="5000000">₹25 lakh +</option>
-            </select>.
+            <select name="budget" aria-label="Budget"><option value="0">let's discuss</option><option value="100000">under ₹1 lakh</option><option value="300000">₹1–3 lakh</option><option value="1000000">₹3–10 lakh</option><option value="2500000">₹10–25 lakh</option><option value="5000000">₹25 lakh +</option></select>.
           </p>
-          <p class="ys__sentence ys__sentence--story">The story, in a line: <textarea name="story" rows="2" maxlength="600" placeholder="a winter wedding where the guests arrive by shikara…" aria-label="Your story in a line"></textarea></p>
+          <p class="ys__sentence">The story, in a line: <textarea name="story" rows="2" maxlength="600" placeholder="a winter wedding where the guests arrive by shikara…" aria-label="Your story in a line"></textarea></p>
           <p class="ys__sentence">Reach me at <input name="phone" type="tel" maxlength="30" placeholder="phone" aria-label="Phone" autocomplete="tel" /> or <input name="email" type="email" maxlength="120" placeholder="email" aria-label="Email" autocomplete="email" />.</p>
-          <p class="ys__error mono" id="scene-error" role="alert" hidden></p>
+          <p class="ys__error" id="scene-error" role="alert" hidden></p>
           <div class="ys__actions">
-            <button type="submit" class="btn btn--saffron" data-magnetic data-action="whatsapp"><span class="btn__dot"></span>Send the script on WhatsApp</button>
-            <button type="submit" class="btn btn--ghost" data-action="studio">Save to Studio OS (demo)</button>
+            <button type="submit" class="btn btn--red" data-action="whatsapp">Send the script on WhatsApp</button>
+            <button type="submit" class="btn btn--line" data-action="studio">Save to Studio OS (demo)</button>
           </div>
-          <p class="ys__fine mono">WhatsApp opens with your script ready — you choose when to send. "Save to Studio" is a client-preview feature that stores the enquiry in this browser only.</p>
+          <p class="ys__fine">WhatsApp opens with your script ready — you choose when to send. “Save to Studio” is a client-preview feature that keeps the enquiry in this browser only.</p>
         </form>
         <aside class="ys__page" aria-label="Live script preview">
           <div class="page" id="script-page">
-            <p class="page__title mono">YOUR SCENE</p>
-            <p class="page__by mono">written by <span data-bind="name">you</span></p>
-            <p class="page__fade mono">FADE IN:</p>
-            <p class="page__slug mono"><span data-bind="intext">EXT.</span> <span data-bind="location">SRINAGAR</span> — <span data-bind="date">A DAY TO REMEMBER</span></p>
-            <p class="page__action"><span data-bind="type-line">A wedding</span><span data-bind="guests-line"></span>. <span data-bind="story">The air is full of something about to begin.</span></p>
-            <p class="page__char mono"><span data-bind="name-caps">YOU</span></p>
+            <p class="page__title">YOUR SCENE</p>
+            <p class="page__by">written by <span data-bind="name">you</span></p>
+            <p>FADE IN:</p>
+            <p class="page__slug"><span data-bind="intext">EXT.</span> <span data-bind="location">SRINAGAR</span> — <span data-bind="date">A DAY TO REMEMBER</span></p>
+            <p><span data-bind="type-line">A wedding</span><span data-bind="guests-line"></span>. <span data-bind="story">The air is full of something about to begin.</span></p>
+            <p class="page__char"><span data-bind="name-caps">YOU</span></p>
             <p class="page__dlg">I want everyone to feel <span data-bind="feeling">moved</span>.</p>
-            <p class="page__char mono">AMAN PRODUCTIONS</p>
+            <p class="page__char">AMAN PRODUCTIONS</p>
             <p class="page__dlg">Then let's begin.</p>
-            <p class="page__trans mono">SMASH CUT TO: THE REAL THING.</p>
+            <p class="page__trans">SMASH CUT TO: THE REAL THING.</p>
             <span class="page__caret" aria-hidden="true"></span>
           </div>
           <div class="wrap-card" id="wrap-card" hidden>
-            <p class="mono">THAT'S A WRAP ON PAGE ONE.</p>
-            <p class="serif wrap-card__big">Your scene is with us.</p>
+            <p class="eyebrow">That's a wrap on page one</p>
+            <p class="wrap-card__big">Your scene is <em>with us.</em></p>
             <p class="wrap-card__copy" id="wrap-copy"></p>
-            <div class="wrap-card__actions"><a class="btn btn--light" href="studio.html#pipeline" data-transition>Open it in Studio OS</a><button class="btn btn--ghost" id="wrap-again">Write another</button></div>
+            <div class="wrap-card__actions"><a class="btn btn--red" href="studio.html#/pipeline">Open it in Studio OS</a><button class="btn btn--line" id="wrap-again">Write another</button></div>
           </div>
         </aside>
       </div>
     </section>
   </main>
 
-  <!-- ═══════════════ END CREDITS ═══════════════ -->
-  <footer class="credits" id="credits" data-reel="07" data-reel-name="END CREDITS" data-shape="logo" data-dim="0.5">
-    <div class="credits__roll">
-      <img class="credits__logo" src="media/ap-logo.jpeg" alt="Aman Productions" width="120" height="120" loading="lazy" />
-      <p class="credits__main">AMAN PRODUCTIONS</p>
-      <p class="credits__sub mono">EVENT MANAGEMENT &amp; FILM PRODUCTION</p>
+  <!-- ═════════════ END CREDITS ═════════════ -->
+  <footer class="credits" id="credits">
+    <div class="credits__inner">
+      <p class="credits__word" aria-hidden="true">Aman</p>
       <dl class="credits__list">
         <div><dt>Starring</dt><dd>You</dd></div>
         <div><dt>Directed by</dt><dd>Your imagination</dd></div>
         <div><dt>Produced by</dt><dd>Aman Productions</dd></div>
-        <div><dt>Filmed on location in</dt><dd>Srinagar, Kashmir</dd></div>
+        <div><dt>On location</dt><dd>Srinagar, Kashmir</dd></div>
         <div><dt>Studio</dt><dd>Abi Guzar, Srinagar 190001</dd></div>
-        <div><dt>Call the studio</dt><dd><a href="tel:+917780996694">+91 77809 96694</a></dd></div>
-        <div><dt>Message the studio</dt><dd><a href="https://wa.me/917780996694" target="_blank" rel="noopener">WhatsApp ↗</a></dd></div>
-        <div><dt>Behind the scenes</dt><dd><a href="studio.html" data-transition>Studio OS ↗</a></dd></div>
-        <div><dt>Photography</dt><dd><button class="linkish" id="credits-open">Image credits</button></dd></div>
+        <div><dt>Call</dt><dd><a href="tel:+917780996694">+91 77809 96694</a></dd></div>
+        <div><dt>Message</dt><dd><a href="https://wa.me/917780996694" target="_blank" rel="noopener">WhatsApp ↗</a></dd></div>
+        <div><dt>Behind the scenes</dt><dd><a href="studio.html">Studio OS ↗</a></dd></div>
       </dl>
-      <p class="credits__disclaimer mono">No moments were left to chance in the making of this website.</p>
-      <p class="credits__end"><span class="credits__the serif">The End</span><span class="credits__begin serif">— of the beginning.</span></p>
-      <div class="credits__bottom mono">
-        <span>© <span id="year">2026</span> AMAN PRODUCTIONS</span>
-        <button class="rewind" id="rewind" data-cursor="Rewind">⟲ REWIND TO THE START</button>
-        <span>CLIENT PREVIEW</span>
+      <p class="credits__end"><em>The End</em> — of the beginning.</p>
+      <div class="credits__bottom">
+        <span>© <span id="year">2026</span> Aman Productions</span>
+        <button class="linkish" id="credits-open">Image credits</button>
+        <button class="rewind" id="rewind">↺ Back to the first frame</button>
       </div>
     </div>
   </footer>
 
-  <div class="rewind-fx" aria-hidden="true"><span class="mono">◀◀ REWIND</span></div>
-
-  <dialog class="lightbox" id="lightbox" aria-label="Image viewer">
-    <button class="lightbox__close" aria-label="Close">✕</button>
-    <img id="lightbox-img" alt="" />
-    <p class="lightbox__cap mono" id="lightbox-cap"></p>
-  </dialog>
-
   <dialog class="credits-dialog" id="credits-dialog" aria-labelledby="credits-dialog-title">
-    <button class="lightbox__close" aria-label="Close">✕</button>
+    <button class="dialog-x" aria-label="Close">✕</button>
     <h2 id="credits-dialog-title">Image credits</h2>
-    <p>The AP logo was supplied by the client. The celebration stage and shikara photographs are from <a href="https://aman-productions-event-management-and-film.wheree.com/" target="_blank" rel="noopener">Aman Productions' public business gallery</a>.</p>
-    <p>Concert and mountain photographs are atmospheric concept imagery from Unsplash (<a href="https://unsplash.com/license" target="_blank" rel="noopener">Unsplash license</a>). They express the creative direction and are not presented as Aman Productions' commissioned work.</p>
-    <p>All particle visuals, maps and illustrations are original, rendered live in your browser.</p>
+    <p>The AP logo was supplied by the client. Frames, objects and scenes on this page are AI-generated concept art created for this presentation — they illustrate the direction and are not presented as photographs of Aman Productions’ past work.</p>
+    <p>Replace them with the studio’s own photography and showreel stills before public launch.</p>
   </dialog>
 
   <script type="module" src="/src/site/main.js"></script>

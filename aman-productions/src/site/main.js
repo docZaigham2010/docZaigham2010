@@ -2,9 +2,7 @@ import './site.css';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
-import { createParticles } from './particles.js';
 import { buildValley } from './valley.js';
-import { setSound, soundOn, clap, tick } from './sound.js';
 import { pushToInbox } from '../shared/inbox.js';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -12,381 +10,275 @@ gsap.registerPlugin(ScrollTrigger);
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
-const mobile = matchMedia('(max-width: 900px)').matches;
+const mobile = () => matchMedia('(max-width: 860px)').matches;
 const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
-const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const STATIC = reduced;
+const STATIC = matchMedia('(prefers-reduced-motion: reduce)').matches;
 if (STATIC) document.documentElement.classList.add('is-static');
 $('#year').textContent = new Date().getFullYear();
-
-// ───────────────────────── Text splitting ─────────────────────────
-function splitWords(root) {
-  const walk = (node) => {
-    [...node.childNodes].forEach((child) => {
-      if (child.nodeType === 3) {
-        const parts = child.textContent.split(/(\s+)/);
-        const frag = document.createDocumentFragment();
-        parts.forEach((p) => {
-          if (!p) return;
-          if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(' ')); return; }
-          const mask = document.createElement('span'); mask.className = 'split-mask';
-          const w = document.createElement('span'); w.className = 'split-word'; w.textContent = p;
-          mask.appendChild(w); frag.appendChild(mask);
-        });
-        child.replaceWith(frag);
-      } else if (child.nodeType === 1 && !child.classList.contains('split-mask')) walk(child);
-    });
-  };
-  walk(root);
-  return $$('.split-word', root);
-}
-$$('[data-split]').filter((n) => !n.parentElement.closest('[data-split]')).forEach((n) => splitWords(n));
-$$('[data-words], [data-scrub]').forEach((n) => splitWords(n));
-// Scrubbed words don't need masks; let them sit inline
-$$('[data-scrub] .split-mask, [data-words] .split-mask').forEach((m) => { m.style.overflow = 'visible'; });
 
 // ───────────────────────── Smooth scroll ─────────────────────────
 let lenis = null;
 if (!STATIC) {
-  lenis = new Lenis({ lerp: .085, wheelMultiplier: .95, smoothWheel: true });
+  lenis = new Lenis({ lerp: .09, smoothWheel: true });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((t) => lenis.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
   lenis.stop();
 }
-const scrollTo = (target, opts = {}) => {
-  if (lenis) lenis.scrollTo(target, { duration: 1.6, easing: (t) => 1 - Math.pow(1 - t, 4), ...opts });
-  else {
-    const y = typeof target === 'number' ? target : (typeof target === 'string' ? $(target) : target)?.getBoundingClientRect().top + scrollY;
-    scrollTo.native(y);
-  }
+const scrollTo = (target) => {
+  if (lenis) lenis.scrollTo(target, { duration: 1.6, easing: (t) => 1 - Math.pow(1 - t, 4) });
+  else (typeof target === 'number' ? window.scrollTo(0, target) : target?.scrollIntoView());
 };
-scrollTo.native = (y) => window.scrollTo({ top: y, behavior: reduced ? 'auto' : 'smooth' });
-
-// In-page anchors go through the director
 document.addEventListener('click', (e) => {
   const a = e.target.closest('a[href^="#"]');
   if (!a) return;
   const id = a.getAttribute('href');
-  if (id.length < 2 && id !== '#') return;
   e.preventDefault();
   closeMenu();
-  const target = id === '#' || id === '#top' ? 0 : $(id);
-  if (target === null) return;
-  scrollTo(target);
+  if (id === '#' || id === '#top') return scrollTo(0);
+  const el = $(id);
+  if (el) scrollTo(id === '#prologue' ? el.offsetTop + innerHeight * .3 : el);
 });
 
-// ───────────────────────── Particles ─────────────────────────
-let field = null;
-const particlesReady = createParticles($('#particles'), { mobile })
-  .then((f) => { field = f; if (STATIC) f.setStatic(true); return f; })
-  .catch((err) => { console.warn('WebGL unavailable — continuing without the particle field.', err); $('#particles').remove(); });
-
-// ───────────────────────── Film leader ─────────────────────────
-const leader = $('#leader');
-const leaderCount = $('#leader-count');
-const leaderLoad = $('#leader-load');
-let entered = false;
-
-async function runLeader() {
-  const sweep = $('.leader__sweep');
-  const steps = STATIC ? [1] : [5, 4, 3, 2, 1];
+// ───────────────────────── Opening: the frame is drawn ─────────────────────────
+{
+  const loader = $('#loader');
+  const count = $('#loader-count');
+  const images = [...document.images].filter((i) => i.loading !== 'lazy');
   let loaded = 0;
-  const loadTick = setInterval(() => { loaded = Math.min(99, loaded + 7 + Math.random() * 9); leaderLoad.textContent = `LOADING REEL ${String(Math.round(loaded)).padStart(3, '0')}%`; }, 120);
-  for (const n of steps) {
-    leaderCount.textContent = n;
-    await gsap.fromTo(sweep, { '--sweep': '0deg' }, { '--sweep': '360deg', duration: STATIC ? .01 : .5, ease: 'none' });
-  }
-  await particlesReady;
-  clearInterval(loadTick);
-  leaderLoad.textContent = 'REEL LOADED · 100%';
-  leader.classList.add('is-ready');
-  $('[data-enter="sound"]', leader).focus({ preventScroll: true });
-}
-runLeader();
-
-function enter(withSound) {
-  if (entered) return;
-  entered = true;
-  if (withSound) toggleSound(true);
-  document.body.classList.remove('is-loading');
-  const tl = gsap.timeline();
-  tl.to(leader, { opacity: 0, duration: STATIC ? .2 : .9, ease: 'power2.inOut', onComplete: () => { leader.remove(); } });
-  if (!STATIC) {
-    tl.fromTo('.letterbox__bar', { scaleY: 3.9 }, { scaleY: 1, duration: 1.6, ease: 'expo.inOut' }, 0.2);
-    tl.from('.cold__title .split-word', { yPercent: 115, duration: 1.4, stagger: .06, ease: 'expo.out' }, .75);
-    tl.from('.cold__slug span, .cold__lede, .cold__scroll', { opacity: 0, y: 16, duration: 1, stagger: .08, ease: 'power3.out' }, 1.2);
-    tl.from('.hud, .hud-foot', { opacity: 0, duration: 1.2 }, 1.1);
-    tl.fromTo('.cold__ghost', { opacity: 0, x: 80 }, { opacity: 1, x: 0, duration: 2.4, ease: 'expo.out' }, .8);
-  }
-  tl.call(() => { lenis?.start(); ScrollTrigger.refresh(); }, null, STATIC ? 0 : 1.1);
-  gsap.to({ v: 0 }, { v: 1, duration: STATIC ? .1 : 3, delay: .4, ease: 'power2.inOut', onUpdate() { field?.intro(this.targets()[0].v); } });
-  startedAt = performance.now();
-}
-$$('[data-enter]').forEach((b) => b.addEventListener('click', () => enter(b.dataset.enter === 'sound')));
-// Impatient viewers: any key or wheel once the reel is loaded enters silently
-addEventListener('keydown', (e) => { if (leader.classList.contains('is-ready') && e.key === 'Escape') enter(false); });
-addEventListener('wheel', () => { if (leader.classList.contains('is-ready')) enter(false); }, { passive: true });
-
-// ───────────────────────── HUD: timecode, reel, progress ─────────────────────────
-let startedAt = performance.now();
-const tc = $('#timecode');
-const pad = (n) => String(n).padStart(2, '0');
-function timecode(sec) {
-  const f = Math.floor((sec % 1) * 24), s = Math.floor(sec) % 60, m = Math.floor(sec / 60) % 60, h = Math.floor(sec / 3600);
-  return `${pad(h)}:${pad(m)}:${pad(s)}:${pad(f)}`;
-}
-let rewinding = false, rewindTC = 0;
-gsap.ticker.add(() => {
-  if (!entered) return;
-  if (rewinding) { rewindTC = Math.max(0, rewindTC - .9); tc.textContent = timecode(rewindTC); return; }
-  tc.textContent = timecode((performance.now() - startedAt) / 1000);
-});
-
-const reelNum = $('#reel-num'), reelName = $('#reel-name'), reelProgress = $('#reel-progress');
-const chapters = $$('[data-shape]').map((el) => ({ el, shape: el.dataset.shape, dim: parseFloat(el.dataset.dim || '1') }));
-let lastReel = '';
-function direct() {
-  const vh = innerHeight;
-  // Which chapter morph is in progress?
-  let a = chapters[0].shape, b = a, t = 1;
-  for (let i = 1; i < chapters.length; i++) {
-    const top = chapters[i].el.getBoundingClientRect().top;
-    if (top < vh * .9) { a = chapters[i - 1].shape; b = chapters[i].shape; t = clamp((vh * .9 - top) / (vh * .7)); }
-  }
-  field?.setChapter(a, b, t);
-  // Which chapter owns the centre of the screen?
-  const mid = vh * .5;
-  const current = chapters.find((c) => { const r = c.el.getBoundingClientRect(); return r.top <= mid && r.bottom >= mid; }) || chapters[0];
-  field?.setOpacity(current.dim);
-  const reel = `REEL ${current.el.dataset.reel}`;
-  if (reel + current.el.dataset.reelName !== lastReel) {
-    lastReel = reel + current.el.dataset.reelName;
-    reelNum.textContent = reel; reelName.textContent = current.el.dataset.reelName;
-    gsap.fromTo([reelNum, reelName], { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: .5, stagger: .05 });
-  }
-  const max = document.documentElement.scrollHeight - vh;
-  reelProgress.style.transform = `scaleX(${clamp(scrollY / max)})`;
-}
-gsap.ticker.add(direct);
-
-// ───────────────────────── Letterbox & cold open choreography ─────────────────────────
-if (!STATIC) {
-  gsap.to('.letterbox__bar', { scaleY: 0, ease: 'none', scrollTrigger: { trigger: '.cold', start: 'top top', end: 'bottom top', scrub: true } });
-  gsap.to('.cold__inner', { yPercent: -18, opacity: 0, ease: 'none', scrollTrigger: { trigger: '.cold', start: 'top top', end: 'bottom top', scrub: true } });
-  gsap.to('.cold__ghost', { xPercent: -30, ease: 'none', scrollTrigger: { trigger: '.cold', start: 'top top', end: 'bottom top', scrub: true } });
-
-  // "Then someone turns on the light."
-  const lightWords = $$('.light-on .split-word');
-  gsap.fromTo(lightWords, { opacity: .06, filter: 'blur(8px)' }, {
-    opacity: 1, filter: 'blur(0px)', stagger: .12, ease: 'none',
-    scrollTrigger: { trigger: '.light-on', start: 'top 70%', end: 'center 45%', scrub: true },
+  images.forEach((img) => {
+    if (img.complete) loaded++;
+    else { const done = () => { loaded++; }; img.addEventListener('load', done, { once: true }); img.addEventListener('error', done, { once: true }); }
   });
-  ScrollTrigger.create({ trigger: '.light-on', start: 'top 60%', end: 'bottom top', onToggle: (s) => document.body.classList.toggle('lights-on', s.isActive) });
+  const state = { p: 0 };
+  const tl = gsap.timeline({ paused: STATIC });
+  tl.to('.loader__frame rect', { strokeDashoffset: 0, duration: 1.8, ease: 'power2.inOut' }, 0)
+    .from('.loader__logo', { scale: .6, opacity: 0, duration: 1, ease: 'expo.out' }, .2)
+    .from('.loader__line > *', { y: 14, opacity: 0, stagger: .1, duration: .8 }, .3);
+  const tick = () => {
+    const target = Math.min(100, Math.max(state.p + .9, (loaded / Math.max(1, images.length)) * 100));
+    state.p += (target - state.p) * .08;
+    count.textContent = Math.round(state.p);
+    if (state.p > 99.4) { count.textContent = '100'; gsap.ticker.remove(tick); finish(); }
+  };
+  if (STATIC) { loader.remove(); document.body.classList.remove('is-loading'); }
+  else gsap.ticker.add(tick);
 
-  // Prologue: the script lights up line by line as you read
-  $$('[data-scrub]').forEach((p) => {
-    gsap.to($$('.split-word', p), { opacity: 1, stagger: .1, ease: 'none', scrollTrigger: { trigger: p, start: 'top 82%', end: 'bottom 55%', scrub: true } });
-  });
-  gsap.from('.script__slug, .script__char, .script__paren, .script__trans, .script__fade', {
-    opacity: 0, x: -20, duration: 1, stagger: .1, ease: 'power3.out', scrollTrigger: { trigger: '.script', start: 'top 70%' },
-  });
+  function finish() {
+    gsap.timeline({ delay: .25 })
+      .to('.loader__count, .loader__line, .loader__logo', { opacity: 0, y: -20, duration: .5, stagger: .05 })
+      .to(loader, { clipPath: 'inset(0 0 100% 0)', duration: 1.1, ease: 'expo.inOut' }, '-=.1')
+      .add(() => { loader.remove(); document.body.classList.remove('is-loading'); lenis?.start(); ScrollTrigger.refresh(); }, '-=.4')
+      .from('.hero__line > span', { yPercent: 110, opacity: 0, duration: 1.4, stagger: .07, ease: 'expo.out' }, '-=.75')
+      .from('.hero__oval', { scale: .82, opacity: 0, rotate: -6, duration: 1.6, ease: 'expo.out' }, '<.1')
+      .from('.hero__float--a', { x: -120, y: -60, rotate: -18, opacity: 0, duration: 1.5, ease: 'expo.out' }, '<.15')
+      .from('.hero__float--b', { x: 120, y: 80, rotate: 18, opacity: 0, duration: 1.5, ease: 'expo.out' }, '<')
+      .from('.bar, .hero__side, .hero__scroll', { opacity: 0, y: -10, duration: .9, stagger: .06 }, '<.3')
+      .from('.hero__now', { xPercent: -100, duration: 1.1, ease: 'expo.out' }, '<');
+  }
 }
 
-// ───────────────────────── 02 · Two crafts ─────────────────────────
+// ───────────────────────── I · Hero: step into the frame ─────────────────────────
 if (!STATIC) {
-  const tl = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: '.crafts', start: 'top top', end: 'bottom bottom', scrub: true } });
-  tl.fromTo('.crafts__q', { scale: .9, opacity: 0 }, { scale: 1, opacity: 1, duration: .08 })
-    .to('.crafts__intro', { scale: 1.6, opacity: 0, filter: 'blur(10px)', duration: .1 }, .1)
-    .fromTo('.craft--live', { clipPath: 'inset(50% 50% 50% 50%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: .2 }, .1)
-    .fromTo('.craft--live .craft__media', { scale: 1.35 }, { scale: 1, duration: .3 }, .1)
-    .from('.craft--live .craft__word', { yPercent: 60, opacity: 0, duration: .12 }, .2)
-    .from('.craft--live .craft__line, .craft--live .craft__copy, .craft--live .craft__tag', { y: 30, opacity: 0, stagger: .02, duration: .08 }, .25)
-    .fromTo('.craft--film', { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: .2 }, .45)
-    .to('.craft--live .craft__media', { yPercent: -12, duration: .2 }, .45)
-    .fromTo('.craft--film .craft__media', { scale: 1.3, yPercent: 10 }, { scale: 1, yPercent: 0, duration: .3 }, .45)
-    .from('.craft--film .craft__word', { yPercent: 60, opacity: 0, duration: .12 }, .55)
-    .from('.craft--film .craft__line, .craft--film .craft__copy, .craft--film .craft__tag', { y: 30, opacity: 0, stagger: .02, duration: .08 }, .6)
-    .to('.craft__body', { opacity: 0, duration: .06 }, .78)
-    .to('.craft--live', { clipPath: mobile ? 'inset(14% 6% 52% 6%)' : 'inset(16% 52% 30% 5%)', duration: .14 }, .8)
-    .to('.craft--film', { clipPath: mobile ? 'inset(52% 6% 14% 6%)' : 'inset(16% 5% 30% 52%)', duration: .14 }, .8)
-    .to('.crafts__outro', { opacity: 1, duration: .08 }, .88)
-    .from('.crafts__outro > *', { yPercent: 80, stagger: .02, duration: .08 }, .88);
+  // Pointer parallax on the exhibition pieces
+  const floats = [['.hero__oval', 12], ['.hero__float--a', -28], ['.hero__float--b', 34]].map(([s, d]) => ({ el: $(s), d, x: gsap.quickTo($(s), 'x', { duration: 1.2, ease: 'power3' }), y: gsap.quickTo($(s), 'y', { duration: 1.2, ease: 'power3' }) }));
+  addEventListener('pointermove', (e) => {
+    if (scrollY > innerHeight * .3) return;
+    const nx = e.clientX / innerWidth - .5, ny = e.clientY / innerHeight - .5;
+    floats.forEach((f) => { f.x(nx * f.d); f.y(ny * f.d); });
+  }, { passive: true });
+
+  // The oval grows until its painting becomes the lake itself
+  const oval = $('.hero__oval');
+  const zoom = () => {
+    const r = oval.getBoundingClientRect();
+    const paintW = r.width * .62, paintH = r.height * .6;
+    return Math.max(innerWidth / paintW, innerHeight / paintH) * 1.15;
+  };
+  const tl = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom bottom', scrub: .8, invalidateOnRefresh: true } });
+  tl.to('.hero__line--1', { xPercent: -40, opacity: 0, duration: .3 }, 0)
+    .to('.hero__line--3', { xPercent: 40, opacity: 0, duration: .3 }, 0)
+    .to('.hero__line--2 > span:first-child', { x: '-30vw', opacity: 0, duration: .3 }, 0)
+    .to('.hero__line--2 > span:last-child', { x: '30vw', opacity: 0, duration: .3 }, 0)
+    .to('.hero__float--a', { x: '-40vw', y: '-30vh', rotate: -30, duration: .35 }, 0)
+    .to('.hero__float--b', { x: '40vw', y: '30vh', rotate: 30, duration: .35 }, 0)
+    .to('.bar, .hero__side, .hero__now, .hero__scroll', { opacity: 0, duration: .12 }, 0)
+    .to('.hero__wall', { padding: 0, duration: .3 }, .05)
+    .to('.hero__canvas', { borderRadius: 0, duration: .3 }, .05)
+    .to(oval, { scale: zoom, rotate: 0, duration: .62, ease: 'power2.in' }, .08)
+    .to('.hero__scene', { opacity: 1, duration: .14 }, .56)
+    .to('.hero__canvas', { opacity: 0, duration: .14 }, .58)
+    .fromTo('.hero__scene img', { scale: 1.25 }, { scale: 1, duration: .3, ease: 'power2.out' }, .62)
+    .to('.hero__into', { opacity: 1, duration: .1 }, .74)
+    .to('.hero__into', { opacity: 0, duration: .1 }, .9);
 }
 
-// ───────────────────────── 03 · The reel ─────────────────────────
+// ───────────────────────── II · Prologue: dawn on the lake ─────────────────────────
 if (!STATIC) {
-  const strip = $('#reel-strip');
-  const frames = $$('.frame', strip);
-  const frameLabel = $('#reel-frame'), reelTC = $('#reel-tc');
-  const distance = () => strip.scrollWidth - innerWidth;
-  const tween = gsap.to(strip, {
-    x: () => -distance(), ease: 'none',
+  const lines = $$('[data-line]');
+  const clock = $('#clock');
+  const tl = gsap.timeline({
+    defaults: { ease: 'none' },
     scrollTrigger: {
-      trigger: '.reel', start: 'top top', end: 'bottom bottom', scrub: .6, invalidateOnRefresh: true,
+      trigger: '.prologue', start: 'top top', end: 'bottom bottom', scrub: .6,
       onUpdate: (s) => {
-        reelTC.textContent = timecode(s.progress * 48);
+        const mins = 5 * 60 + 42 + Math.round(s.progress * 38); // 05:42 → 06:20, the sun comes up
+        clock.textContent = `${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`;
       },
     },
   });
-  // The projector gate: frames tilt as they pass through, and the counter follows the frame in the gate
-  const inView = { on: false };
-  ScrollTrigger.create({ trigger: '.reel', start: 'top bottom', end: 'bottom top', onToggle: (s) => { inView.on = s.isActive; } });
-  gsap.ticker.add(() => {
-    if (!inView.on) return;
-    const centre = innerWidth / 2;
-    let best = 0, bestD = Infinity;
-    frames.forEach((f, i) => {
-      const r = f.getBoundingClientRect();
-      const off = (r.left + r.width / 2 - centre) / innerWidth;
-      if (Math.abs(off) < bestD) { bestD = Math.abs(off); best = i; }
-      f.style.transform = `rotateY(${clamp(off * -18, -14, 14)}deg) scale(${1 - Math.min(.08, Math.abs(off) * .08)})`;
+  tl.to('.prologue__frame rect', { strokeDashoffset: 0, duration: .25 }, 0)
+    .fromTo('.prologue__bg', { scale: 1.08, filter: 'brightness(.85) saturate(.85)' }, { scale: 1.22, filter: 'brightness(1.08) saturate(1.1)', duration: 1 }, 0);
+  lines.forEach((l, i) => {
+    const at = .08 + i * .17;
+    tl.to(l, { opacity: 1, y: 0, duration: .07, ease: 'power2.out' }, at);
+    if (i < lines.length - 1 && mobile()) tl.to(l, { opacity: 0, y: -20, duration: .06 }, at + .15);
+    else if (i < lines.length - 1) tl.to(l, { opacity: .45, duration: .06 }, at + .15);
+  });
+}
+
+// ───────────────────────── Rising section titles ─────────────────────────
+if (!STATIC) {
+  $$('[data-rise]').forEach((el) => {
+    gsap.from(el, { yPercent: 60, opacity: 0, rotate: 2, duration: 1.3, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 88%' } });
+  });
+  gsap.from('.craft', { y: 120, opacity: 0, stagger: .12, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.crafts__row', start: 'top 85%' } });
+  gsap.from('.rep__panel', { scale: .92, borderRadius: 80, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.rep', start: 'top 85%' } });
+  gsap.from('.step', { y: 40, opacity: 0, stagger: .08, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: '.steps', start: 'top 85%' } });
+  gsap.from('.credits__word', { yPercent: 40, opacity: 0, duration: 1.6, ease: 'expo.out', scrollTrigger: { trigger: '.credits', start: 'top 80%' } });
+}
+
+// ───────────────────────── Dock: appears after the hero ─────────────────────────
+{
+  const dock = $('#dock');
+  const links = $$('.dock__links a');
+  ScrollTrigger.create({ trigger: '.prologue', start: 'top 60%', endTrigger: 'body', end: 'bottom bottom', onToggle: (s) => dock.classList.toggle('is-shown', s.isActive) });
+  links.forEach((a) => {
+    const sec = $(a.getAttribute('href'));
+    ScrollTrigger.create({ trigger: sec, start: 'top 50%', end: 'bottom 50%', onToggle: (s) => a.classList.toggle('is-on', s.isActive) });
+  });
+}
+
+// ───────────────────────── III · Crafts accordion ─────────────────────────
+$$('.craft').forEach((c) => {
+  const open = () => $$('.craft').forEach((x) => x.classList.toggle('is-open', x === c));
+  c.addEventListener('mouseenter', () => finePointer && open());
+  c.addEventListener('click', open);
+  c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+});
+
+// ───────────────────────── IV · The repertoire ─────────────────────────
+{
+  const items = [
+    { img: 'obj-samovar', name: 'Weddings & celebrations', word: 'celebrate', text: 'From the mehendi to the last dance — décor, flow, hospitality and every family ritual, held with care. The kahwa is always hot.', tags: ['Concept & décor', 'Venues', 'Hospitality'], type: 'Wedding' },
+    { img: 'obj-camera', name: 'Brand films & documentaries', word: 'cinematic', text: 'A sixty-second story that stops the scroll, or a long, patient film about people and place. Treatment to final grade.', tags: ['Treatment', 'Shoot', 'Edit & colour'], type: 'Brand film' },
+    { img: 'obj-spot', name: 'Concerts & live shows', word: 'electric', text: 'Sound, light and crowd choreography for nights that are louder than words — production design to artist logistics.', tags: ['Production design', 'Sound & light', 'Artists'], type: 'Concert / festival' },
+    { img: 'obj-clapper', name: 'Music videos & event films', word: 'rhythm', text: 'Visual worlds built around a sound, and aftermovies that let your event live on — bold, rhythmic, made for repeat.', tags: ['Concept', 'Multi-camera', 'Same-day edits'], type: 'Music video' },
+    { img: 'obj-mic', name: 'Corporate events & conferences', word: 'remarkable', text: 'Launches, summits, offsites and award nights — staged with the polish your brand deserves and a run of show to the second.', tags: ['Stage & AV', 'Registration', 'Run of show'], type: 'Corporate event' },
+    { img: 'obj-shikara', name: 'Destination experiences', word: 'enchanting', text: 'Shikara arrivals, garden ceremonies, snow-lit evenings. We bring your guests into the valley — travel, stays and permits included.', tags: ['Travel & stays', 'Permits', 'Local craft'], type: 'Destination experience' },
+  ];
+  const stage = $('#rep-stage'), info = $('#rep-info'), ghost = $('#rep-ghost');
+  const els = items.map((it, i) => {
+    const d = document.createElement('div');
+    d.className = 'rep__item';
+    d.innerHTML = `<img src="media/v3/${it.img}.webp" alt="${it.name}" draggable="false" loading="lazy" />`;
+    d.addEventListener('click', () => { if (!dragged) go(i); });
+    stage.appendChild(d);
+    return d;
+  });
+  $('#rep-total').textContent = String(items.length).padStart(2, '0');
+  let index = 0, pos = 0, dragged = false;
+  const layout = (p, instant) => {
+    els.forEach((el, i) => {
+      let o = i - p;
+      const n = items.length;
+      if (o > n / 2) o -= n; if (o < -n / 2) o += n;
+      const a = Math.abs(o);
+      const spread = mobile() ? 70 : 38;
+      gsap.to(el, {
+        xPercent: -50 + o * spread * (mobile() ? 1.2 : 1.5), yPercent: -50 + a * 6, scale: 1 - Math.min(.55, a * .42), opacity: a > 1.6 ? 0 : o > .5 && !mobile() ? .35 : 1 - a * .45,
+        zIndex: 10 - Math.round(a), filter: `brightness(${1 - Math.min(.6, a * .45)})`, rotate: o * -3, duration: instant ? 0 : 1, ease: 'expo.out', overwrite: true,
+      });
     });
-    frameLabel.textContent = best < 8 ? `FR ${pad(best + 1)}` : 'FR —';
-  });
-  frames.forEach((f) => {
-    const img = $('img', f);
-    if (img) gsap.fromTo(img, { xPercent: -8 }, { xPercent: 8, ease: 'none', scrollTrigger: { trigger: f, containerAnimation: tween, start: 'left right', end: 'right left', scrub: true } });
-    const info = $$('.frame__info > *', f);
-    if (info.length) gsap.from(info, { y: 30, opacity: 0, stagger: .05, duration: .8, ease: 'power3.out', scrollTrigger: { trigger: f, containerAnimation: tween, start: 'left 75%' } });
-  });
-  gsap.from('.reel__title .split-word, .reel__title', { yPercent: 40, opacity: 0, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: '.reel', start: 'top 60%' } });
-}
-
-// ───────────────────────── 04 · The method (clapperboard) ─────────────────────────
-{
-  const steps = $$('.step');
-  const stick = $('.clapper__stick'), flash = $('.clapper__flash');
-  const sceneEl = $('#clap-scene'), stepEl = $('#clap-step');
-  let current = -1;
-  const activate = (i) => {
-    if (i === current) return;
-    current = i;
-    steps.forEach((s, k) => s.classList.toggle('is-active', k === i));
-    sceneEl.textContent = pad(i + 1);
-    stepEl.textContent = $('h3', steps[i]).textContent.toUpperCase();
-    if (STATIC) return;
-    gsap.timeline()
-      .to(stick, { rotate: -22, duration: .18, ease: 'power2.out' })
-      .to(stick, { rotate: 0, duration: .11, ease: 'power4.in', onComplete: clap })
-      .fromTo(flash, { opacity: .9 }, { opacity: 0, duration: .5 })
-      .fromTo('.clapper', { x: -3 }, { x: 0, duration: .25, ease: 'elastic.out(1, .3)' }, '<')
-      .to(stick, { rotate: -12, duration: .9, ease: 'power3.inOut' }, '+=.35');
   };
-  if (STATIC) steps.forEach((s) => s.classList.add('is-active'));
-  else {
-    activate(0);
-    ScrollTrigger.create({ trigger: '.method', start: 'top top', end: 'bottom bottom', onUpdate: (s) => activate(Math.min(steps.length - 1, Math.floor(s.progress * steps.length * .999))) });
-    gsap.from('.method__title .split-word, .method__title', { yPercent: 30, opacity: 0, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: '.method', start: 'top 60%' } });
-  }
+  const render = () => {
+    const it = items[index];
+    info.innerHTML = `<h3>${it.name}</h3><p>${it.text}</p><ul>${it.tags.map((t) => `<li>${t}</li>`).join('')}</ul><a href="#your-scene" data-type="${it.type}">Plan this with us →</a>`;
+    $('a', info).addEventListener('click', () => { $('#scene-form').type.value = it.type; $('#scene-form').dispatchEvent(new Event('change')); });
+    $('#rep-now').textContent = String(index + 1).padStart(2, '0');
+    $('#rep-bar').style.width = `${(index + 1) / items.length * 100}%`;
+    gsap.fromTo(ghost, { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 1, ease: 'expo.out', onStart: () => { ghost.textContent = it.word; } });
+  };
+  const go = (i) => { index = (i + items.length) % items.length; pos = index; layout(pos); render(); };
+  $('#rep-prev').addEventListener('click', () => go(index - 1));
+  $('#rep-next').addEventListener('click', () => go(index + 1));
+  $('.rep__panel').addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') go(index - 1); if (e.key === 'ArrowRight') go(index + 1); });
+  // Drag (mouse & touch)
+  const panel = $('.rep__panel');
+  let startX = 0, startPos = 0, down = false;
+  panel.addEventListener('pointerdown', (e) => { if (e.target.closest('a, button')) return; down = true; dragged = false; startX = e.clientX; startPos = pos; });
+  addEventListener('pointermove', (e) => {
+    if (!down) return;
+    const dx = e.clientX - startX;
+    if (Math.abs(dx) > 6) dragged = true;
+    pos = startPos - dx / (panel.clientWidth * .35);
+    layout(pos, false);
+  });
+  addEventListener('pointerup', () => { if (!down) return; down = false; if (dragged) go(Math.round(pos)); setTimeout(() => { dragged = false; }, 0); });
+  layout(0, true); render();
+  addEventListener('resize', () => layout(pos, true));
 }
 
-// ───────────────────────── 05 · The valley ─────────────────────────
+// ───────────────────────── V · Method: a peek follows the cursor ─────────────────────────
 {
-  const v = buildValley($('#valley-svg'), $('#valley-card'), $('#valley-list'), () => tick());
-  // On phones the map is swipeable; open it centred on Srinagar
-  const mapScroll = $('.valley__scroll');
-  requestAnimationFrame(() => { if (mapScroll.scrollWidth > mapScroll.clientWidth) mapScroll.scrollLeft = (mapScroll.scrollWidth - mapScroll.clientWidth) * .5; });
+  const peek = $('#peek'), img = $('img', peek);
+  const px = gsap.quickTo(peek, 'x', { duration: .6, ease: 'power3' });
+  const py = gsap.quickTo(peek, 'y', { duration: .6, ease: 'power3' });
+  $$('.step').forEach((s) => {
+    s.addEventListener('mouseenter', () => { img.src = s.dataset.img; peek.classList.add('is-on'); s.classList.add('is-on'); });
+    s.addEventListener('mouseleave', () => { peek.classList.remove('is-on'); s.classList.remove('is-on'); });
+    s.addEventListener('mousemove', (e) => { px(e.clientX + 30); py(e.clientY - 120); });
+  });
+}
+
+// ───────────────────────── VI · The valley ─────────────────────────
+{
+  const v = buildValley($('#valley-svg'), $('#valley-card'), $('#valley-list'));
+  const scroller = $('.valley__scroll');
+  requestAnimationFrame(() => { if (scroller.scrollWidth > scroller.clientWidth) scroller.scrollLeft = (scroller.scrollWidth - scroller.clientWidth) * .5; });
   if (!STATIC) {
     v.routes.forEach((p) => { const L = p.getTotalLength(); p.style.strokeDasharray = `${L}`; p.style.strokeDashoffset = `${L}`; });
     gsap.to(v.routes, { strokeDashoffset: 0, stagger: .15, ease: 'none', scrollTrigger: { trigger: '.valley__map', start: 'top 75%', end: 'center 45%', scrub: true } });
     gsap.from(v.pins, { opacity: 0, scale: 0, transformOrigin: 'center', stagger: .08, duration: .8, ease: 'back.out(2)', scrollTrigger: { trigger: '.valley__map', start: 'top 70%' } });
-    gsap.from('.valley .ridges path', { opacity: 0, y: 20, stagger: .02, duration: .8, ease: 'power2.out', scrollTrigger: { trigger: '.valley__map', start: 'top 80%' } });
   }
 }
 
-// ───────────────────────── Reveal-on-enter titles ─────────────────────────
-if (!STATIC) {
-  $$('.valley__title, .sheet__title, .ys__title').forEach((t) => {
-    gsap.from($$('.split-word', t).length ? $$('.split-word', t) : t, { yPercent: 110, duration: 1.2, stagger: .06, ease: 'expo.out', scrollTrigger: { trigger: t, start: 'top 82%' } });
-  });
-  // Contact sheet: shots drift at different speeds
-  $$('.shot').forEach((s, i) => {
-    gsap.fromTo(s, { y: 60 + i * 30 }, { y: -40 - i * 20, ease: 'none', scrollTrigger: { trigger: '.contact-sheet', start: 'top bottom', end: 'bottom top', scrub: true } });
-    gsap.from(s, { clipPath: 'inset(100% 0 0 0)', duration: 1.4, ease: 'expo.inOut', scrollTrigger: { trigger: s, start: 'top 90%' } });
-  });
-  // End credits roll up a little slower than the page
-  gsap.fromTo('.credits__roll', { y: '18vh' }, { y: 0, ease: 'none', scrollTrigger: { trigger: '.credits', start: 'top bottom', end: 'bottom bottom', scrub: true } });
-  gsap.from('.credits__begin', { opacity: 0, y: 20, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: '.credits__end', start: 'top 70%' } });
-}
-
-// ───────────────────────── Lightbox & dialogs ─────────────────────────
-const lightbox = $('#lightbox');
-$$('[data-lightbox]').forEach((b) => b.addEventListener('click', () => {
-  const img = $('img', b);
-  $('#lightbox-img').src = img.src; $('#lightbox-img').alt = img.alt;
-  $('#lightbox-cap').textContent = $('.shot__cap', b).textContent;
-  lightbox.showModal(); lenis?.stop();
-}));
-$('#credits-open').addEventListener('click', () => { $('#credits-dialog').showModal(); lenis?.stop(); });
-$$('dialog').forEach((d) => {
-  $('.lightbox__close', d)?.addEventListener('click', () => d.close());
-  d.addEventListener('click', (e) => { if (e.target === d) d.close(); });
-  d.addEventListener('close', () => lenis?.start());
-});
-
-// ───────────────────────── Scene selection menu ─────────────────────────
-const menu = $('#scenes'), menuBtn = $('#menu-open');
-function openMenu() { menu.classList.add('is-open'); menu.inert = false; menuBtn.setAttribute('aria-expanded', 'true'); lenis?.stop(); $('#menu-close').focus(); }
-function closeMenu() { if (!menu.classList.contains('is-open')) return; menu.classList.remove('is-open'); menu.inert = true; menuBtn.setAttribute('aria-expanded', 'false'); lenis?.start(); menuBtn.focus({ preventScroll: true }); }
-menuBtn.addEventListener('click', openMenu);
+// ───────────────────────── Menu ─────────────────────────
+const menu = $('#menu');
+function openMenu() { menu.classList.add('is-open'); menu.inert = false; lenis?.stop(); $('#menu-close').focus(); }
+function closeMenu() { if (!menu.classList.contains('is-open')) return; menu.classList.remove('is-open'); menu.inert = true; lenis?.start(); }
+$('#menu-open').addEventListener('click', openMenu);
+$('#menu-open-2').addEventListener('click', openMenu);
 $('#menu-close').addEventListener('click', closeMenu);
 addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
 
-// ───────────────────────── Sound ─────────────────────────
-const soundBtn = $('#sound-toggle');
-function toggleSound(force) {
-  const on = typeof force === 'boolean' ? force : !soundOn();
-  setSound(on);
-  soundBtn.setAttribute('aria-pressed', String(on));
-  $('b', soundBtn).textContent = on ? 'ON' : 'OFF';
-}
-soundBtn.addEventListener('click', () => toggleSound());
-
-// ───────────────────────── Cursor & magnetism ─────────────────────────
+// ───────────────────────── Cursor ─────────────────────────
 if (finePointer && !STATIC) {
   document.documentElement.classList.add('has-cursor');
-  const cursor = $('.cursor'), ring = $('.cursor__ring'), dot = $('.cursor__dot'), label = $('.cursor__label');
-  const pos = { x: innerWidth / 2, y: innerHeight / 2 }, ringPos = { ...pos };
-  addEventListener('pointermove', (e) => { pos.x = e.clientX; pos.y = e.clientY; }, { passive: true });
-  gsap.ticker.add(() => {
-    ringPos.x += (pos.x - ringPos.x) * .18; ringPos.y += (pos.y - ringPos.y) * .18;
-    dot.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
-    ring.style.transform = `translate(${ringPos.x}px, ${ringPos.y}px)`;
-  });
+  const cursor = $('.cursor'), label = $('.cursor__label');
+  const cx = gsap.quickTo(cursor, 'x', { duration: .25, ease: 'power3' });
+  const cy = gsap.quickTo(cursor, 'y', { duration: .25, ease: 'power3' });
+  addEventListener('pointermove', (e) => { cx(e.clientX); cy(e.clientY); cursor.classList.add('is-live'); }, { passive: true });
   document.addEventListener('mouseover', (e) => {
-    const t = e.target.closest('[data-cursor], a, button, select, input, textarea, [role="button"]');
-    cursor.classList.toggle('is-hover', !!t);
-    const text = t?.dataset?.cursor;
+    const t = e.target.closest('[data-cursor]');
+    const text = t && !e.target.closest('a, button, input, select, textarea') ? t.dataset.cursor : '';
     cursor.classList.toggle('is-label', !!text);
+    cursor.classList.toggle('is-dark', !!t?.closest('.rep'));
     if (text) label.textContent = text;
-    if (t && t !== cursor.lastTarget) tick();
-    cursor.lastTarget = t;
-  });
-  $$('[data-magnetic]').forEach((m) => {
-    m.addEventListener('pointermove', (e) => {
-      const r = m.getBoundingClientRect();
-      gsap.to(m, { x: (e.clientX - r.left - r.width / 2) * .3, y: (e.clientY - r.top - r.height / 2) * .4, duration: .5, ease: 'power3.out' });
-    });
-    m.addEventListener('pointerleave', () => gsap.to(m, { x: 0, y: 0, duration: .8, ease: 'elastic.out(1, .4)' }));
   });
 }
 
-// ───────────────────────── Film grain ─────────────────────────
-{
-  const c = document.createElement('canvas');
-  const S = 256;
-  c.width = S; c.height = S;
-  const g = c.getContext('2d');
-  const img = g.createImageData(S, S);
-  for (let i = 0; i < img.data.length; i += 4) { const v = Math.random() * 255; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
-  g.putImageData(img, 0, 0);
-  const grain = $('#grain');
-  grain.style.backgroundImage = `url(${c.toDataURL('image/png')})`;
-  if (STATIC) grain.style.animation = 'none';
-}
-
-// ───────────────────────── 06 · Your scene (enquiry) ─────────────────────────
+// ───────────────────────── VII · Your scene ─────────────────────────
 {
   const form = $('#scene-form');
   const page = $('#script-page');
@@ -404,20 +296,19 @@ if (finePointer && !STATIC) {
   };
   const fmtDate = (v) => v ? new Date(v + 'T12:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase() : 'A DAY TO REMEMBER';
   function render() {
-    const f = form;
-    const isFilm = filmTypes.includes(f.type.value);
+    const isFilm = filmTypes.includes(form.type.value);
     guests.hidden = isFilm;
-    const name = f.name.value.trim();
+    const name = form.name.value.trim();
     bind('name', name || 'you');
     bind('name-caps', (name || 'you').toUpperCase());
-    bind('intext', f.intext.value);
-    bind('location', f.location.value.toUpperCase());
-    bind('date', fmtDate(f.date.value));
+    bind('intext', form.intext.value);
+    bind('location', form.location.value.toUpperCase());
+    bind('date', fmtDate(form.date.value));
     const t = typeLabel();
     bind('type-line', t.charAt(0).toUpperCase() + t.slice(1));
-    bind('guests-line', !isFilm && f.guests.value ? ` for ${f.guests.value} people` : '');
-    bind('feeling', f.feeling.value);
-    bind('story', f.story.value.trim() || 'The air is full of something about to begin.');
+    bind('guests-line', !isFilm && form.guests.value ? ` for ${form.guests.value} people` : '');
+    bind('feeling', form.feeling.value);
+    bind('story', form.story.value.trim() || 'The air is full of something about to begin.');
   }
   form.addEventListener('input', render);
   form.addEventListener('change', render);
@@ -426,36 +317,25 @@ if (finePointer && !STATIC) {
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const action = e.submitter?.dataset.action || 'studio';
-    const name = form.name.value.trim();
-    const phone = form.phone.value.trim(), email = form.email.value.trim();
+    const name = form.name.value.trim(), phone = form.phone.value.trim(), email = form.email.value.trim();
     err.hidden = true;
     if (!name) { err.textContent = 'Every script needs a writer — please add your name.'; err.hidden = false; form.name.focus(); return; }
     if (!phone && !email) { err.textContent = 'How do we reach you? Add a phone number or an email.'; err.hidden = false; form.phone.focus(); return; }
     if (email && !form.email.checkValidity()) { err.textContent = 'That email doesn’t look quite right.'; err.hidden = false; form.email.focus(); return; }
-
     const enquiry = {
-      name, phone, email,
-      type: form.type.value,
-      location: form.location.value,
-      date: form.date.value,
-      guests: Number(form.guests.value) || null,
-      feeling: form.feeling.value,
-      budget: Number(form.budget.value) || 0,
-      story: form.story.value.trim(),
-      source: action === 'whatsapp' ? 'Website · WhatsApp' : 'Website',
+      name, phone, email, type: form.type.value, location: form.location.value, date: form.date.value,
+      guests: Number(form.guests.value) || null, feeling: form.feeling.value, budget: Number(form.budget.value) || 0,
+      story: form.story.value.trim(), source: action === 'whatsapp' ? 'Website · WhatsApp' : 'Website',
     };
     try { pushToInbox(enquiry); } catch (x) { console.warn('Could not save the demo enquiry', x); }
-
     if (action === 'whatsapp') {
       const lines = [
-        `Hello Aman Productions — here's my scene:`,
-        ``,
+        `Hello Aman Productions — here's my scene:`, ``,
         `${form.intext.value} ${form.location.value.toUpperCase()} — ${fmtDate(form.date.value)}`,
         `${name} is planning ${typeLabel()}${!filmTypes.includes(form.type.value) && form.guests.value ? ` for about ${form.guests.value} people` : ''}.`,
         `Everyone should feel ${form.feeling.value}.`,
         `Budget: ${form.budget.selectedOptions[0].textContent}.`,
-        enquiry.story ? `The story: ${enquiry.story}` : '',
-        ``,
+        enquiry.story ? `The story: ${enquiry.story}` : '', ``,
         `Reach me at ${[phone, email].filter(Boolean).join(' / ')}`,
       ].filter((l, i, arr) => l !== '' || arr[i - 1] !== '');
       window.open(`https://wa.me/917780996694?text=${encodeURIComponent(lines.join('\n'))}`, '_blank', 'noopener');
@@ -463,40 +343,23 @@ if (finePointer && !STATIC) {
     $('#wrap-copy').textContent = action === 'whatsapp'
       ? 'WhatsApp is open with your script ready to send. A copy has also been saved to this browser’s Studio OS for the client preview.'
       : 'Saved to Studio OS in this browser (client preview). Open the studio to see it arrive in the pipeline.';
-    gsap.to(page, {
-      rotate: -8, y: -40, opacity: 0, duration: STATIC ? .01 : .7, ease: 'power3.in', onComplete: () => {
-        page.hidden = true; wrap.hidden = false;
-        gsap.from(wrap, { opacity: 0, y: 30, duration: .8, ease: 'expo.out' });
-      },
-    });
-    clap();
+    gsap.to(page, { rotate: -8, y: -40, opacity: 0, duration: STATIC ? .01 : .7, ease: 'power3.in', onComplete: () => { page.hidden = true; wrap.hidden = false; gsap.from(wrap, { opacity: 0, y: 30, duration: .8, ease: 'expo.out' }); } });
   });
   $('#wrap-again').addEventListener('click', () => {
     form.reset(); render();
     wrap.hidden = true; page.hidden = false;
-    gsap.fromTo(page, { opacity: 0, y: 30, rotate: 1.2 }, { opacity: 1, y: 0, rotate: 1.2, duration: .8, ease: 'expo.out' });
+    gsap.fromTo(page, { opacity: 0, y: 30 }, { opacity: 1, y: 0, rotate: 1.4, duration: .8, ease: 'expo.out' });
     form.name.focus();
   });
 }
 
-// ───────────────────────── Rewind ─────────────────────────
-$('#rewind').addEventListener('click', () => {
-  const fx = $('.rewind-fx');
-  rewinding = true; rewindTC = (performance.now() - startedAt) / 1000;
-  fx.classList.add('is-on');
-  const done = () => { fx.classList.remove('is-on'); rewinding = false; startedAt = performance.now(); };
-  if (lenis) lenis.scrollTo(0, { duration: 2.6, easing: (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, onComplete: done });
-  else { window.scrollTo(0, 0); done(); }
+// ───────────────────────── Credits ─────────────────────────
+$('#credits-open').addEventListener('click', () => { $('#credits-dialog').showModal(); lenis?.stop(); });
+$$('dialog').forEach((d) => {
+  $('.dialog-x', d)?.addEventListener('click', () => d.close());
+  d.addEventListener('click', (e) => { if (e.target === d) d.close(); });
+  d.addEventListener('close', () => lenis?.start());
 });
+$('#rewind').addEventListener('click', () => (lenis ? lenis.scrollTo(0, { duration: 2.4, easing: (t) => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) }) : window.scrollTo(0, 0)));
 
-// ───────────────────────── Shutter transition to the studio ─────────────────────────
-$$('a[data-transition]').forEach((a) => a.addEventListener('click', (e) => {
-  if (e.metaKey || e.ctrlKey || e.shiftKey) return;
-  e.preventDefault();
-  if (STATIC) { location.href = a.href; return; }
-  gsap.to('.shutter i', { scaleY: 1, duration: .6, ease: 'expo.inOut', onComplete: () => { location.href = a.href; } });
-}));
-addEventListener('pageshow', () => gsap.set('.shutter i', { scaleY: 0 }));
-
-// Keep geometry honest after fonts settle
 document.fonts?.ready.then(() => ScrollTrigger.refresh());

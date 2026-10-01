@@ -13,10 +13,10 @@ Event management + film production studio in Abi Guzar, Srinagar, Kashmir. The c
 - Keep provenance honest: concept images stay labelled; never invent clients, awards or stats.
 - The website's WhatsApp link targets the real business number +91 7780996694.
 - Respect `prefers-reduced-motion` (`.is-static` mode) and keep scroll native-feeling in both directions (Lenis, no wheel hijacking).
-- Particle chapters are driven by `data-shape` on sections; `data-dim` sets particle opacity behind dense content.
+- Visual direction (v3): cream/maroon/vermilion editorial gallery, image-led. Concept art lives in `public/media/v3/` and must stay labelled as concept art.
 
 ## Verify after changes
-Desktop (1440) and phone (390, 320) — no horizontal overflow; WebGL renders; every reel; the "Your scene" → Studio OS pipeline → convert → invoice → payment flow; no console errors.
+Desktop (1440) and phone (390, 320) — no horizontal overflow; the hero zoom-into-the-frame; every chapter; the "Your scene" → Studio OS pipeline → convert → invoice → payment flow; no console errors.
 
 ## Deployment
 The previous presentation lived on the Vercel project `aman-productions-studio` (team scope `auzaie`). Deploy this folder with `vercel deploy --prod` from `aman-productions/` only when asked. `vercel.json` builds with Vite and keeps noindex headers for the preview.

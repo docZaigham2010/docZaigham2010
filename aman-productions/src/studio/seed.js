@@ -156,7 +156,7 @@ export function seed() {
     version: 2,
     settings: {
       company: 'Aman Productions', tagline: 'Event Management & Film Production', address: 'Abi Guzar, Srinagar, Jammu & Kashmir 190001', phone: '+91 77809 96694',
-      email: '', gstin: '', gstRate: 18, invoicePrefix: 'AP/26-27/', quotePrefix: 'Q-26-', bank: '', theme: 'dark', role: 'Owner', userName: 'Aman',
+      email: '', gstin: '', gstRate: 18, invoicePrefix: 'AP/26-27/', quotePrefix: 'Q-26-', bank: '', theme: 'light', role: 'Owner', userName: 'Aman',
     },
     clients, crew, projects, leads, gear, invoices, entries, activity,
     seededAt: today(),

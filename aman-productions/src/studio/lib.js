@@ -81,3 +81,8 @@ export function taskProgress(p) {
   const t = p.tasks || [];
   return t.length ? Math.round(t.filter((x) => x.status === 'done').length / t.length * 100) : 0;
 }
+
+// Cover art for productions, by service (concept imagery shipped with the website)
+const COVERS = { Wedding: 'scene-wedding', Celebration: 'frame-wedding', 'Corporate event': 'obj-mic', 'Concert / festival': 'obj-spot', 'Destination experience': 'obj-shikara',
+  'Brand film': 'obj-camera', Documentary: 'scene-dal', 'Music video': 'obj-clapper', 'Event film': 'scene-film', 'Something new': 'frame-oval' };
+export const coverFor = (p) => `media/v3/${COVERS[p?.service] || (p?.kind === 'film' ? 'scene-film' : 'scene-wedding')}.webp`;

@@ -56,11 +56,12 @@ export function Empty({ icon: Icon, title, children, action }) {
   );
 }
 
-export function Stat({ label, value, sub, icon: Icon, tone, trend }) {
+export function Stat({ label, value, sub, icon: Icon, tone, trend, meter }) {
   return (
     <div className={cx('stat', tone && `stat--${tone}`)}>
-      <div className="stat__top"><span>{label}</span>{Icon && <Icon size={16} strokeWidth={1.75} />}</div>
+      <div className="stat__top"><span>{Icon && <i className="stat__icon"><Icon size={15} strokeWidth={1.75} /></i>}{label}</span>{meter != null && <em className="stat__pct">{Math.round(meter * 100)}%</em>}</div>
       <p className="stat__value">{value}</p>
+      {meter != null && <div className="capsules" aria-hidden="true">{Array.from({ length: 8 }, (_, i) => <i key={i} className={i < Math.round(meter * 8) ? 'on' : ''} />)}</div>}
       {sub && <p className="stat__sub">{trend && <b className={trend > 0 ? 'up' : 'down'}>{trend > 0 ? '▲' : '▼'}</b>}{sub}</p>}
     </div>
   );

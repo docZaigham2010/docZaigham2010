@@ -15,12 +15,13 @@ export function GroupedBars({ data, series, height = 220, format = compactInr })
   const max = niceMax(Math.max(...data.flatMap((d) => series.map((s) => d[s.key] || 0))));
   const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
   const groupW = iw / data.length;
-  const barW = Math.min(18, (groupW - 12) / series.length - 2);
+  const barW = Math.min(22, (groupW - 12) / series.length - 4);
   const y = (v) => pad.t + ih - (v / max) * ih;
   const ticks = [0, .5, 1].map((f) => max * f);
+  // Capsules: fully rounded bars, like pills standing on the baseline
   const bar = (x, top, w, h) => {
-    const r = Math.min(4, w / 2, h);
-    return `M${x} ${top + h} V${top + r} Q${x} ${top} ${x + r} ${top} H${x + w - r} Q${x + w} ${top} ${x + w} ${top + r} V${top + h} Z`;
+    const r = Math.min(w / 2, h / 2);
+    return `M${x} ${top + h - r} V${top + r} A${r} ${r} 0 0 1 ${x + w} ${top + r} V${top + h - r} A${r} ${r} 0 0 1 ${x} ${top + h - r} Z`;
   };
   return (
     <div className="chart">
@@ -30,13 +31,13 @@ export function GroupedBars({ data, series, height = 220, format = compactInr })
           {ticks.map((t) => <g key={t}><line x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} className="chart__grid" /><text x={pad.l - 8} y={y(t) + 4} textAnchor="end" className="chart__tick">{format(t)}</text></g>)}
           {data.map((d, i) => {
             const gx = pad.l + i * groupW;
-            const start = gx + (groupW - (barW + 2) * series.length) / 2;
+            const start = gx + (groupW - (barW + 4) * series.length) / 2;
             return (
               <g key={d.label} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)}>
                 <rect x={gx} y={pad.t} width={groupW} height={ih} className={hover === i ? 'chart__hit is-on' : 'chart__hit'} />
                 {series.map((s, k) => {
                   const v = d[s.key] || 0; const h = Math.max(0, ih - (y(v) - pad.t));
-                  return h > 0 && <path key={s.key} d={bar(start + k * (barW + 2), y(v), barW, h)} style={{ fill: `var(--s${k + 1})`, opacity: d.future ? .45 : 1 }} />;
+                  return h > 0 && <g key={s.key} style={{ opacity: d.future ? .45 : 1 }}><path d={bar(start + k * (barW + 4), y(v), barW, h)} style={{ fill: `var(--s${k + 1})` }} />{h > barW && <circle cx={start + k * (barW + 4) + barW / 2} cy={y(v) + barW / 2} r={barW / 4.5} className="chart__cap" />}</g>;
                 })}
                 <text x={gx + groupW / 2} y={H - 8} textAnchor="middle" className="chart__tick">{d.label}</text>
               </g>
