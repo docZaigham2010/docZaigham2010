@@ -5,7 +5,7 @@ import { Card, Stat, StatusBadge, Progress, Badge, Empty, Avatar } from '../ui.j
 import { GroupedBars, HBars } from '../charts.jsx';
 import {
   compactInr, inr, fmtDate, fmtRelative, today, rel, addDays, parse, sum, invoiceTotals, invoiceStatus, PHASES, STAGES, taskProgress,
-  projectCost, projectEstimate, timeAgo, daysBetween, coverFor,
+  projectCost, projectEstimate, timeAgo, daysBetween,
 } from '../lib.js';
 
 const greeting = () => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; };
@@ -51,7 +51,7 @@ export default function Dashboard({ alerts }) {
       <section className="hero-card">
         <div className="hero-card__text">
           <p className="eyebrow">{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })} · Control Room</p>
-          <h1>{greeting()}, <span className="chip-img"><img src="media/v3/obj-samovar.webp" alt="" /></span> {s.settings.userName}. <span className="h1-soft">Here’s <span className="chip-img chip-img--wide"><img src="media/v3/scene-dal.webp" alt="" /></span> today’s call sheet.</span></h1>
+          <h1>{greeting()}, {s.settings.userName}. <span className="h1-soft">Here’s today’s call sheet.</span></h1>
           <p className="hero-card__lede">
             {next
               ? <><b>{next.name.split('—')[0].trim()}</b> {daysBetween(t0, next.startDate) === 0 ? 'is happening today' : <>is <b>{daysBetween(t0, next.startDate)} days</b> away</>} — {taskProgress(next)}% of its tasks are done.</>
@@ -60,7 +60,7 @@ export default function Dashboard({ alerts }) {
           </p>
         </div>
         {next && (
-          <a className="countdown" href={`#/productions/${next.id}`} style={{ backgroundImage: `url(${coverFor(next)})` }}>
+          <a className="countdown" href={`#/productions/${next.id}`}>
             <span className="countdown__k">Next on set</span>
             <span className="countdown__n">{Math.max(0, daysBetween(t0, next.startDate))}<small>days</small></span>
             <span className="countdown__name">{next.name.split('—')[0].trim()}</span><span className="countdown__t">{next.kind === 'film' ? <Film size={14} /> : <PartyPopper size={14} />}{fmtDate(next.startDate, { weekday: 'short', day: 'numeric', month: 'short' })} · {next.location}</span>
@@ -105,6 +105,7 @@ export default function Dashboard({ alerts }) {
           </Card>
         )}
         <Card title="Production health" action={<a className="link" href="#/productions">All productions <ArrowUpRight size={14} /></a>} pad={false}>
+          {active.length === 0 && <Empty icon={Clapperboard} title="No productions yet.">Win a lead in the pipeline, or create an event or film.</Empty>}
           <ul className="health">
             {active.map((p) => {
               const est = projectEstimate(p), cost = projectCost(p);

@@ -9,7 +9,7 @@ Event management + film production studio in Abi Guzar, Srinagar, Kashmir. The c
 `npm install`, then `npm run dev`. Build with `npm run build` (Vite, multi-page: index.html + studio.html, `base: './'`). Static output in `dist/`.
 
 ## Rules
-- Studio OS stays in **demo mode** (browser localStorage, fictional data) unless the user explicitly asks for a live backend. All data access goes through `src/studio/store.js`.
+- Studio OS stays in **demo mode** (browser localStorage, blank workspace — no sample records) unless the user explicitly asks for a live backend. All data access goes through `src/studio/store.js`.
 - Keep provenance honest: concept images stay labelled; never invent clients, awards or stats.
 - The website's WhatsApp link targets the real business number +91 7780996694.
 - Respect `prefers-reduced-motion` (`.is-static` mode) and keep scroll native-feeling in both directions (Lenis, no wheel hijacking).

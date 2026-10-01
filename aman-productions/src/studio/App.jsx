@@ -138,7 +138,7 @@ function Shell() {
         </nav>
         <div className="side__foot">
           <a className="side__site" href="./" ><ArrowUpRight size={14} /> View the public website</a>
-          <div className="side__demo"><i />Client preview · demo data in this browser</div>
+          <div className="side__demo"><i />Saved in this browser</div>
         </div>
       </aside>
       <div className="scrim" onClick={() => setNavOpen(false)} />

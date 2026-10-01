@@ -36,11 +36,11 @@ export default function Settings() {
             <Segmented options={[{ value: 'dark', label: 'Dark — control room' }, { value: 'light', label: 'Light — daylight' }]} value={s.settings.theme} onChange={(t) => actions.saveSettings({ theme: t })} label="Theme" />
           </Card>
           <Card title="Your data">
-            <p className="muted small" style={{ marginTop: 0 }}>In this client preview, everything is stored in this browser only. Export a copy any time.</p>
+            <p className="muted small" style={{ marginTop: 0 }}>Everything is stored in this browser only. Export a copy any time.</p>
             <div className="row">
               <Button icon={Download} onClick={exportData}>Export JSON</Button>
               <Button icon={Upload} onClick={() => file.current.click()}>Import</Button>
-              <Button variant="ghost" icon={RotateCcw} onClick={async () => { if (await confirm({ title: 'Reset the demo workspace?', text: 'All changes in this browser will be replaced by the original sample data.', danger: true, ok: 'Reset' })) { resetDemo(); toast('Demo data restored'); } }}>Reset demo</Button>
+              <Button variant="ghost" icon={RotateCcw} onClick={async () => { if (await confirm({ title: 'Erase everything?', text: 'All productions, leads, people, gear and invoices in this browser will be deleted. Export a copy first if you need one.', danger: true, ok: 'Erase all' })) { resetDemo(); toast('Workspace cleared'); } }}>Erase all data</Button>
               <input ref={file} type="file" accept="application/json" hidden onChange={async (e) => {
                 const f = e.target.files[0]; if (!f) return;
                 try { importData(JSON.parse(await f.text())); toast('Workspace imported', 'green'); } catch (err) { toast(err.message || 'Could not import that file', 'red'); }

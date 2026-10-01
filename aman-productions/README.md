@@ -48,9 +48,9 @@ A control room for both sides of the business. Open `/studio.html` (or "Studio O
 - **Settings** — business & GST details, invoice numbering, dark/light theme, export/import/reset.
 - **Everywhere** — ⌘K / Ctrl+K command palette, Create menu, notifications, role views (Owner / Producer / Crew — Crew can't see money), responsive with a mobile tab bar.
 
-## Demo boundaries (client preview)
+## Data (client preview)
 
-This is still a **client preview**. All Studio OS records are fictional sample data stored in the browser (`localStorage`), not shared between devices or people. There is no real sign-in, shared database, file storage, email, or payment collection; a recorded payment only updates the books. Invoices say they are not valid tax invoices until a GSTIN is set. The website's WhatsApp button is real — it opens WhatsApp to the studio's number with the message ready; the visitor still chooses to send it.
+This is still a **client preview**. Studio OS starts as a blank workspace; records are stored in the browser (`localStorage`), not shared between devices or people. There is no real sign-in, shared database, file storage, email, or payment collection; a recorded payment only updates the books. Invoices say they are not valid tax invoices until a GSTIN is set. The website's WhatsApp button is real — it opens WhatsApp to the studio's number with the message ready; the visitor still chooses to send it.
 
 To go live: connect an authenticated database (all reads/writes already go through `src/studio/store.js`), add real staff accounts and server-side roles, enquiry notifications, document storage and the studio's registered GST details.
 

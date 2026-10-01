@@ -17,7 +17,7 @@ Replace or supplement these with the studio's own photography and showreel still
 ## Original work
 - The valley ridgeline map, copy and all code were created for this presentation.
 - Location coordinates are approximate public coordinates; distances are computed straight-line (haversine) from Abi Guzar.
-- Studio OS sample people, clients, projects and figures are fictional.
+- Studio OS ships with no records; it starts blank.
 - No clients, awards, statistics or project credits are claimed.
 
 ## Typography & libraries (bundled locally)

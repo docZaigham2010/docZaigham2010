@@ -5,7 +5,7 @@ import { seed, TEMPLATES } from './seed.js';
 import { uid, today, addDays, SERVICES, STAGE_PROB, sum } from './lib.js';
 import { drainInbox, INBOX_KEY } from '../shared/inbox.js';
 
-const KEY = 'aman-studio-os-v2';
+const KEY = 'aman-studio-os-v3'; // v3: starts blank (v2 held the demo workspace)
 const listeners = new Set();
 let state = load();
 
@@ -16,7 +16,7 @@ function load() {
       const d = JSON.parse(raw);
       if (d && d.version === 2 && Array.isArray(d.projects)) return d;
     }
-  } catch (e) { console.warn('Studio storage unavailable — using a fresh demo workspace.', e); }
+  } catch (e) { console.warn('Studio storage unavailable — using a fresh, empty workspace.', e); }
   return seed();
 }
 
@@ -43,6 +43,7 @@ export function update(fn, logText, kind = 'info') {
 }
 
 export function resetDemo() { state = seed(); persist(); emit(); }
+try { localStorage.removeItem('aman-studio-os-v2'); } catch { /* old demo data */ }
 export function importData(obj) {
   if (!obj || obj.version !== 2 || !Array.isArray(obj.projects)) throw new Error('This file is not a Studio OS v2 export.');
   state = obj; persist(); emit();

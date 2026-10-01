@@ -7,7 +7,7 @@ import { useStudio, actions, crewClashes, getState } from '../store.js';
 import { Button, Badge, Card, Drawer, Empty, Field, Modal, PageHead, Progress, Segmented, StatusBadge, Tabs, useForm, useUI, InlineEdit, Avatar, Stat } from '../ui.jsx';
 import {
   PHASES, SERVICES, compactInr, inr, fmtDate, fmtDateLong, fmtRelative, today, sum, taskProgress, projectCost, projectEstimate, crewCost,
-  invoiceTotals, invoiceStatus, uid, cx, daysBetween, overlaps, addDays, coverFor,
+  invoiceTotals, invoiceStatus, uid, cx, daysBetween, overlaps, addDays,
 } from '../lib.js';
 import { navigate } from '../App.jsx';
 
@@ -47,9 +47,9 @@ export function Productions({ create }) {
             const est = projectEstimate(p), cost = projectCost(p);
             return (
               <a key={p.id} className="pcard" href={`#/productions/${p.id}`} style={{ '--accent': p.color }}>
-                <div className="pcard__cover"><img src={coverFor(p)} alt="" loading="lazy" /><StatusBadge status={p.status} /></div>
                 <div className="pcard__top">
                   <span className="pcard__kind">{p.kind === 'film' ? <Film size={14} /> : <PartyPopper size={14} />}{p.service}</span>
+                  <StatusBadge status={p.status} />
                 </div>
                 <h3>{p.name}</h3>
                 <p className="pcard__client">{client(p.clientId)?.name} · <span className="mono">{p.code}</span></p>
@@ -164,7 +164,6 @@ export function ProductionDetail({ id, tab }) {
   return (
     <div className="pdetail" style={{ '--accent': p.color }}>
       <a className="back" href="#/productions"><ArrowLeft size={15} /> Productions</a>
-      <div className="pbanner" aria-hidden="true"><img src={coverFor(p)} alt="" /></div>
       <header className="pdetail__head">
         <div>
           <p className="eyebrow">{p.kind === 'film' ? <Film size={13} /> : <PartyPopper size={13} />} {p.service} · <span className="mono">{p.code}</span></p>

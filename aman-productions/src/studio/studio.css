@@ -649,8 +649,8 @@ html, body { font-family: 'Inter Variable', system-ui, sans-serif; }
 .chip-img--wide { width: 2.1em; }
 .chip-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .hero-card__lede { font-size: 15px; }
-.countdown { position: relative; overflow: hidden; min-width: 300px; min-height: 230px; padding: 20px; border: 0; border-radius: 22px; background-size: cover; background-position: center; color: #fff; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; isolation: isolate; }
-.countdown::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(0deg, rgba(20, 8, 6, .85), rgba(20, 8, 6, .05) 70%); }
+.countdown { position: relative; overflow: hidden; min-width: 300px; min-height: 230px; padding: 20px; border: 0; border-radius: 22px; background: #1d1311; color: #fbf8f2; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; isolation: isolate; }
+
 .countdown__k { position: absolute; top: 16px; left: 16px; padding: 6px 12px; border-radius: 999px; background: rgba(255, 255, 255, .18); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #fff; font-family: inherit; letter-spacing: .06em; }
 .countdown__n { font-family: 'Instrument Serif', serif; font-variation-settings: normal; font-weight: 400; font-size: 72px; line-height: .9; }
 .countdown__n small { color: rgba(255, 255, 255, .8); }
