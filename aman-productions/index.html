@@ -50,10 +50,16 @@
   </nav>
 
   <main id="top">
-    <!-- ═════════════ I · THE EXHIBITION (hero) ═════════════ -->
-    <section class="hero" id="hero" aria-labelledby="hero-title">
-      <div class="hero__pin">
-        <div class="hero__scene" aria-hidden="true"><img src="media/v3/scene-dal.webp" alt="" /></div>
+    <!-- ═════════════ I + II · ONE CONTINUOUS SHOT ═════════════
+         The exhibition wall → the camera pushes into the painting → the painting comes alive
+         and the camera swings round behind the shikara → dawn on the lake, and the story is told. -->
+    <section class="cinema" id="hero" aria-labelledby="hero-title">
+      <div class="cinema__pin">
+        <!-- the film: a scroll-scrubbed frame sequence of the camera move -->
+        <canvas class="cinema__seq" id="seq" aria-hidden="true"></canvas>
+        <img class="cinema__still" src="media/v3/seq/seq-end.jpg" alt="Dawn mist on Dal Lake with a single shikara" />
+        <div class="cinema__shade" aria-hidden="true"></div>
+
         <div class="hero__wall">
           <div class="hero__canvas">
             <header class="bar">
@@ -85,30 +91,29 @@
           <img class="hero__float hero__float--a" src="media/v3/frame-wedding.webp" alt="A papier-mâché frame holding a photograph of a couple under fairy lights" width="1400" height="900" />
           <img class="hero__float hero__float--b" src="media/v3/frame-film.webp" alt="A carved walnut frame holding a painting of a film crew in the snow" width="1000" height="1200" />
         </div>
-        <div class="hero__into" aria-hidden="true"><p>Step into the frame</p></div>
-      </div>
-    </section>
 
-    <!-- ═════════════ II · INTO THE FRAME (prologue on the lake) ═════════════ -->
-    <section class="prologue" id="prologue" aria-labelledby="prologue-title">
-      <div class="prologue__pin">
-        <img class="prologue__bg" src="media/v3/scene-dal.webp" alt="Dawn mist on Dal Lake with a single shikara" />
-        <div class="prologue__shade"></div>
-        <svg class="prologue__frame" aria-hidden="true" preserveAspectRatio="none"><rect x="1" y="1" rx="28" ry="28" pathLength="100" /></svg>
-        <div class="prologue__clock" aria-hidden="true"><span class="prologue__time" id="clock">05:42</span><span class="prologue__ampm">AM · Dal Lake, Srinagar</span></div>
-        <h2 class="sr-only" id="prologue-title">Prologue</h2>
-        <div class="prologue__lines">
-          <p class="glass" data-line>Every story begins somewhere quiet.</p>
-          <p class="glass" data-line>Mist on the water. A shikara draws one silver line across the lake.</p>
-          <p class="glass" data-line>Somewhere in this city, someone is about to have the most important day of their life.</p>
-          <p class="glass" data-line>Somewhere else, a story is waiting for its very first frame.</p>
-          <p class="glass glass--big" data-line><em>We make both of them happen.</em></p>
+        <!-- the lens: a viewfinder appears as the painting comes alive -->
+        <div class="lens" aria-hidden="true"><i></i><i></i><i></i><i></i><span class="lens__rec"><b></b>REC</span><span class="lens__tc" id="lens-tc">00:00:00</span></div>
+
+        <!-- II · dawn on the lake -->
+        <div class="prologue" id="prologue-ui">
+          <svg class="prologue__frame" aria-hidden="true" preserveAspectRatio="none"><rect x="1" y="1" rx="28" ry="28" pathLength="100" /></svg>
+          <div class="prologue__clock" aria-hidden="true"><span class="prologue__time" id="clock">05:42</span><span class="prologue__ampm">AM · Dal Lake, Srinagar</span></div>
+          <h2 class="sr-only" id="prologue-title">Prologue</h2>
+          <div class="prologue__lines">
+            <p class="glass" data-line>Every story begins somewhere quiet.</p>
+            <p class="glass" data-line>Mist on the water. A shikara draws one silver line across the lake.</p>
+            <p class="glass" data-line>Somewhere in this city, someone is about to have the most important day of their life.</p>
+            <p class="glass" data-line>Somewhere else, a story is waiting for its very first frame.</p>
+            <p class="glass glass--big" data-line><em>We make both of them happen.</em></p>
+          </div>
         </div>
       </div>
+      <span class="anchor" id="prologue" aria-hidden="true"></span>
     </section>
 
     <!-- ═════════════ III · TWO CRAFTS ═════════════ -->
-    <section class="crafts" id="crafts" aria-labelledby="crafts-title">
+    <section class="crafts stacked" id="crafts" aria-labelledby="crafts-title">
       <header class="sec-head">
         <p class="eyebrow">Chapter three</p>
         <h2 id="crafts-title" class="display"><span data-rise>Two crafts.</span> <em data-rise>One obsession.</em></h2>

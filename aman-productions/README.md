@@ -17,7 +17,7 @@ Version 3 is art-directed after the reference set (editorial museum hero, wine-s
 |---|---|
 | **Opening** | A cream page; a rounded frame draws itself around the screen while a huge vermilion counter loads to 100%, then the curtain lifts. |
 | **I · The exhibition** | Chinar-maroon wall, cream canvas. *THE MOMENTS THAT BECOME STORIES* in giant vermilion serif, interlocked with a hand-carved Kashmiri walnut oval frame; a papier-mâché frame and a khatamband frame float across the edges and follow the pointer. |
-| **Into the frame** | Scrolling dives *into* the oval painting — the type splits away, the canvas dissolves, and the painting becomes the full-screen misty Dal Lake. |
+| **Into the frame — one continuous shot** | Scrolling pushes the camera into the oval painting until the shikara fills the screen; the painting dissolves into live footage and the camera orbits round behind the boat as it sails into the misty lake (a 6-second Kling 3 Pro camera move between two key frames, played back as 120 scroll-scrubbed frames on a canvas, with a viewfinder and running timecode). |
 | **II · Prologue** | On the lake, a glass frame draws itself, a dawn clock ticks from 05:42 to 06:20, and the story arrives line by line on glass cards: *We make both of them happen.* |
 | **III · Two crafts** | Expanding image cards — **LIVE** (event management, a mandap under chinar trees) and **FRAME** (film production, a night shoot in snow). |
 | **IV · The repertoire** | A draggable dark showcase of six objects (copper samovar, cinema camera, stage spotlight, papier-mâché clapperboard, ribbon microphone, model shikara), each a service, with a giant ghost word behind it and a "Plan this with us" link that pre-fills the enquiry. |
@@ -25,6 +25,8 @@ Version 3 is art-directed after the reference set (editorial museum hero, wine-s
 | **VI · The valley** | The ridgeline map of Kashmir, printed in ink on cream, with routes drawn from the Abi Guzar studio and real straight-line distances. |
 | **VII · Your scene** | The fill-in-the-blanks screenplay enquiry with a live script page; sends on WhatsApp to +91 77809 96694 and lands in Studio OS. |
 | **End credits** | A maroon footer with a giant italic *Aman*, rolling credits and "Back to the first frame". |
+
+Between chapters nothing cuts: the next chapter slides up over the previous one like a card being dealt while the shot behind recedes; the craft cards open from a sliver, the repertoire stage grows out of the page, the valley sheet unfolds and the script page drifts in.
 
 Also: a floating glass navigation dock that appears after the hero, a circular-reveal menu, a context cursor (Step in / Open / Drag), reduced-motion static layout, no third-party requests.
 

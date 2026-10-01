@@ -117,10 +117,6 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 .menu__foot { display: flex; flex-wrap: wrap; gap: 28px; font-size: 14px; color: rgba(242, 235, 223, .7); }
 
 /* ───────────────────────── I · Hero ───────────────────────── */
-.hero { height: 280vh; position: relative; background: var(--maroon); }
-.hero__pin { position: sticky; top: 0; height: 100svh; overflow: hidden; }
-.hero__scene { position: absolute; inset: 0; opacity: 0; }
-.hero__scene img { width: 100%; height: 100%; object-fit: cover; }
 .hero__wall { position: absolute; inset: 0; padding: clamp(14px, 2.2vw, 30px); }
 .hero__canvas { position: relative; height: 100%; background: var(--cream); border-radius: var(--r); overflow: hidden; }
 .hero__canvas::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 50% 40%, transparent 60%, rgba(42, 14, 11, .08)); }
@@ -167,10 +163,6 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 .hero__into p { margin: 0; font-family: var(--serif); font-style: italic; font-size: clamp(40px, 6vw, 96px); color: var(--paper); text-shadow: 0 4px 40px rgba(0, 0, 0, .4); }
 
 /* ───────────────────────── II · Prologue ───────────────────────── */
-.prologue { height: 420vh; position: relative; background: #0d1a20; }
-.prologue__pin { position: sticky; top: 0; height: 100svh; overflow: hidden; }
-.prologue__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 60%; }
-.prologue__shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(8, 18, 24, .55), transparent 60%), linear-gradient(0deg, rgba(8, 18, 24, .45), transparent 40%); }
 .prologue__frame { position: absolute; inset: clamp(18px, 4vw, 56px); width: calc(100% - 2 * clamp(18px, 4vw, 56px)); height: calc(100% - 2 * clamp(18px, 4vw, 56px)); overflow: visible; pointer-events: none; }
 .prologue__frame rect { width: calc(100% - 2px); height: calc(100% - 2px); fill: none; stroke: rgba(251, 248, 242, .55); stroke-width: 2; stroke-dasharray: 100; stroke-dashoffset: 100; vector-effect: non-scaling-stroke; }
 .prologue__clock { position: absolute; left: clamp(40px, 7vw, 110px); bottom: clamp(40px, 8vh, 90px); color: rgba(251, 248, 242, .9); display: grid; }
@@ -394,3 +386,49 @@ dialog::backdrop { background: rgba(42, 14, 11, .7); backdrop-filter: blur(6px);
 .is-static .prologue__lines { position: relative; right: auto; top: auto; translate: none; margin: 0 auto; }
 .is-static .prologue__lines .glass { opacity: 1; transform: none; }
 .is-static .prologue__frame rect { stroke-dashoffset: 0; }
+
+/* ═════════════ One continuous shot (hero → camera move → prologue) ═════════════ */
+.cinema { position: relative; height: 820vh; background: #0d1a20; }
+.cinema__pin { position: sticky; top: 0; height: 100svh; overflow: hidden; background: var(--maroon); transform-origin: 50% 30%; }
+.cinema__seq, .cinema__still { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
+.cinema__still { object-fit: cover; }
+.cinema__shade { position: absolute; inset: 0; opacity: 0; pointer-events: none; background: linear-gradient(90deg, rgba(8, 18, 24, .55), transparent 60%), linear-gradient(0deg, rgba(8, 18, 24, .45), transparent 40%); }
+.hero__wall { z-index: 2; }
+.hero__oval { transform-origin: 49.7% 54.5%; }
+.hero__oval img { will-change: transform; }
+.anchor { position: absolute; left: 0; top: 52%; width: 1px; height: 1px; }
+
+/* the viewfinder: corners, REC and a running timecode while the camera moves */
+.lens { position: absolute; inset: clamp(18px, 4vw, 56px); z-index: 3; pointer-events: none; opacity: 0; color: rgba(251, 248, 242, .9); font-family: var(--mono); font-size: 12px; letter-spacing: .14em; }
+.lens i { position: absolute; width: 34px; height: 34px; border: 0 solid currentColor; }
+.lens i:nth-child(1) { left: 0; top: 0; border-width: 2px 0 0 2px; }
+.lens i:nth-child(2) { right: 0; top: 0; border-width: 2px 2px 0 0; }
+.lens i:nth-child(3) { left: 0; bottom: 0; border-width: 0 0 2px 2px; }
+.lens i:nth-child(4) { right: 0; bottom: 0; border-width: 0 2px 2px 0; }
+.lens__rec { position: absolute; left: 50px; top: 10px; display: flex; align-items: center; gap: 8px; }
+.lens__rec b { width: 9px; height: 9px; border-radius: 50%; background: var(--red); box-shadow: 0 0 10px var(--red); animation: blink 1.4s steps(2) infinite; }
+.lens__tc { position: absolute; right: 50px; top: 10px; font-variant-numeric: tabular-nums; }
+
+.prologue { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.prologue__clock, .prologue__lines { opacity: 1; }
+.prologue__clock { opacity: 0; }
+
+/* chapters slide up over the previous one like cards being dealt */
+.stacked { position: relative; z-index: 3; margin-top: -100svh; background: var(--cream); border-radius: 36px 36px 0 0; box-shadow: 0 -30px 80px rgba(13, 26, 32, .35); }
+
+/* image reveals */
+.craft { clip-path: inset(0 0 0 0 round var(--r)); }
+
+.is-static .cinema { height: auto; }
+.is-static .cinema__pin { position: relative; height: auto; }
+.is-static .hero__wall { position: relative; height: 100svh; }
+.is-static .cinema__still { position: relative; opacity: 1; height: 100svh; }
+.is-static .cinema__seq, .is-static .lens { display: none; }
+.is-static .prologue { position: relative; padding: 14vh 20px; background: #0d1a20; }
+.is-static .prologue__clock { opacity: 1; position: relative; left: auto; top: auto; bottom: auto; margin-bottom: 30px; }
+.is-static .stacked { margin-top: 0; }
+@media (max-width: 860px) {
+  .lens__rec { left: 40px; } .lens__tc { right: 40px; }
+  .stacked { border-radius: 26px 26px 0 0; }
+}
+.your-scene { overflow-x: clip; }

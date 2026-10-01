@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { buildValley } from './valley.js';
+import { createSequence } from './sequence.js';
 import { pushToInbox } from '../shared/inbox.js';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -37,7 +38,7 @@ document.addEventListener('click', (e) => {
   closeMenu();
   if (id === '#' || id === '#top') return scrollTo(0);
   const el = $(id);
-  if (el) scrollTo(id === '#prologue' ? el.offsetTop + innerHeight * .3 : el);
+  if (el) scrollTo(el);
 });
 
 // ───────────────────────── Opening: the frame is drawn ─────────────────────────
@@ -56,7 +57,8 @@ document.addEventListener('click', (e) => {
     .from('.loader__logo', { scale: .6, opacity: 0, duration: 1, ease: 'expo.out' }, .2)
     .from('.loader__line > *', { y: 14, opacity: 0, stagger: .1, duration: .8 }, .3);
   const tick = () => {
-    const target = Math.min(100, Math.max(state.p + .9, (loaded / Math.max(1, images.length)) * 100));
+    const frac = (loaded / Math.max(1, images.length)) * .5 + Math.min(1, (window.__seq?.progress() || 0) * 4) * .5;
+    const target = Math.min(100, Math.max(state.p + .35, frac * 100));
     state.p += (target - state.p) * .08;
     count.textContent = Math.round(state.p);
     if (state.p > 99.4) { count.textContent = '100'; gsap.ticker.remove(tick); finish(); }
@@ -78,63 +80,89 @@ document.addEventListener('click', (e) => {
   }
 }
 
-// ───────────────────────── I · Hero: step into the frame ─────────────────────────
+// ───────────────────────── I + II · One continuous shot ─────────────────────────
+// Wall → push into the painting → the painting comes alive and the camera swings
+// behind the shikara (a scrubbed film) → dawn on the lake, the story arrives.
+const SEQ_COUNT = 120;
+const seq = window.__seq = STATIC ? null : createSequence($('#seq'), {
+  count: SEQ_COUNT,
+  src: (i) => `media/v3/seq/${mobile() ? 'm' : 'd'}/${String(i + 1).padStart(3, '0')}.webp`,
+});
 if (!STATIC) {
-  // Pointer parallax on the exhibition pieces
-  const floats = [['.hero__oval', 12], ['.hero__float--a', -28], ['.hero__float--b', 34]].map(([s, d]) => ({ el: $(s), d, x: gsap.quickTo($(s), 'x', { duration: 1.2, ease: 'power3' }), y: gsap.quickTo($(s), 'y', { duration: 1.2, ease: 'power3' }) }));
+  // Pointer parallax on the exhibition pieces (on the inner image, so the zoom owns the figure)
+  const floats = [['.hero__oval img', 12], ['.hero__float--a', -28], ['.hero__float--b', 34]].map(([s, d]) => ({ d, x: gsap.quickTo($(s), 'x', { duration: 1.2, ease: 'power3' }), y: gsap.quickTo($(s), 'y', { duration: 1.2, ease: 'power3' }) }));
   addEventListener('pointermove', (e) => {
-    if (scrollY > innerHeight * .3) return;
+    if (scrollY > innerHeight * .4) return;
     const nx = e.clientX / innerWidth - .5, ny = e.clientY / innerHeight - .5;
     floats.forEach((f) => { f.x(nx * f.d); f.y(ny * f.d); });
   }, { passive: true });
 
-  // The oval grows until its painting becomes the lake itself
+  // The push-in lands exactly on the film's first frame: the 640×360 region around the
+  // shikara (centre 49.7% / 54.5% of the oval) is scaled to cover the viewport.
   const oval = $('.hero__oval');
+  const canvasEl = $('.hero__canvas');
   const zoom = () => {
-    const r = oval.getBoundingClientRect();
-    const paintW = r.width * .62, paintH = r.height * .6;
-    return Math.max(innerWidth / paintW, innerHeight / paintH) * 1.15;
+    const w = oval.offsetWidth, h = oval.offsetHeight;
+    return Math.max(innerWidth / (w * .428), innerHeight / (h * .362));
   };
-  const tl = gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom bottom', scrub: .8, invalidateOnRefresh: true } });
-  tl.to('.hero__line--1', { xPercent: -40, opacity: 0, duration: .3 }, 0)
-    .to('.hero__line--3', { xPercent: 40, opacity: 0, duration: .3 }, 0)
-    .to('.hero__line--2 > span:first-child', { x: '-30vw', opacity: 0, duration: .3 }, 0)
-    .to('.hero__line--2 > span:last-child', { x: '30vw', opacity: 0, duration: .3 }, 0)
-    .to('.hero__float--a', { x: '-40vw', y: '-30vh', rotate: -30, duration: .35 }, 0)
-    .to('.hero__float--b', { x: '40vw', y: '30vh', rotate: 30, duration: .35 }, 0)
-    .to('.bar, .hero__side, .hero__now, .hero__scroll', { opacity: 0, duration: .12 }, 0)
-    .to('.hero__wall', { padding: 0, duration: .3 }, .05)
-    .to('.hero__canvas', { borderRadius: 0, duration: .3 }, .05)
-    .to(oval, { scale: zoom, rotate: 0, duration: .62, ease: 'power2.in' }, .08)
-    .to('.hero__scene', { opacity: 1, duration: .14 }, .56)
-    .to('.hero__canvas', { opacity: 0, duration: .14 }, .58)
-    .fromTo('.hero__scene img', { scale: 1.25 }, { scale: 1, duration: .3, ease: 'power2.out' }, .62)
-    .to('.hero__into', { opacity: 1, duration: .1 }, .74)
-    .to('.hero__into', { opacity: 0, duration: .1 }, .9);
-}
+  const topFrac = () => parseFloat(getComputedStyle(oval).top) / canvasEl.offsetHeight;
+  const toX = () => oval.offsetWidth * .003;
+  const toY = () => innerHeight / 2 - (topFrac() * innerHeight - .57 * oval.offsetHeight + .545 * oval.offsetHeight);
 
-// ───────────────────────── II · Prologue: dawn on the lake ─────────────────────────
-if (!STATIC) {
   const lines = $$('[data-line]');
-  const clock = $('#clock');
+  const clock = $('#clock'), tc = $('#lens-tc');
+  const film = { f: 0 };
+  const S = .21, E = .55; // the film plays between these points of the scroll
   const tl = gsap.timeline({
     defaults: { ease: 'none' },
     scrollTrigger: {
-      trigger: '.prologue', start: 'top top', end: 'bottom bottom', scrub: .6,
-      onUpdate: (s) => {
-        const mins = 5 * 60 + 42 + Math.round(s.progress * 38); // 05:42 → 06:20, the sun comes up
+      trigger: '.cinema', start: 'top top', end: 'bottom bottom', scrub: .9, invalidateOnRefresh: true,
+      onUpdate: (st) => {
+        const p = st.progress;
+        const fp = Math.min(1, Math.max(0, (p - S) / (E - S)));
+        const secs = fp * 6;
+        tc.textContent = `00:00:${String(Math.floor(secs)).padStart(2, '0')}:${String(Math.floor((secs % 1) * 24)).padStart(2, '0')}`;
+        const pp = Math.min(1, Math.max(0, (p - .56) / .32));
+        const mins = 5 * 60 + 42 + Math.round(pp * 38); // 05:42 → 06:20, the sun comes up
         clock.textContent = `${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`;
       },
     },
   });
-  tl.to('.prologue__frame rect', { strokeDashoffset: 0, duration: .25 }, 0)
-    .fromTo('.prologue__bg', { scale: 1.08, filter: 'brightness(.85) saturate(.85)' }, { scale: 1.22, filter: 'brightness(1.08) saturate(1.1)', duration: 1 }, 0);
+  // 1 · the wall clears: type parts like curtains, framed pieces fly off
+  tl.to('.hero__line--1', { xPercent: -45, opacity: 0, duration: .07 }, 0)
+    .to('.hero__line--3', { xPercent: 45, opacity: 0, duration: .07 }, 0)
+    .to('.hero__line--2 > span:first-child', { x: '-35vw', opacity: 0, duration: .07 }, 0)
+    .to('.hero__line--2 > span:last-child', { x: '35vw', opacity: 0, duration: .07 }, 0)
+    .to('.hero__float--a', { x: '-50vw', y: '-40vh', rotate: -40, duration: .09 }, 0)
+    .to('.hero__float--b', { x: '50vw', y: '40vh', rotate: 40, duration: .09 }, 0)
+    .to('.bar, .hero__side, .hero__now, .hero__scroll', { opacity: 0, duration: .03 }, 0)
+    .to('.hero__wall', { padding: 0, duration: .08 }, .01)
+    .to('.hero__canvas', { borderRadius: 0, duration: .08 }, .01)
+  // 2 · the camera pushes into the painting, onto the shikara
+    .to(oval, { scale: zoom, x: toX, y: toY, duration: .19, ease: 'power2.inOut' }, .02)
+    .to('.hero__canvas', { backgroundColor: '#5a6a5c', duration: .06 }, .13)
+  // 3 · the painting comes alive — cross-dissolve into the film's first frame
+    .to('.cinema__seq', { opacity: 1, duration: .03 }, .19)
+    .to('.hero__wall', { opacity: 0, duration: .02 }, .205)
+    .to('.lens', { opacity: 1, duration: .03 }, .21)
+  // 4 · the film: the camera swings round behind the shikara
+    .to(film, { f: SEQ_COUNT - 1, duration: E - S, onUpdate: () => seq.draw(film.f) }, S)
+  // 5 · the camera settles; the lens becomes a frame and the story arrives
+    .to('.lens', { opacity: 0, duration: .03 }, E)
+    .to('.cinema__shade', { opacity: 1, duration: .05 }, E)
+    .to('.prologue__frame rect', { strokeDashoffset: 0, duration: .08 }, E + .01)
+    .to('.prologue__clock', { opacity: 1, duration: .04 }, E + .03)
+    .to('.cinema__seq', { scale: 1.14, duration: .45 }, E);
   lines.forEach((l, i) => {
-    const at = .08 + i * .17;
-    tl.to(l, { opacity: 1, y: 0, duration: .07, ease: 'power2.out' }, at);
-    if (i < lines.length - 1 && mobile()) tl.to(l, { opacity: 0, y: -20, duration: .06 }, at + .15);
-    else if (i < lines.length - 1) tl.to(l, { opacity: .45, duration: .06 }, at + .15);
+    const at = .6 + i * .055;
+    tl.to(l, { opacity: 1, y: 0, duration: .025, ease: 'power2.out' }, at);
+    if (i < lines.length - 1) tl.to(l, mobile() ? { opacity: 0, y: -20, duration: .02 } : { opacity: .45, duration: .02 }, at + .05);
   });
+  tl.to({}, { duration: .01 }, .99);
+
+  // The next chapter slides over the lake: the shot recedes like a card being set down
+  gsap.timeline({ scrollTrigger: { trigger: '.crafts', start: 'top bottom', end: 'top top', scrub: true } })
+    .to('.cinema__pin', { scale: .9, borderRadius: 40, filter: 'brightness(.55)', ease: 'none' });
 }
 
 // ───────────────────────── Rising section titles ─────────────────────────
@@ -142,8 +170,19 @@ if (!STATIC) {
   $$('[data-rise]').forEach((el) => {
     gsap.from(el, { yPercent: 60, opacity: 0, rotate: 2, duration: 1.3, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 88%' } });
   });
-  gsap.from('.craft', { y: 120, opacity: 0, stagger: .12, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.crafts__row', start: 'top 85%' } });
-  gsap.from('.rep__panel', { scale: .92, borderRadius: 80, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: '.rep', start: 'top 85%' } });
+  // Crafts: each card's window opens from a sliver while its image settles
+  $$('.craft').forEach((c, i) => {
+    gsap.fromTo(c, { clipPath: 'inset(30% 12% 30% 12% round 28px)' }, { clipPath: 'inset(0% 0% 0% 0% round 28px)', ease: 'none', scrollTrigger: { trigger: '.crafts__row', start: 'top 95%', end: 'top 35%', scrub: .8 } });
+    gsap.fromTo($('img', c), { scale: 1.35, yPercent: 8 }, { scale: 1, yPercent: 0, ease: 'none', scrollTrigger: { trigger: '.crafts__row', start: 'top 95%', end: 'bottom top', scrub: .8 } });
+  });
+  // Repertoire: the dark stage grows out of the cream page and the lights dim around it
+  gsap.fromTo('.rep__panel', { scale: .8, borderRadius: 120, y: 80 }, { scale: 1, borderRadius: 34, y: 0, ease: 'none', scrollTrigger: { trigger: '.rep', start: 'top bottom', end: 'top 15%', scrub: .8 } });
+  // Valley: the paper sheet rises and unfolds
+  gsap.fromTo('.valley', { y: 120, scale: .94, rotate: -1.2 }, { y: 0, scale: 1, rotate: 0, ease: 'none', scrollTrigger: { trigger: '.valley', start: 'top bottom', end: 'top 25%', scrub: .8 } });
+  // Your scene: the script page drifts in at an angle
+  gsap.fromTo('.page', { y: 160, rotate: 8 }, { y: 0, rotate: 1.4, ease: 'none', scrollTrigger: { trigger: '.ys__grid', start: 'top bottom', end: 'top 30%', scrub: .8 } });
+  // Credits rise over the page
+  gsap.fromTo('.credits', { y: 120 }, { y: 0, ease: 'none', scrollTrigger: { trigger: '.credits', start: 'top bottom', end: 'top 40%', scrub: .8 } });
   gsap.from('.step', { y: 40, opacity: 0, stagger: .08, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: '.steps', start: 'top 85%' } });
   gsap.from('.credits__word', { yPercent: 40, opacity: 0, duration: 1.6, ease: 'expo.out', scrollTrigger: { trigger: '.credits', start: 'top 80%' } });
 }
@@ -152,7 +191,7 @@ if (!STATIC) {
 {
   const dock = $('#dock');
   const links = $$('.dock__links a');
-  ScrollTrigger.create({ trigger: '.prologue', start: 'top 60%', endTrigger: 'body', end: 'bottom bottom', onToggle: (s) => dock.classList.toggle('is-shown', s.isActive) });
+  ScrollTrigger.create({ trigger: '.cinema', start: '58% top', endTrigger: 'body', end: 'bottom bottom', onToggle: (s) => dock.classList.toggle('is-shown', s.isActive) });
   links.forEach((a) => {
     const sec = $(a.getAttribute('href'));
     ScrollTrigger.create({ trigger: sec, start: 'top 50%', end: 'bottom 50%', onToggle: (s) => a.classList.toggle('is-on', s.isActive) });

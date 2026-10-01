@@ -10,6 +10,7 @@ All website and Studio OS imagery in `public/media/v3/` is **AI-generated concep
 - `frame-oval`, `frame-wedding`, `frame-film` — carved walnut / papier-mâché frames holding cinematic scenes (backgrounds removed locally with ImageMagick).
 - `obj-samovar`, `obj-camera`, `obj-spot`, `obj-clapper`, `obj-mic`, `obj-shikara` — studio-lit objects for the repertoire showcase.
 - `scene-dal`, `scene-wedding`, `scene-film` — full-bleed scenes.
+- `seq/d`, `seq/m` — 120 frames (desktop/mobile) from a 6-second AI-generated camera move (Kling 3 Pro via ElevenLabs), using `seq/seq-start.jpg` (a crop of the oval painting) as first frame and the Dal Lake scene as last frame.
 
 Replace or supplement these with the studio's own photography and showreel stills before a public launch. The previous concept photos (Unsplash) and public-gallery photos are no longer used.
 
