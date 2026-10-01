@@ -23,11 +23,14 @@ const setMotion = (v) => { try { localStorage.setItem(MOTION_KEY, v); } catch { 
 if (STATIC) document.documentElement.classList.add('is-static');
 $('#year').textContent = new Date().getFullYear();
 {
-  const btn = $('#motion-toggle');
-  btn.textContent = STATIC ? 'Motion: off — play the full experience' : 'Motion: on';
-  btn.setAttribute('aria-pressed', String(!STATIC));
-  btn.addEventListener('click', () => setMotion(STATIC ? 'full' : 'calm'));
-  if (prefersReduced && !motionPref) {
+  if (STATIC) {
+    // calm mode was chosen earlier — keep one quiet way back to the moving story
+    const note = document.createElement('div');
+    note.className = 'motion-note';
+    note.innerHTML = '<p>You’re watching the still version.</p><button type="button">Play the full experience</button>';
+    note.querySelector('button').addEventListener('click', () => setMotion('full'));
+    document.body.appendChild(note);
+  } else if (prefersReduced && !motionPref) {
     const note = document.createElement('div');
     note.className = 'motion-note';
     note.setAttribute('role', 'status');
@@ -398,13 +401,11 @@ addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
   });
 }
 
-// ───────────────────────── Credits ─────────────────────────
-$('#credits-open').addEventListener('click', () => { $('#credits-dialog').showModal(); lenis?.stop(); });
+// ───────────────────────── Dialogs ─────────────────────────
 $$('dialog').forEach((d) => {
   $('.dialog-x', d)?.addEventListener('click', () => d.close());
   d.addEventListener('click', (e) => { if (e.target === d) d.close(); });
   d.addEventListener('close', () => lenis?.start());
 });
-$('#rewind').addEventListener('click', () => (lenis ? lenis.scrollTo(0, { duration: 2.4, easing: (t) => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) }) : window.scrollTo(0, 0)));
 
 document.fonts?.ready.then(() => ScrollTrigger.refresh());
