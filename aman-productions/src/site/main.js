@@ -162,7 +162,7 @@ if (!STATIC) {
 
   // The next chapter slides over the lake: the shot recedes like a card being set down
   gsap.timeline({ scrollTrigger: { trigger: '.crafts', start: 'top bottom', end: 'top top', scrub: true } })
-    .to('.cinema__pin', { scale: .9, borderRadius: 40, filter: 'brightness(.55)', ease: 'none' });
+    .fromTo('.cinema__pin', { scale: 1, borderRadius: 0, filter: 'brightness(1)' }, { scale: .92, borderRadius: 40, filter: 'brightness(.8)', ease: 'none' });
 }
 
 // ───────────────────────── Rising section titles ─────────────────────────
@@ -274,7 +274,7 @@ $$('.craft').forEach((c) => {
   const px = gsap.quickTo(peek, 'x', { duration: .6, ease: 'power3' });
   const py = gsap.quickTo(peek, 'y', { duration: .6, ease: 'power3' });
   $$('.step').forEach((s) => {
-    s.addEventListener('mouseenter', () => { img.src = s.dataset.img; peek.classList.add('is-on'); s.classList.add('is-on'); });
+    s.addEventListener('mouseenter', (e) => { img.src = s.dataset.img; gsap.set(peek, { x: e.clientX + 30, y: e.clientY - 120 }); peek.classList.add('is-on'); s.classList.add('is-on'); });
     s.addEventListener('mouseleave', () => { peek.classList.remove('is-on'); s.classList.remove('is-on'); });
     s.addEventListener('mousemove', (e) => { px(e.clientX + 30); py(e.clientY - 120); });
   });
@@ -308,13 +308,21 @@ if (finePointer && !STATIC) {
   const cx = gsap.quickTo(cursor, 'x', { duration: .25, ease: 'power3' });
   const cy = gsap.quickTo(cursor, 'y', { duration: .25, ease: 'power3' });
   addEventListener('pointermove', (e) => { cx(e.clientX); cy(e.clientY); cursor.classList.add('is-live'); }, { passive: true });
-  document.addEventListener('mouseover', (e) => {
-    const t = e.target.closest('[data-cursor]');
-    const text = t && !e.target.closest('a, button, input, select, textarea') ? t.dataset.cursor : '';
+  // Re-read what's under the pointer on mouse moves *and* on scroll, because content
+  // scrolls beneath a still mouse. The "Step in" label only belongs to the untouched wall.
+  let mx = -1, my = -1;
+  const sync = () => {
+    if (mx < 0) return;
+    const el = document.elementFromPoint(mx, my);
+    const t = el?.closest('[data-cursor]');
+    let text = t && !el.closest('a, button, input, select, textarea') ? t.dataset.cursor : '';
+    if (t?.classList.contains('hero__oval') && scrollY > innerHeight * .15) text = '';
     cursor.classList.toggle('is-label', !!text);
     cursor.classList.toggle('is-dark', !!t?.closest('.rep'));
     if (text) label.textContent = text;
-  });
+  };
+  addEventListener('pointermove', (e) => { mx = e.clientX; my = e.clientY; sync(); }, { passive: true });
+  addEventListener('scroll', sync, { passive: true });
 }
 
 // ───────────────────────── VII · Your scene ─────────────────────────
