@@ -110,24 +110,26 @@ const seq = window.__seq = STATIC ? null : createSequence($('#seq'), {
 });
 if (!STATIC) {
   // Pointer parallax on the exhibition pieces (on the inner image, so the zoom owns the figure)
-  const floats = [['.hero__oval img', 12], ['.hero__float--a', -28], ['.hero__float--b', 34]].map(([s, d]) => ({ d, x: gsap.quickTo($(s), 'x', { duration: 1.2, ease: 'power3' }), y: gsap.quickTo($(s), 'y', { duration: 1.2, ease: 'power3' }) }));
+  const floats = [['.hero__oval .oval__wood', 12], ['.hero__oval .oval__shot', 12], ['.hero__float--a', -28], ['.hero__float--b', 34]].map(([s, d]) => ({ d, x: gsap.quickTo($(s), 'x', { duration: 1.2, ease: 'power3' }), y: gsap.quickTo($(s), 'y', { duration: 1.2, ease: 'power3' }) }));
   addEventListener('pointermove', (e) => {
     if (scrollY > innerHeight * .4) return;
     const nx = e.clientX / innerWidth - .5, ny = e.clientY / innerHeight - .5;
     floats.forEach((f) => { f.x(nx * f.d); f.y(ny * f.d); });
   }, { passive: true });
 
-  // The push-in lands exactly on the film's first frame: the 640×360 region around the
-  // shikara (centre 49.7% / 54.5% of the oval) is scaled to cover the viewport.
+  // The push-in lands exactly on the film's first frame: the oval's window already holds
+  // that frame (a 16:9 box, 79.14% × 67% of the oval, centred at 50.2% / 50.4%), so we
+  // scale it until it covers the viewport — then the canvas takes over with identical pixels.
   const oval = $('.hero__oval');
+  gsap.set(oval, { xPercent: -50, yPercent: -57 }); // centring lives in GSAP so x/y below are pure offsets
   const canvasEl = $('.hero__canvas');
   const zoom = () => {
     const w = oval.offsetWidth, h = oval.offsetHeight;
-    return Math.max(innerWidth / (w * .428), innerHeight / (h * .362));
+    return Math.max(innerWidth / (w * .7914), innerHeight / (h * .67));
   };
   const topFrac = () => parseFloat(getComputedStyle(oval).top) / canvasEl.offsetHeight;
-  const toX = () => oval.offsetWidth * .003;
-  const toY = () => innerHeight / 2 - (topFrac() * innerHeight - .57 * oval.offsetHeight + .545 * oval.offsetHeight);
+  const toX = () => -oval.offsetWidth * .002;
+  const toY = () => innerHeight / 2 - (topFrac() * innerHeight - .066 * oval.offsetHeight);
 
   const lines = $$('[data-line]');
   const clock = $('#clock'), tc = $('#lens-tc');
@@ -160,10 +162,12 @@ if (!STATIC) {
     .to('.hero__canvas', { borderRadius: 0, duration: .08 }, .01)
   // 2 · the camera pushes into the painting, onto the shikara
     .to(oval, { scale: zoom, x: toX, y: toY, duration: .19, ease: 'power2.inOut' }, .02)
-    .to('.hero__canvas', { backgroundColor: '#5a6a5c', duration: .06 }, .13)
+    .to('.oval__wood', { opacity: 0, duration: .05, ease: 'power1.in' }, .15)
+    .to('.oval__shot', { clipPath: 'ellipse(100% 100% at 50% 50%)', duration: .05 }, .15)
+    .to('.oval__wood, .oval__shot', { x: 0, y: 0, duration: .03 }, .12)
   // 3 · the painting comes alive — cross-dissolve into the film's first frame
-    .to('.cinema__seq', { opacity: 1, duration: .03 }, .19)
-    .to('.hero__wall', { opacity: 0, duration: .02 }, .205)
+    .to('.cinema__seq', { opacity: 1, duration: .005 }, .205)
+    .to('.hero__wall', { opacity: 0, duration: .005 }, .21)
     .to('.lens', { opacity: 1, duration: .03 }, .21)
   // 4 · the film: the camera swings round behind the shikara
     .to(film, { f: SEQ_COUNT - 1, duration: E - S, onUpdate: () => seq.draw(film.f) }, S)
@@ -286,18 +290,6 @@ $$('.craft').forEach((c) => {
   addEventListener('pointerup', () => { if (!down) return; down = false; if (dragged) go(Math.round(pos)); setTimeout(() => { dragged = false; }, 0); });
   layout(0, true); render();
   addEventListener('resize', () => layout(pos, true));
-}
-
-// ───────────────────────── V · Method: a peek follows the cursor ─────────────────────────
-{
-  const peek = $('#peek'), img = $('img', peek);
-  const px = gsap.quickTo(peek, 'x', { duration: .6, ease: 'power3' });
-  const py = gsap.quickTo(peek, 'y', { duration: .6, ease: 'power3' });
-  $$('.step').forEach((s) => {
-    s.addEventListener('mouseenter', (e) => { img.src = s.dataset.img; gsap.set(peek, { x: e.clientX + 30, y: e.clientY - 120 }); peek.classList.add('is-on'); s.classList.add('is-on'); });
-    s.addEventListener('mouseleave', () => { peek.classList.remove('is-on'); s.classList.remove('is-on'); });
-    s.addEventListener('mousemove', (e) => { px(e.clientX + 30); py(e.clientY - 120); });
-  });
 }
 
 // ───────────────────────── VI · The valley ─────────────────────────

@@ -229,9 +229,6 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 .step p { margin: 0; color: var(--ink-2); max-width: 460px; }
 .step__out { justify-self: end; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); text-align: right; }
 .step:hover h3, .step.is-on h3 { color: var(--red); transform: translateX(14px); font-style: italic; }
-.peek { position: fixed; left: 0; top: 0; z-index: 90; width: 300px; aspect-ratio: 4 / 3; border-radius: 18px; overflow: hidden; pointer-events: none; opacity: 0; transform: scale(.6); transition: opacity .35s, transform .5s var(--ease); background: var(--night); box-shadow: 0 30px 60px rgba(42, 14, 11, .35); }
-.peek.is-on { opacity: 1; transform: scale(1); }
-.peek img { width: 100%; height: 100%; object-fit: cover; }
 
 /* ───────────────────────── VI · Valley ───────────────────────── */
 .valley { padding: clamp(80px, 12vh, 140px) 0; background: var(--paper); border-radius: calc(var(--r) + 6px); margin: 0 clamp(10px, 2vw, 28px); }
@@ -364,8 +361,7 @@ dialog::backdrop { background: rgba(42, 14, 11, .7); backdrop-filter: blur(6px);
   .rep__info { position: relative; right: auto; top: auto; translate: none; width: auto; padding: 0 24px; }
   .step h3 { font-size: 46px; }
   .step__out { display: none; }
-  .peek { display: none; }
-  .valley__scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .valley__scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .valley__svg { width: 760px; max-width: none; }
   .valley__card { position: relative; left: auto; top: auto; width: auto; margin: 0; border-radius: 0; border-width: 1px 0 0; box-shadow: none; }
   .ys__grid { grid-template-columns: 1fr; }
@@ -394,8 +390,8 @@ dialog::backdrop { background: rgba(42, 14, 11, .7); backdrop-filter: blur(6px);
 .cinema__still { object-fit: cover; }
 .cinema__shade { position: absolute; inset: 0; opacity: 0; pointer-events: none; background: linear-gradient(90deg, rgba(8, 18, 24, .55), transparent 60%), linear-gradient(0deg, rgba(8, 18, 24, .45), transparent 40%); }
 .hero__wall { z-index: 2; }
-.hero__oval { transform-origin: 49.7% 54.5%; }
-.hero__oval img { will-change: transform; }
+
+.hero__oval .oval__wood, .hero__oval .oval__shot { will-change: transform; }
 .anchor { position: absolute; left: 0; top: 52%; width: 1px; height: 1px; }
 
 /* the viewfinder: corners, REC and a running timecode while the camera moves */
@@ -442,3 +438,12 @@ dialog::backdrop { background: rgba(42, 14, 11, .7); backdrop-filter: blur(6px);
 .is-static .cinema__pin { display: flex; flex-direction: column; overflow: visible; }
 .is-static .hero__wall { order: -1; position: relative; inset: auto; }
 .is-static .cinema__shade { display: none; }
+
+/* The oval: carved wood over the film's first frame. The shot box is the 16:9 frame
+   cover-fitted to the frame's window (window = 73.3% × 67% of the oval, centred). */
+.hero__oval { aspect-ratio: 1400 / 930; transform-origin: 50.2% 50.4%; }
+html:not(.is-static) .hero__oval { translate: none; }
+.oval__shot { position: absolute; left: 10.63%; top: 16.9%; width: 79.14%; height: 67%; overflow: hidden;
+  clip-path: ellipse(63.2% 74.6% at 49.7% 49.4%); }
+.oval__shot img { width: 100%; height: 100%; object-fit: cover; }
+.oval__wood { position: relative; width: 100%; }
