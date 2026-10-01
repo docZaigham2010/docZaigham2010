@@ -1,0 +1,207 @@
+/* ==========================================================================
+   Recovery of Kashmir Markhor — Impact Report (2022-26)
+   Editorial redesign · A4 portrait · design system
+   --------------------------------------------------------------------------
+   Page      210 × 297 mm, single-sided, no printer bleed marks
+   Margins   top 22 · bottom 24 · inner/outer 18 mm  → text frame 174 × 251
+   Grid      12 columns · 10.83 mm column · 4 mm gutter
+   Baseline  4.8 mm body rhythm (9.6 / 13.6 pt)
+   Type      Source Serif 4 (text, display) · Hanken Grotesk (labels, data)
+   Colour    Forest green (primary) · Markhor ochre (accent) · warm neutrals
+   ========================================================================== */
+
+@font-face { font-family: "Source Serif 4"; src: url(fonts/SS4Text-400.ttf) format("truetype"); font-style: normal; font-weight: 400; }
+@font-face { font-family: "Source Serif 4"; src: url(fonts/SS4Text-Italic-400.ttf) format("truetype"); font-style: italic; font-weight: 400; }
+@font-face { font-family: "Source Serif 4"; src: url(fonts/SS4Text-600.ttf) format("truetype"); font-style: normal; font-weight: 600; }
+@font-face { font-family: "Source Serif 4"; src: url(fonts/SS4Text-Italic-600.ttf) format("truetype"); font-style: italic; font-weight: 600; }
+@font-face { font-family: "Source Serif Display"; src: url(fonts/SS4Display-300.ttf) format("truetype"); font-style: normal; font-weight: 300; }
+@font-face { font-family: "Source Serif Display"; src: url(fonts/SS4Display-400.ttf) format("truetype"); font-style: normal; font-weight: 400; }
+@font-face { font-family: "Source Serif Display"; src: url(fonts/SS4Display-500.ttf) format("truetype"); font-style: normal; font-weight: 500; }
+@font-face { font-family: "Source Serif Display"; src: url(fonts/SS4Display-Italic-400.ttf) format("truetype"); font-style: italic; font-weight: 400; }
+@font-face { font-family: "Hanken Grotesk"; src: url(fonts/Hanken-400.ttf) format("truetype"); font-style: normal; font-weight: 400; }
+@font-face { font-family: "Hanken Grotesk"; src: url(fonts/Hanken-500.ttf) format("truetype"); font-style: normal; font-weight: 500; }
+@font-face { font-family: "Hanken Grotesk"; src: url(fonts/Hanken-600.ttf) format("truetype"); font-style: normal; font-weight: 600; }
+@font-face { font-family: "Hanken Grotesk"; src: url(fonts/Hanken-700.ttf) format("truetype"); font-style: normal; font-weight: 700; }
+@font-face { font-family: "Hanken Grotesk"; src: url(fonts/Hanken-Italic-400.ttf) format("truetype"); font-style: italic; font-weight: 400; }
+
+:root {
+  --ink: #1d1f1b;
+  --ink-2: #474a43;
+  --grey: #80837b;
+  --rule: #cfd1c8;
+  --paper: #ffffff;
+  --stone: #f3f2ed;        /* annexure ground */
+  --tint: #ecefe7;         /* summary panels */
+  --green: #2b4731;        /* primary */
+  --green-2: #5d7a5f;
+  --green-3: #9fb29c;
+  --green-4: #cdd8c9;
+  --ochre: #a35c27;        /* accent */
+  --serif: "Source Serif 4", Georgia, serif;
+  --display: "Source Serif Display", "Source Serif 4", Georgia, serif;
+  --sans: "Hanken Grotesk", Helvetica, Arial, sans-serif;
+  --m: 18mm;               /* side margin */
+}
+
+@page { size: 210mm 297mm; margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: #8a8c86; }
+body {
+  font-family: var(--serif);
+  color: var(--ink);
+  font-size: 9.6pt;
+  line-height: 13.6pt;
+  font-variant-numeric: lining-nums;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  text-rendering: geometricPrecision;
+}
+@media screen { .page { margin: 10mm auto; box-shadow: 0 0 0 0.3mm rgba(0,0,0,.15); } }
+@media print { html, body { background: var(--paper); } }
+
+.page {
+  width: 210mm; height: 297mm;
+  position: relative; overflow: hidden;
+  background: var(--paper);
+  break-after: page; page-break-after: always;
+}
+.page:last-child { break-after: auto; page-break-after: auto; }
+
+/* ---------- frames and grid ---------- */
+.abs { position: absolute; }
+.fr  { position: absolute; left: var(--m); right: var(--m); }   /* full text width */
+.g12 { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 4mm; }
+
+/* ---------- images ---------- */
+.ph { position: absolute; overflow: hidden; background: #ddd; }
+.ph img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ph.contain { background: transparent; }
+.ph.contain img { object-fit: contain; }
+.bleed-l { left: 0; } .bleed-r { right: 0; }
+
+/* ---------- running footer ---------- */
+.ft {
+  position: absolute; left: var(--m); right: var(--m); bottom: 11mm;
+  display: flex; align-items: baseline; gap: 4mm;
+  font-family: var(--sans); font-size: 6.4pt; line-height: 8pt;
+  letter-spacing: .06em; color: var(--grey);
+}
+.ft .t { text-transform: uppercase; letter-spacing: .14em; }
+.ft .s { flex: 1; text-align: right; }
+.ft .n { font-size: 8pt; font-weight: 600; letter-spacing: .02em; color: var(--ink); min-width: 7mm; text-align: right; font-variant-numeric: tabular-nums; }
+.ft::before { content: ""; position: absolute; left: 0; right: 0; top: -2.6mm; border-top: .25pt solid var(--rule); }
+.ft.light { color: rgba(255,255,255,.86); }
+.ft.light .n { color: #fff; }
+.ft.light::before { border-top-color: rgba(255,255,255,.45); }
+
+/* ---------- display type ---------- */
+.kicker {
+  font-family: var(--sans); font-size: 6.8pt; line-height: 9pt; font-weight: 600;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--ochre);
+}
+h1.title {
+  font-family: var(--display); font-weight: 400; font-size: 27pt; line-height: 30pt;
+  letter-spacing: -.012em; color: var(--green);
+}
+h1.title.sm { font-size: 21pt; line-height: 25pt; }
+.secnum {
+  font-family: var(--display); font-weight: 300; font-size: 70pt; line-height: 56pt;
+  color: var(--ochre); letter-spacing: -.03em; font-variant-numeric: lining-nums;
+}
+.secnum.sm { font-size: 44pt; line-height: 38pt; }
+.opener { display: grid; grid-template-columns: 34mm 1fr; column-gap: 4mm; align-items: end; padding-bottom: 5mm; border-bottom: .5pt solid var(--green); }
+
+h2.sub {          /* summary sub-heads */
+  font-family: var(--serif); font-weight: 600; font-size: 11pt; line-height: 14.5pt; color: var(--green);
+  margin: 0 0 2.4mm;
+}
+h2.sub .no { color: var(--ochre); font-weight: 600; }
+
+/* ---------- text ---------- */
+.txt p { margin: 0 0 3.4mm; text-align: left; hyphens: manual; }
+.txt p:last-child { margin-bottom: 0; }
+.cols2 { column-count: 2; column-gap: 8mm; }
+.cols2 > * { break-inside: auto; }
+.lead { font-size: 12.4pt; line-height: 18pt; color: var(--ink); }
+.txt b, .bl b { font-weight: 600; }
+sup { font-size: .62em; line-height: 0; vertical-align: .55em; }
+
+ul.bl { list-style: none; }
+ul.bl li { position: relative; padding-left: 5mm; margin: 0 0 2.6mm; break-inside: avoid; }
+ul.bl li:last-child { margin-bottom: 0; }
+ul.bl li::before { content: ""; position: absolute; left: 0; top: 2.25mm; width: 2.4mm; border-top: .9pt solid var(--ochre); }
+ul.bl.tight li { margin-bottom: 1.8mm; }
+
+/* ---------- panels (section summaries) ---------- */
+.panel { background: var(--tint); padding: 5mm 6mm 5.4mm; border-left: 1.6mm solid var(--green); }
+.panel h4 {
+  font-family: var(--sans); font-size: 6.8pt; line-height: 9pt; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--green); margin-bottom: 2.2mm;
+}
+.panel p { font-size: 10.6pt; line-height: 15pt; color: var(--ink); }
+.panel p + p { margin-top: 2.4mm; }
+.panel b { font-weight: 600; }
+
+/* ---------- timeline rows (section 4) ---------- */
+.yr { display: grid; grid-template-columns: 34mm 1fr; column-gap: 4mm; padding-top: 3mm; border-top: .25pt solid var(--rule); }
+.yr + .yr { margin-top: 4mm; }
+.yr .lab {
+  font-family: var(--sans); font-size: 7.4pt; line-height: 13.6pt; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ochre);
+}
+
+/* ---------- captions & credits ---------- */
+.cap { font-family: var(--sans); font-size: 7.4pt; line-height: 10.4pt; color: var(--ink-2); }
+.cap b { font-weight: 700; color: var(--green); letter-spacing: .02em; }
+.cap.rule { padding-top: 2mm; border-top: .5pt solid var(--ochre); }
+.credit { font-family: var(--sans); font-size: 6.2pt; line-height: 8pt; color: var(--grey); letter-spacing: .03em; font-style: italic; }
+.credit.w { color: rgba(255,255,255,.9); }
+.vcredit { position: absolute; transform-origin: 0 0; transform: rotate(-90deg); white-space: nowrap; }
+
+/* ---------- figures / charts ---------- */
+.fig-h { font-family: var(--sans); font-size: 7.6pt; line-height: 10pt; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--green); }
+svg text { font-family: var(--sans); }
+
+/* ---------- table ---------- */
+table.data { width: 100%; border-collapse: collapse; font-family: var(--sans); font-size: 7.8pt; line-height: 10.4pt; font-variant-numeric: tabular-nums lining-nums; }
+table.data th { font-weight: 600; color: var(--ink-2); text-align: right; vertical-align: bottom; padding: 1.4mm 1.6mm 1.6mm; }
+table.data th.grp { text-align: left; font-size: 7pt; letter-spacing: .14em; text-transform: uppercase; color: var(--green); font-weight: 700; border-bottom: .6pt solid var(--green); padding-bottom: 1.4mm; }
+table.data th.l, table.data td.l { text-align: left; }
+table.data thead tr:last-child th { border-bottom: .6pt solid var(--ink); }
+table.data td { text-align: right; padding: 1.9mm 1.6mm; border-bottom: .25pt solid var(--rule); color: var(--ink); }
+table.data td.yr1 { font-weight: 700; color: var(--green); text-align: left; }
+table.data .sep { border-left: .25pt solid var(--rule); }
+table.data tbody tr:last-child td { border-bottom: .6pt solid var(--ink); }
+
+/* ---------- name lists ---------- */
+.names { list-style: none; }
+.names li { padding: 2.05mm 0 2.15mm; border-bottom: .25pt solid var(--rule); font-size: 10pt; line-height: 13.2pt; color: var(--ink-2); }
+.names li:first-child { border-top: .25pt solid var(--rule); }
+.names b { font-weight: 600; color: var(--ink); }
+
+/* ---------- acknowledgements ---------- */
+.ack-row { display: grid; grid-template-columns: 52mm 1fr; column-gap: 4mm; padding: 3mm 0 3.2mm; border-top: .25pt solid var(--rule); }
+.ack-row:last-child { border-bottom: .25pt solid var(--rule); }
+.ack-row h3 { font-family: var(--sans); font-size: 7.2pt; line-height: 13.6pt; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--green); }
+.ack-row ul { list-style: none; font-size: 10pt; line-height: 13.6pt; }
+.ack-row li + li { margin-top: 1mm; }
+
+/* ---------- contents ---------- */
+.toc { list-style: none; }
+.toc li { display: grid; grid-template-columns: 15mm 1fr 18mm; column-gap: 4mm; align-items: baseline; padding: 3.3mm 0 3.5mm; border-bottom: .25pt solid var(--rule); }
+.toc li:first-child { border-top: .5pt solid var(--green); }
+.toc .k { font-family: var(--display); font-size: 12pt; color: var(--ochre); font-weight: 400; }
+.toc .e { font-family: var(--serif); font-size: 13pt; line-height: 17pt; color: var(--ink); }
+.toc .p { font-family: var(--sans); font-size: 8.4pt; font-weight: 600; text-align: right; color: var(--green); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+.toc li.front .e { color: var(--ink-2); }
+
+/* ---------- key achievements (green page) ---------- */
+.green-page { background: var(--green); color: #fff; }
+.ka { list-style: none; columns: 2; column-gap: 9mm; }
+.ka li { break-inside: avoid; padding: 3.4mm 0 4mm; border-top: .4pt solid rgba(255,255,255,.32); font-size: 11.4pt; line-height: 15.6pt; color: #fff; }
+.ka li::before { content: ""; display: block; width: 5mm; border-top: 1.2pt solid #d29a62; margin-bottom: 2.6mm; }
+
+/* ---------- annexure ---------- */
+.annex { background: var(--stone); }
+.annex .doc { position: absolute; background: #fff; box-shadow: 0 0 0 .25pt #c9c8c0; }
+.annex .doc img { display: block; width: 100%; height: 100%; object-fit: contain; }
