@@ -1,0 +1,15 @@
+{
+  "fps": 30,
+  "width": 1080,
+  "height": 1920,
+  "eggEndsAt": 64,
+  "end": 225,
+  "cards": [
+    { "id": "hook", "text": "dropping leads?", "theme": "cream", "kind": "phrase", "from": 64 },
+    { "id": "w1", "text": "custom.", "theme": "dark", "kind": "word", "from": 86 },
+    { "id": "w2", "text": "AI-powered.", "theme": "cream", "kind": "word", "from": 112 },
+    { "id": "w3", "text": "automated.", "theme": "dark", "kind": "word", "from": 137 },
+    { "id": "cta", "text": "DM us to start.", "theme": "cream", "kind": "phrase", "from": 163 },
+    { "id": "sign", "text": "DM us to start.", "handle": "@auzaie", "theme": "cream", "kind": "phrase", "from": 188 }
+  ]
+}

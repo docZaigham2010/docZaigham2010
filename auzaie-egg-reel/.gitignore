@@ -1,0 +1,4 @@
+# Intermediates the scripts rebuild; the generated egg footage is the one source that can't be.
+build/*
+!build/egg_veo.mp4
+__pycache__/
