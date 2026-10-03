@@ -1,0 +1,29 @@
+{
+  "end": 10.9,
+  "beats": [
+    { "at": 0.0, "text": "we", "dark": false, "fx": "blur", "size": 170 },
+    { "at": 0.7, "dark": true, "lines": [["we", 150, 18], ["don't", 150, -18]], "gap": 120 },
+    { "at": 1.4, "text": "just", "dark": false, "size": 120, "dx": -110, "y": 880 },
+    { "at": 2.0, "dark": true, "lines": [["just", 120, 40], ["code", 330, -10]], "gap": 190 },
+    { "at": 2.5, "text": "we", "dark": false, "fx": "pop", "size": 160 },
+    { "at": 3.0, "text": "build", "dark": true, "fx": "warp", "size": 170 },
+    { "at": 3.5, "text": "systems", "dark": false, "fx": "pop", "size": 150 },
+    { "at": 4.0, "text": "automation", "dark": true, "size": 150 },
+    { "at": 4.4, "text": "AI agents", "dark": false, "size": 150 },
+    { "at": 4.7, "text": "clarity", "dark": true, "fx": "blur", "size": 160 },
+    { "at": 5.2, "text": "follow-ups", "dark": false, "size": 150 },
+    { "at": 5.5, "text": "speed", "dark": true, "fx": "blur", "size": 170 },
+    { "at": 5.9, "text": "workflows", "dark": false, "size": 150 },
+    { "at": 6.2, "text": "growth", "dark": true, "size": 170 },
+    { "at": 6.6, "text": "dashboards", "dark": false, "size": 150 },
+    { "at": 6.9, "text": "insights", "dark": true, "size": 160 },
+    { "at": 7.2, "text": "time", "dark": false, "size": 170 },
+    { "at": 7.5, "text": "freedom", "dark": true, "size": 160 },
+    { "at": 7.8, "text": "re", "dark": false, "size": 160 },
+    { "at": 8.0, "text": "repe.", "dark": true, "size": 160 },
+    { "at": 8.3, "text": "repea", "dark": false, "size": 160 },
+    { "at": 8.6, "text": "repeat.", "dark": true, "size": 160 },
+    { "at": 8.9, "text": "repeat.", "dark": false, "size": 270, "fx": "grow" },
+    { "at": 9.3, "dark": true, "cta": true }
+  ]
+}
