@@ -6,9 +6,11 @@
     "setup": "npx playwright install chromium",
     "record": "node record.mjs",
     "build": "node build.mjs",
-    "reel": "node record.mjs && node build.mjs"
+    "reel": "node record.mjs && node build.mjs",
+    "motion": "cd reel && node render.mjs && python3 mix.py"
   },
   "dependencies": {
+    "gsap": "^3.15.0",
     "playwright": "^1.56.1"
   }
 }

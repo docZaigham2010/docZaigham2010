@@ -1,0 +1,31 @@
+import { launch, wire } from './net.mjs';
+import fs from 'node:fs';
+const dir = new URL('./explore/', import.meta.url).pathname;
+fs.mkdirSync(dir, { recursive: true });
+const b = await launch();
+const ctx = await b.newContext({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 2 });
+await wire(ctx);
+const page = await ctx.newPage();
+await page.goto(process.env.APP_URL); await page.waitForTimeout(5000);
+await page.screenshot({ path: dir + '00-signin.png' });
+await page.goto('https://ahmad.readyforyourreview.com/'); await page.waitForTimeout(5000);
+await page.screenshot({ path: dir + '00-home.png', fullPage: true });
+fs.writeFileSync(dir + 'home.txt', await page.evaluate(() => document.body.innerText));
+await page.goto(process.env.APP_URL); await page.waitForTimeout(4000);
+await page.locator('input').nth(0).fill(process.env.APP_EMAIL);
+await page.locator('input[type=password]').first().fill(process.env.APP_PASSWORD);
+await page.locator('button:has-text("Login")').first().click();
+await page.waitForTimeout(7000);
+console.log('after login url', page.url());
+await page.screenshot({ path: dir + '01-landing.png' });
+fs.writeFileSync(dir + 'landing.txt', await page.evaluate(() => document.body.innerText));
+const links = await page.evaluate(() => [...document.querySelectorAll('a[href]')].map(a => ({ href: a.getAttribute('href'), text: a.innerText.trim().split('\n').join(' | ') })));
+console.log(JSON.stringify(links));
+fs.writeFileSync(dir + 'state.json', JSON.stringify(await ctx.storageState()));
+const brand = await page.evaluate(() => {
+  const colors = {};
+  for (const el of document.querySelectorAll('*')) { const s = getComputedStyle(el); for (const c of [s.backgroundColor, s.color, s.borderTopColor]) colors[c] = (colors[c]||0)+1; }
+  return { colors: Object.entries(colors).sort((a,b)=>b[1]-a[1]).slice(0,20), fonts: [...new Set([...document.querySelectorAll('*')].map(e=>getComputedStyle(e).fontFamily))].slice(0,5), imgs: [...document.querySelectorAll('img')].map(i=>i.src) };
+});
+console.log(JSON.stringify(brand));
+await b.close();
