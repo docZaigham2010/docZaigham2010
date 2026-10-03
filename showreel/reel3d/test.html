@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000;overflow:hidden}</style></head><body>
+<script type="importmap">{"imports":{"three":"../node_modules/three/build/three.module.js","three/addons/":"../node_modules/three/examples/jsm/"}}</script>
+<script type="module">
+import { THREE, W, H, draw, studioEnv, backdrop, makeApple, makeLogo, loadFonts, text3d, mats, glassCard, letterIn } from './engine.js';
+await loadFonts();
+const env = studioEnv();
+const s = new THREE.Scene(); s.environment = env;
+const bd = backdrop(s, {});
+const cam = new THREE.PerspectiveCamera(30, W / H, .1, 200);
+const which = new URLSearchParams(location.search).get('v') || 'apple';
+let obj;
+if (which === 'apple') { obj = makeApple(); obj.position.y = .6; s.add(obj); cam.position.set(0, .7, 7.5); cam.lookAt(0, .3, 0);
+  const t = text3d([['Every apple', mats.white()]], { size: .42 }); t.position.set(0, -1.75, 0); s.add(t);
+  const t2 = text3d([['tells a ', mats.white()], ['story.', mats.red()]], { size: .42 }); t2.position.set(0, -2.35, 0); s.add(t2);
+  const key = new THREE.SpotLight(0xffffff, 120, 0, .45, .7); key.position.set(-4, 5, 4); s.add(key);
+  const rim = new THREE.SpotLight(0xff6050, 150, 0, .5, .6); rim.position.set(4, 2, -4); s.add(rim);
+  obj.rotation.y = .6;
+}
+if (which === 'logo') { obj = makeLogo(); s.add(obj); cam.position.set(1.2, .4, 6.5); cam.lookAt(0, 0, 0); obj.rotation.y = .25;
+  const t = text3d([['Malus ', mats.white()], ['Lens', mats.red()]], { size: .5 }); t.position.set(0, -1.9, 0); s.add(t);
+  const key = new THREE.SpotLight(0xffffff, 120, 0, .45, .7); key.position.set(-4, 5, 5); s.add(key);
+  const card = glassCard(2.2, .7, (g, w, h) => { g.fillStyle = '#fff'; g.font = '600 120px Inter'; g.textBaseline = 'middle'; g.fillText('LOT-2410', 60, h / 2); }); card.position.set(.9, 1.6, 1); card.rotation.y = -.3; s.add(card);
+}
+window.__ready = true;
+window.__seek = (t) => { bd.tick(t); draw(s, cam, { dof: { focus: cam.position.distanceTo(new THREE.Vector3()), aperture: .0004, maxblur: .006 }, bloom: .5 }); };
+</script></body></html>

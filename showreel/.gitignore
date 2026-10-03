@@ -3,3 +3,5 @@ node_modules/
 package-lock.json
 explore/
 reel/out/
+reel3d/out/
+reel3d/*.png
