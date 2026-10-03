@@ -1,0 +1,4 @@
+# Rebuilt by each reel's build.py; the generated hook footage is kept.
+*/build/*
+!*/build/hook_veo.mp4
+__pycache__/
