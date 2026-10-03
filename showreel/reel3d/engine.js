@@ -43,7 +43,8 @@ renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = false;
 document.body.appendChild(renderer.domElement);
 
-const rt = new THREE.WebGLRenderTarget(W, H, { type: THREE.HalfFloatType, samples: 4 });
+const Q = new URLSearchParams(location.search);
+const rt = new THREE.WebGLRenderTarget(W, H, { type: THREE.HalfFloatType, samples: Number(Q.get('msaa') ?? 2) });
 export const composer = new EffectComposer(renderer, rt);
 const renderPass = new RenderPass(new THREE.Scene(), new THREE.PerspectiveCamera());
 export const bokeh = new BokehPass(new THREE.Scene(), new THREE.PerspectiveCamera(), { focus: 10, aperture: 0.0005, maxblur: 0.008 });
@@ -60,7 +61,9 @@ export const lens = new ShaderPass({
     void main(){
       vec2 d = vUv - center; vec3 c = vec3(0.);
       const int N = 12;
+      int n = zoom > 0.002 ? N : 1;
       for (int i = 0; i < N; i++) {
+        if (i >= n) break;
         float s = 1. - zoom * float(i) / float(N);
         vec2 uv = center + d * s;
         float k = ca * (1. + 6. * zoom);
@@ -68,7 +71,7 @@ export const lens = new ShaderPass({
         c.g += texture2D(tDiffuse, uv).g;
         c.b += texture2D(tDiffuse, center + (uv - center) * (1. - k)).b;
       }
-      c /= float(N);
+      c /= float(n);
       float r = length(d * vec2(1., 1.6));
       c *= mix(1., smoothstep(1.05, 0.25, r), vig);
       c += (h(vUv * 1000.) - .5) * grain;
@@ -83,7 +86,7 @@ composer.addPass(renderPass); composer.addPass(bokeh); composer.addPass(hudPass)
 
 export function draw(scene, camera, fx = {}) {
   renderPass.scene = scene; renderPass.camera = camera;
-  bokeh.enabled = !!fx.dof;
+  bokeh.enabled = !!fx.dof && Q.get('dof') !== '0';
   if (fx.dof) {
     bokeh.scene = scene; bokeh.camera = camera;
     bokeh.uniforms.focus.value = fx.dof.focus; bokeh.uniforms.aperture.value = fx.dof.aperture; bokeh.uniforms.maxblur.value = fx.dof.maxblur ?? 0.01;
@@ -158,9 +161,9 @@ const PROFILE = [[0, -0.84], [0.14, -0.9], [0.36, -0.95], [0.62, -0.9], [0.86, -
 export function appleRadiusAt(y) { // approximate outer radius at height y (for placing parts)
   let best = 0; for (let i = 0; i < PROFILE.length - 1; i++) { const [r0, y0] = PROFILE[i], [r1, y1] = PROFILE[i + 1]; if ((y - y0) * (y - y1) <= 0 && y1 !== y0) best = Math.max(best, lerp(r0, r1, (y - y0) / (y1 - y0))); } return best;
 }
-function appleGeometry() {
+function appleGeometry(pts = 120, segs = 160) {
   const curve = new THREE.SplineCurve(PROFILE.map(([x, y]) => new THREE.Vector2(x, y)));
-  const g = new THREE.LatheGeometry(curve.getPoints(120), 160);
+  const g = new THREE.LatheGeometry(curve.getPoints(pts), segs);
   g.computeVertexNormals();
   return g;
 }
@@ -188,7 +191,7 @@ function appleSkin(seed = 3) {
   });
 }
 let _skin;
-export const appleGeo = () => appleGeometry();
+export const appleGeo = () => appleGeometry(24, 28);
 export const appleMat = () => new THREE.MeshPhysicalMaterial({ map: (_skin ??= appleSkin(3)), roughness: .34, clearcoat: .55, clearcoatRoughness: .22, sheen: .4, sheenColor: new THREE.Color(0xffb0a0) });
 export function makeApple({ logo = false, seed = 3 } = {}) {
   const grp = new THREE.Group();

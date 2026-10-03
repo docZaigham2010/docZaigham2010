@@ -1,4 +1,5 @@
 // The Malus Lens film: nine 3D shots cut to the voiceover (line start = VO time + 1.0s).
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import {
   THREE, RoundedBoxGeometry, W, H, RED, clamp, lerp, E, P, rng, draw, studioEnv, backdrop, canvasTex, tex,
   makeApple, makeLogo, appleGeo, appleMat, appleRadiusAt, loadFonts, text3d, letterIn, mats, glassCard, roundRect, makePhone,
@@ -79,22 +80,24 @@ const wood = canvasTex(512, 128, (g, w, h) => {
   for (let i = 0; i < 90; i++) { g.strokeStyle = `rgba(${r() < .5 ? '30,18,8' : '140,100,60'},${.15 + r() * .25})`; g.lineWidth = 1 + r() * 2; g.beginPath(); const y = r() * h; g.moveTo(0, y); g.bezierCurveTo(w * .3, y + (r() - .5) * 10, w * .7, y + (r() - .5) * 10, w, y + (r() - .5) * 6); g.stroke(); }
 });
 const woodMat = new THREE.MeshStandardMaterial({ map: wood, roughness: .8 });
+const crateGeos = [];
 function crate(x, y, z, seed) {
-  const g = new THREE.Group(), W2 = 1.5, D2 = 1.05, H2 = .6;
-  const slab = (w, h, d, px, py, pz) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), woodMat); m.position.set(px, py, pz); g.add(m); };
+  const g = { position: { set() {} } }, W2 = 1.5, D2 = 1.05, H2 = .6;
+  const slab = (w, h, d, px, py, pz) => { const b = new THREE.BoxGeometry(w, h, d); b.translate(px + x, py + y, pz + z); crateGeos.push(b); };
   for (let i = 0; i < 2; i++) { const yy = .12 + i * .3; slab(W2, .2, .05, 0, yy, D2 / 2); slab(W2, .2, .05, 0, yy, -D2 / 2); slab(.05, .2, D2, W2 / 2, yy, 0); slab(.05, .2, D2, -W2 / 2, yy, 0); }
   slab(W2, .04, D2, 0, .02, 0);
-  g.position.set(x, y, z); return g;
+  return g;
 }
 const crates = [], appleSpots = [];
 {
   const r = rng(11);
-  for (let row = 0; row < 4; row++) for (let i = -4; i <= 4; i++) for (let lvl = 0; lvl < 2; lvl++) {
+  for (let row = 0; row < 3; row++) for (let i = -3; i <= 3; i++) for (let lvl = 0; lvl < 2; lvl++) {
     const x = i * 1.62 + (row % 2) * .8, z = -row * 2.6, y = lvl * .66 - 1.2;
-    const c = crate(x, y, z, i); s2.add(c); crates.push(c);
+    crate(x, y, z, i);
     for (let a = 0; a < 15; a++) appleSpots.push([x + ((a % 5) - 2) * .28 + (r() - .5) * .04, y + .5 + (r() * .04), z + (Math.floor(a / 5) - 1) * .3 + (r() - .5) * .04, r() * 6, r() * .5]);
   }
 }
+s2.add(new THREE.Mesh(mergeGeometries(crateGeos), woodMat));
 const inst = new THREE.InstancedMesh(appleGeo(), appleMat(), appleSpots.length);
 { const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3();
   appleSpots.forEach(([x, y, z, ry, rx], i) => { q.setFromEuler(new THREE.Euler(rx, ry, 0)); sc.setScalar(.135 + (i % 7) * .004); m.compose(new THREE.Vector3(x, y, z), q, sc); inst.setMatrixAt(i, m); }); }
