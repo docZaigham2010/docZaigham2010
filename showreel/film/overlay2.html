@@ -1,0 +1,418 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Malus Lens Film v2</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+  @font-face{font-family:'Montserrat';font-weight:800;src:url(../reel/fonts/Montserrat-800.woff2) format('woff2');}
+  :root { --white: #f6f3ee; --red: #e3262f; --a: #4ade80; --b: #fbbf24; --mono: 'Geist Mono', monospace; --sans: 'Inter Tight', sans-serif; --serif: 'Instrument Serif', serif; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; color: var(--white); font-family: var(--sans); }
+  #cam { position: absolute; inset: 0; transform-origin: 50% 58%; }
+  #bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .abs { position: absolute; }
+  .full { position: absolute; inset: 0; }
+  #scrimB { left: 0; right: 0; bottom: 0; height: 1000px; opacity: 0; background: linear-gradient(0deg, rgba(0,0,0,.62), rgba(0,0,0,.32) 45%, transparent); }
+  #scrimT { left: 0; right: 0; top: 0; height: 760px; opacity: 0; background: linear-gradient(180deg, rgba(0,0,0,.6), rgba(0,0,0,.25) 55%, transparent); }
+
+  /* type system */
+  .blk { position: absolute; left: 72px; right: 72px; }
+  .ln { display: block; overflow: hidden; padding: .04em 0 .14em; margin-bottom: -.12em; }
+  .ln > span { display: inline-block; will-change: transform; }
+  .sans { font-family: var(--sans); font-weight: 650; font-weight: 600; letter-spacing: -.045em; line-height: .98; }
+  .serif { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -.02em; line-height: .95; }
+  .mono { font-family: var(--mono); font-weight: 500; letter-spacing: .28em; text-transform: uppercase; }
+  .soft { color: rgba(246,243,238,.62); }
+  .shadow { text-shadow: 0 2px 40px rgba(0,0,0,.35); }
+
+  /* chapter label */
+  .chap { position: absolute; left: 72px; top: 300px; display: flex; align-items: center; gap: 20px; font-size: 24px; opacity: 0; }
+  .chap i { width: 12px; height: 12px; border-radius: 50%; background: var(--red); box-shadow: 0 0 18px rgba(227,38,47,.8); }
+  .chap b { font-weight: 500; }
+  .chap u { display: block; height: 1.5px; width: 140px; background: rgba(246,243,238,.55); transform-origin: 0 50%; }
+
+  /* opener */
+  #opener { left: 0; right: 0; top: 820px; text-align: center; }
+  #opener .k { font-size: 24px; letter-spacing: .6em; padding-left: .6em; }
+  #opener .t { font-size: 84px; margin-top: 26px; }
+  #opener .rule { width: 1px; height: 90px; margin: 30px auto 0; background: linear-gradient(180deg, rgba(246,243,238,.8), transparent); transform-origin: 50% 0; }
+
+  /* cold */
+  #coldwrap { opacity: 0; background: #050505; }
+  #cold { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-style: italic; font-size: 560px; letter-spacing: -.04em;
+    color: transparent; -webkit-background-clip: text; background-clip: text; background-size: 1080px 1920px; background-position: 0 0; transform-origin: 47% 52%; }
+  #coldlbl { left: 0; right: 0; top: 1300px; text-align: center; font-size: 24px; opacity: 0; }
+
+  /* stage */
+  #stagebg { opacity: 0; background: radial-gradient(900px 700px at 50% 42%, rgba(160,18,26,.32), transparent 70%), #050505; }
+  #beam { left: 50%; top: 960px; height: 2px; width: 0; transform: translateX(-50%); background: linear-gradient(90deg, transparent, #fff, transparent); box-shadow: 0 0 24px rgba(255,255,255,.8); opacity: 0; }
+  #dot { left: 540px; top: 960px; width: 20px; height: 20px; margin: -10px; border-radius: 50%; background: var(--red); box-shadow: 0 0 40px 10px rgba(227,38,47,.6); opacity: 0; }
+  #mark { left: 340px; top: 470px; width: 400px; height: 440px; overflow: visible; opacity: 0; }
+  #wordmark { left: 0; right: 0; top: 960px; text-align: center; font: 800 150px Montserrat; letter-spacing: -.045em; }
+  #wordmark .ln > span { padding: 0 .02em; }
+  #changes { left: 0; right: 0; top: 1170px; text-align: center; font-size: 110px; }
+  #iris { opacity: 0; background: #000; --r: 0px; -webkit-mask-image: radial-gradient(circle at 50% 46%, transparent var(--r), #000 calc(var(--r) + 2px)); mask-image: radial-gradient(circle at 50% 46%, transparent var(--r), #000 calc(var(--r) + 2px)); }
+
+  /* viewfinder */
+  #vf { opacity: 0; }
+  #vf .c { position: absolute; width: 56px; height: 56px; border: 0 solid rgba(255,255,255,.95); }
+  #focus { left: 400px; top: 940px; width: 300px; height: 300px; border: 2.5px solid rgba(255,255,255,.95); border-radius: 22px; opacity: 0; box-shadow: 0 0 30px rgba(255,255,255,.35); }
+  #vflabel { left: 0; right: 0; top: 230px; text-align: center; font-size: 22px; }
+  #rec { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--red); margin-right: 14px; vertical-align: 2px; }
+  #flash { background: #fff; opacity: 0; }
+
+  /* detection */
+  #det { overflow: visible; }
+  #det rect.box { fill: none; stroke: rgba(255,255,255,.92); stroke-width: 3; filter: drop-shadow(0 0 8px rgba(255,255,255,.55)); }
+  .pill { position: absolute; padding: 6px 12px 5px; border-radius: 10px; font: 500 20px var(--mono); letter-spacing: .06em; color: #0b0b0b; opacity: 0; white-space: nowrap; }
+  #scan { left: 0; right: 0; height: 420px; top: 0; opacity: 0; background: linear-gradient(180deg, transparent, rgba(255,255,255,.18) 85%, rgba(255,255,255,.75) 99%, transparent); mix-blend-mode: screen; }
+  .stat { position: absolute; top: 290px; }
+  .stat .l { font-size: 21px; }
+  .stat .n { font-family: var(--sans); font-weight: 300; font-size: 170px; letter-spacing: -.06em; line-height: .9; margin-top: 8px; font-variant-numeric: tabular-nums; }
+
+  /* results */
+  #res, #wts { left: 72px; right: 72px; top: 290px; opacity: 0; }
+  .big { font-family: var(--sans); font-weight: 200; font-size: 300px; letter-spacing: -.07em; line-height: .85; font-variant-numeric: tabular-nums; }
+  .big em { font-family: var(--serif); font-style: italic; font-size: 110px; letter-spacing: -.02em; margin-left: 18px; }
+  .meter { margin-top: 34px; }
+  .meter .top { display: flex; justify-content: space-between; font-size: 21px; }
+  .meter .rail { height: 3px; background: rgba(246,243,238,.25); margin-top: 14px; border-radius: 2px; }
+  .meter .rail i { display: block; height: 100%; width: 0; border-radius: 2px; }
+  .foot { margin-top: 30px; font-size: 18px; color: rgba(246,243,238,.5); }
+
+  /* report */
+  #paper { left: 230px; top: 300px; width: 620px; height: 860px; border-radius: 18px; background: #f8f6f1; color: #111; padding: 44px; opacity: 0;
+    box-shadow: 0 80px 140px rgba(0,0,0,.6), 0 10px 30px rgba(0,0,0,.3); transform-origin: 50% 100%; }
+  #paper img { height: 64px; }
+  #paper .hr { height: 4px; background: var(--red); margin: 22px 0 28px; border-radius: 2px; }
+  #paper h4 { font: 600 52px var(--sans); letter-spacing: -.04em; }
+  #paper p { font: 500 22px var(--sans); color: #777; margin-top: 6px; }
+  #paper .r { display: flex; justify-content: space-between; font: 500 28px var(--sans); padding: 16px 0; border-bottom: 1.5px solid #e8e3db; }
+  #paper .bars { display: flex; gap: 12px; align-items: flex-end; height: 150px; margin-top: 30px; }
+  #paper .bars i { flex: 1; border-radius: 8px 8px 3px 3px; }
+  #sharepill { left: 50%; top: 1200px; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; padding: 18px 30px; border-radius: 60px; background: #f8f6f1; color: #111; font: 600 28px var(--sans); opacity: 0; box-shadow: 0 20px 50px rgba(0,0,0,.4); }
+
+  /* end */
+  #endmark { left: 410px; top: 430px; width: 260px; height: 286px; overflow: visible; opacity: 0; }
+  #endword { left: 0; right: 0; top: 790px; text-align: center; font: 800 132px Montserrat; letter-spacing: -.045em; }
+  #endtag { left: 72px; right: 72px; top: 1020px; text-align: center; }
+  #cta { left: 50%; top: 1350px; transform: translateX(-50%); padding: 26px 56px; border: 2px solid rgba(246,243,238,.85); border-radius: 80px; font: 600 38px var(--sans); letter-spacing: -.01em; opacity: 0; white-space: nowrap; }
+  #black { background: #000; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="cam"><img id="bg" src="frames/00000.jpg"><svg id="det" class="full" viewBox="0 0 1080 1920"></svg><div id="pills" class="full"></div><div id="scan" class="abs"></div></div>
+  <div id="scrimT" class="abs"></div><div id="scrimB" class="abs"></div>
+
+  <!-- opener -->
+  <div id="opener" class="abs"><div class="k mono"><span>Malus Lens</span></div><div class="t serif shadow"><span class="ln"><span>A season in the cold store</span></span></div><div class="rule"></div></div>
+
+  <!-- chapters -->
+  <div class="chap mono" id="ch1"><i></i><b>01 — Harvest</b><u></u></div>
+  <div class="chap mono" id="ch2"><i></i><b>02 — Transit</b><u></u></div>
+  <div class="chap mono" id="ch3"><i></i><b>03 — Storage</b><u></u></div>
+  <div class="chap mono" id="ch4"><i></i><b>04 — Grading</b><u></u></div>
+
+  <!-- statements -->
+  <div class="blk shadow" id="t1" style="top:1250px"><span class="ln sans" style="font-size:112px"><span>Every apple</span></span><span class="ln serif" style="font-size:112px"><span>arrives with a story.</span></span></div>
+  <div class="blk shadow" id="t2" style="top:1300px"><span class="ln serif" style="font-size:168px"><span>Picked at dawn.</span></span></div>
+  <div class="blk shadow" id="t3" style="top:1230px"><span class="ln sans" style="font-size:112px"><span>Driven through</span></span><span class="ln serif" style="font-size:150px"><span>the night.</span></span></div>
+  <div class="blk shadow" id="t4" style="top:1230px"><span class="ln sans" style="font-size:112px"><span>Stacked by</span></span><span class="ln serif" style="font-size:150px"><span>the thousand,</span></span></div>
+  <div class="blk shadow" id="t5" style="top:1180px"><span class="ln sans soft" style="font-size:66px"><span>For years, every grade</span></span><span class="ln sans soft" style="font-size:66px"><span>came down to</span></span></div>
+  <div class="blk shadow" id="t6" style="top:1330px"><span class="ln serif" style="font-size:170px"><span>tired hands,</span></span></div>
+  <div class="blk shadow" id="t7" style="top:1510px"><span class="ln sans" style="font-size:72px"><span>and a long shift.</span></span></div>
+
+  <!-- cold -->
+  <div id="coldwrap" class="full"><div id="cold">cold.</div><div id="coldlbl" class="abs mono soft">In the cold</div></div>
+
+  <!-- stage + mark -->
+  <div id="stagebg" class="full"></div>
+  <div id="beam" class="abs"></div><div id="dot" class="abs"></div>
+  <svg id="mark" class="abs" viewBox="0 0 200 220"></svg>
+  <div id="wordmark" class="abs"><span class="ln" style="display:inline-block"><span>Malus</span></span> <span class="ln" style="display:inline-block;color:var(--red)"><span>Lens</span></span></div>
+  <div id="changes" class="abs serif"><span class="ln"><span>changes that.</span></span></div>
+  <div id="iris" class="full"></div>
+
+  <!-- viewfinder -->
+  <div id="vf" class="full">
+    <div class="c" style="left:72px;top:380px;border-left-width:3px;border-top-width:3px;border-top-left-radius:18px"></div>
+    <div class="c" style="right:72px;top:380px;border-right-width:3px;border-top-width:3px;border-top-right-radius:18px"></div>
+    <div class="c" style="left:72px;top:1500px;border-left-width:3px;border-bottom-width:3px;border-bottom-left-radius:18px"></div>
+    <div class="c" style="right:72px;top:1500px;border-right-width:3px;border-bottom-width:3px;border-bottom-right-radius:18px"></div>
+    <div id="vflabel" class="abs mono"><span id="rec"></span>Crate 01 · Lot 2410</div>
+  </div>
+  <div id="focus" class="abs"></div>
+  <div class="blk shadow" id="t8" style="top:1600px"><span class="ln sans" style="font-size:96px;display:inline-block"><span>One photo</span></span> <span class="ln serif" style="font-size:110px;display:inline-block"><span>per crate.</span></span></div>
+
+  <!-- AI -->
+  <div class="stat" id="sDet" style="left:72px;opacity:0"><div class="l mono soft">Apples detected</div><div class="n" id="nDet">0</div></div>
+  <div class="stat" id="sA" style="left:540px;opacity:0"><div class="l mono" style="color:var(--a)">Grade A</div><div class="n" id="nA">0</div></div>
+  <div class="stat" id="sB" style="left:810px;opacity:0"><div class="l mono" style="color:var(--b)">Grade B</div><div class="n" id="nB">0</div></div>
+  <div class="blk shadow" id="t9" style="top:1600px"><span class="ln sans" style="font-size:96px;display:inline-block"><span>Every apple,</span></span> <span class="ln serif" style="font-size:110px;display:inline-block"><span>counted.</span></span></div>
+  <div class="blk shadow" id="t10" style="top:1430px"><span class="ln sans" style="font-size:96px;display:inline-block;color:var(--a);margin-right:.22em"><span>Grade A.</span></span> <span class="ln sans" style="font-size:96px;display:inline-block;color:var(--b)"><span>Grade B.</span></span></div>
+  <div class="blk shadow" id="t11" style="top:1560px"><span class="ln serif" style="font-size:150px"><span>in seconds.</span></span></div>
+
+  <!-- results -->
+  <div id="res" class="abs shadow">
+    <div class="mono soft" style="font-size:21px">Lot 2410 — Results</div>
+    <div class="big" style="margin-top:24px"><span id="rTot">0</span><em>apples</em></div>
+    <div class="meter"><div class="top mono"><span style="color:var(--a)">Grade A</span><span id="rA">0.0%</span></div><div class="rail"><i id="mA" style="background:var(--a)"></i></div></div>
+    <div class="meter"><div class="top mono"><span style="color:var(--b)">Grade B</span><span id="rB">0.0%</span></div><div class="rail"><i id="mB" style="background:var(--b)"></i></div></div>
+    <div class="foot mono">Sample results</div>
+  </div>
+  <div id="wts" class="abs shadow">
+    <div class="mono soft" style="font-size:21px">Estimated Grade A weight</div>
+    <div class="big" style="margin-top:24px"><span id="wA">0.0</span><em>kg</em></div>
+    <div class="meter"><div class="top mono"><span style="color:var(--b)">Grade B</span><span id="wB">0.0 kg</span></div><div class="rail"><i id="mwB" style="background:var(--b)"></i></div></div>
+    <div class="meter"><div class="top mono"><span>Sampled · 2 crates</span><span id="wT">0.0 kg</span></div><div class="rail"><i id="mwT" style="background:var(--white)"></i></div></div>
+    <div class="foot mono">Sample results</div>
+  </div>
+  <div class="blk shadow" id="t12" style="top:1560px"><span class="ln sans" style="font-size:120px"><span>Clear counts.</span></span></div>
+  <div class="blk shadow" id="t13" style="top:1560px"><span class="ln sans" style="font-size:120px"><span>Real weights.</span></span></div>
+
+  <!-- report -->
+  <div id="paper" class="abs">
+    <img src="../reel/img/app-logo.png"><div class="hr"></div>
+    <h4>Lot 2410</h4><p>Quality check report · 2 crates</p>
+    <div class="r" style="margin-top:20px"><span>Total apples</span><b>128</b></div>
+    <div class="r"><span style="color:#15803d">Grade A</span><b>111 · 86.7%</b></div>
+    <div class="r"><span style="color:#b45309">Grade B</span><b>17 · 13.3%</b></div>
+    <div class="r"><span>Est. A weight</span><b>34.8 kg</b></div>
+    <div class="bars"><i style="height:92%;background:#4ade80"></i><i style="height:16%;background:#fbbf24"></i><i style="height:80%;background:#4ade80"></i><i style="height:24%;background:#fbbf24"></i><i style="height:100%;background:#e3262f"></i></div>
+  </div>
+  <div id="sharepill" class="abs"><svg width="30" height="30" viewBox="0 0 24 24"><path fill="#e3262f" d="M18 16.1c-.8 0-1.4.3-2 .8l-7.1-4.2c.1-.2.1-.5.1-.7s0-.5-.1-.7L16 7.2c.5.5 1.2.8 2 .8 1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3c0 .2 0 .5.1.7L8 9.8C7.5 9.3 6.8 9 6 9c-1.7 0-3 1.3-3 3s1.3 3 3 3c.8 0 1.5-.3 2-.8l7.1 4.2c-.1.2-.1.4-.1.6 0 1.6 1.3 2.9 2.9 2.9s2.9-1.3 2.9-2.9-1.2-2.9-2.8-2.9z"/></svg>Report shared</div>
+  <div class="blk shadow" id="t14" style="top:1520px"><span class="ln sans" style="font-size:100px;display:inline-block"><span>A report</span></span> <span class="ln serif" style="font-size:116px;display:inline-block"><span>you can share.</span></span></div>
+  <div class="blk shadow" id="t15" style="top:1300px"><span class="ln sans soft" style="font-size:96px"><span>Before the next</span></span><span class="ln serif" style="font-size:150px"><span>truck arrives.</span></span></div>
+  <div class="blk shadow" id="t16" style="top:1300px"><span class="ln sans" style="font-size:96px"><span>Built for the people</span></span><span class="ln serif" style="font-size:136px"><span>who keep it running.</span></span></div>
+
+  <!-- end -->
+  <svg id="endmark" class="abs" viewBox="0 0 200 220"></svg>
+  <div id="endword" class="abs"><span class="ln" style="display:inline-block"><span>Malus</span></span> <span class="ln" style="display:inline-block;color:var(--red)"><span>Lens</span></span></div>
+  <div id="endtag" class="abs"><span class="ln sans" style="font-size:84px"><span>Apple quality,</span></span><span class="ln serif" style="font-size:104px"><span>assessed in seconds.</span></span></div>
+  <div id="cta" class="abs">Book a demo &nbsp;→</div>
+
+  <div id="flash" class="full"></div>
+  <div id="black" class="full"></div>
+</div>
+
+<template id="appleT">
+  <defs>
+    <clipPath id="CLIPID"><path d="M100 62 C86 48 58 44 40 58 C18 76 18 118 30 146 C42 176 64 200 84 200 C92 200 95 196 100 196 C105 196 108 200 116 200 C136 200 158 176 170 146 C182 118 182 76 160 58 C142 44 114 48 100 62 Z"></path></clipPath>
+    <linearGradient id="GRADID" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f2444c"></stop><stop offset=".55" stop-color="#d81f29"></stop><stop offset="1" stop-color="#981018"></stop></linearGradient>
+    <linearGradient id="SWEEPID" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"></stop><stop offset=".5" stop-color="#fff" stop-opacity=".55"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+  </defs>
+  <g class="all">
+    <path class="stem" d="M100 64 C100 50 98 40 93 30" fill="none" stroke="#5a3a1a" stroke-width="7" stroke-linecap="round"></path>
+    <path class="leaf" d="M104 52 C108 30 126 16 150 14 C146 38 128 52 104 52 Z" fill="#30b04a"></path>
+    <path class="body" d="M100 62 C86 48 58 44 40 58 C18 76 18 118 30 146 C42 176 64 200 84 200 C92 200 95 196 100 196 C105 196 108 200 116 200 C136 200 158 176 170 146 C182 118 182 76 160 58 C142 44 114 48 100 62 Z" fill="url(#GRADID)"></path>
+    <g clip-path="url(#CLIPID)">
+      <rect class="band" x="0" y="121" width="200" height="13" fill="#fff"></rect>
+      <rect class="sweep" x="-140" y="0" width="90" height="220" fill="url(#SWEEPID)" transform="skewX(-18)"></rect>
+    </g>
+    <circle class="ring" cx="100" cy="127" r="41" fill="#fff"></circle>
+    <circle class="lens" cx="100" cy="127" r="32" fill="#0b0b0c"></circle>
+    <circle class="hl" cx="113" cy="114" r="8.5" fill="#fff"></circle>
+  </g>
+</template>
+
+<script src="../node_modules/gsap/dist/gsap.min.js"></script>
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+['mark', 'endmark'].forEach(id => { $('#' + id).innerHTML = $('#appleT').innerHTML.replaceAll('CLIPID', id + 'c').replaceAll('GRADID', id + 'g').replaceAll('SWEEPID', id + 's').replace(/url\(#(\w+)\)/g, (m, a) => `url(#${a})`); });
+const tl = gsap.timeline({ paused: true });
+const TOTAL = 43.4;
+gsap.defaults({ ease: 'expo.out' });
+const set = (s, v, t) => tl.set(s, v, t);
+
+// lines rise out of their masks; leave by sliding up and out
+function lines(sel, tin, tout, { stagger = .12, dur = 1.1, times } = {}) {
+  const ls = $$(`${sel} .ln > span`);
+  set(sel, { opacity: 1 }, tin - .01);
+  ls.forEach((l, i) => tl.fromTo(l, { yPercent: 115, rotate: 2.5 }, { yPercent: 0, rotate: 0, duration: dur, ease: 'expo.out' }, times ? times[i] : tin + i * stagger));
+  if (tout != null) tl.to(ls, { yPercent: -115, duration: .55, ease: 'expo.in', stagger: .05 }, tout);
+}
+function chapter(sel, tin, tout) {
+  set(sel, { opacity: 1 }, tin);
+  tl.fromTo(`${sel} i`, { scale: 0 }, { scale: 1, duration: .6, ease: 'back.out(3)' }, tin);
+  tl.fromTo(`${sel} b`, { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: .8 }, tin + .08);
+  tl.fromTo(`${sel} u`, { scaleX: 0 }, { scaleX: 1, duration: 1.2, ease: 'expo.inOut' }, tin + .15);
+  tl.to(sel, { opacity: 0, duration: .3, ease: 'power2.in' }, tout);
+}
+// SVG parts transform about a point in the mark's own coordinates (explicit, no CSS transform maths)
+function svgT(sel, from, to, t, d, ease, [ox, oy]) {
+  const els = $$(sel), o = { ...from };
+  const apply = () => els.forEach(e => e.setAttribute('transform', `translate(${ox} ${oy}) rotate(${o.r || 0}) scale(${o.sx ?? o.s ?? 1} ${o.sy ?? o.s ?? 1}) translate(${-ox} ${-oy})`));
+  tl.fromTo(o, { ...from }, { ...to, duration: d, ease, onUpdate: apply, onStart: apply }, t);
+  apply();
+}
+function count(el, to, t, d, dec = 0, suf = '') { const o = { v: 0 }; tl.to(o, { v: to, duration: d, ease: 'power3.out', onUpdate: () => { $(el).textContent = o.v.toFixed(dec) + suf; } }, t); }
+
+// ---- opener 0–2.2 ----------------------------------------------------------------------
+tl.fromTo('#black', { opacity: 1 }, { opacity: 0, duration: 1.6, ease: 'power2.inOut' }, .1);
+tl.fromTo('#opener .k span', { opacity: 0, letterSpacing: '1.1em' }, { opacity: .85, letterSpacing: '.6em', duration: 1.6 }, .2);
+lines('#opener .t', .55, 1.75, { dur: 1.3 });
+tl.fromTo('#opener .rule', { scaleY: 0 }, { scaleY: 1, duration: 1.2, ease: 'expo.inOut' }, .8);
+tl.to(['#opener .k', '#opener .rule'], { opacity: 0, duration: .4, ease: 'power2.in' }, 1.75);
+tl.to('#scrimB', { opacity: 1, duration: .8 }, 1.6);
+
+// ---- the journey -------------------------------------------------------------------------
+lines('#t1', 1.85, 4.4, { times: [1.85, 3.3] });
+chapter('#ch1', 4.85, 6.1); tl.to('#scrimT', { opacity: 1, duration: .5 }, 4.75);
+lines('#t2', 4.9, 6.05, { dur: 1.2 });
+chapter('#ch2', 6.4, 7.95);
+lines('#t3', 6.48, 7.9, { times: [6.48, 7.0] });
+chapter('#ch3', 8.15, 9.8);
+lines('#t4', 8.26, 9.75, { times: [8.26, 8.75] });
+// "cold." — the cold store, seen through the letters, then dive through them
+set('#coldwrap', { opacity: 1 }, 9.95);
+tl.fromTo('#cold', { scale: 1.18, opacity: 0 }, { scale: 1, opacity: 1, duration: .7, ease: 'expo.out' }, 9.95);
+tl.fromTo('#coldlbl', { opacity: 0, y: 14 }, { opacity: .8, y: 0, duration: .6 }, 10.1);
+tl.to('#coldlbl', { opacity: 0, duration: .2 }, 10.55);
+tl.to('#cold', { scale: 14, duration: .45, ease: 'expo.in' }, 10.55);
+tl.to('#coldwrap', { backgroundColor: 'rgba(5,5,5,0)', duration: .3, ease: 'power2.in' }, 10.7);
+set('#coldwrap', { opacity: 0 }, 11.0);
+chapter('#ch4', 11.05, 15.9);
+lines('#t5', 11.06, 13.75, { times: [11.06, 12.64] });
+lines('#t6', 13.9, 15.95, { dur: 1.3 });
+lines('#t7', 15.46, 15.95, { dur: .9 });
+tl.to('#black', { opacity: 1, duration: .45, ease: 'power2.in' }, 15.85);
+tl.to(['#scrimB', '#scrimT'], { opacity: 0, duration: .2 }, 16.25);
+
+// ---- the stage: a line of light becomes the mark on the drop --------------------------------
+set('#stagebg', { opacity: 1 }, 16.3); set('#black', { opacity: 0 }, 16.3);
+tl.fromTo('#stagebg', { opacity: 0 }, { opacity: 1, duration: .2 }, 16.3);
+set('#beam', { opacity: 1 }, 16.35);
+tl.fromTo('#beam', { width: 0 }, { width: 760, duration: .45, ease: 'expo.out' }, 16.35);
+tl.to('#beam', { width: 0, duration: .25, ease: 'expo.in' }, 16.72);
+set('#dot', { opacity: 1 }, 16.85); tl.fromTo('#dot', { scale: 0 }, { scale: 1, duration: .15, ease: 'back.out(3)' }, 16.85);
+set('#beam', { opacity: 0 }, 16.98);
+// 17.0 the drop
+set('#dot', { opacity: 0 }, 17.0);
+set('#flash', { opacity: .5 }, 17.0); tl.to('#flash', { opacity: 0, duration: .5, ease: 'power2.out' }, 17.0);
+set('#mark', { opacity: 1 }, 17.0);
+svgT('#mark .all', { s: .05 }, { s: 1 }, 17.0, 1.0, 'expo.out', [100, 127]);
+tl.fromTo('#mark .band', { attr: { x: 100, width: 0 } }, { attr: { x: 0, width: 200 }, duration: .7, ease: 'expo.inOut' }, 17.12);
+tl.fromTo('#mark .ring', { attr: { r: 0 } }, { attr: { r: 41 }, duration: .7, ease: 'expo.out' }, 17.2);
+tl.fromTo('#mark .lens', { attr: { r: 0 } }, { attr: { r: 32 }, duration: .8, ease: 'expo.out' }, 17.3);
+tl.fromTo('#mark .hl', { attr: { r: 0 } }, { attr: { r: 8.5 }, duration: .5, ease: 'back.out(3)' }, 17.6);
+svgT('#mark .leaf', { s: .001, r: -40 }, { s: 1, r: 0 }, 17.3, .8, 'back.out(2.2)', [104, 52]);
+svgT('#mark .stem', { sx: 1, sy: .001 }, { sx: 1, sy: 1 }, 17.25, .5, 'expo.out', [100, 64]);
+tl.fromTo('#mark .sweep', { attr: { x: -140 } }, { attr: { x: 300 }, duration: 1.0, ease: 'power2.inOut' }, 17.55);
+lines('#wordmark', 17.15, null, { stagger: .1, dur: 1.0 });
+lines('#changes', 17.46, null, { times: [17.46] });
+// fly into the lens; the next shot opens through it like an aperture
+tl.to(['#wordmark', '#changes'], { opacity: 0, y: -30, duration: .3, ease: 'power2.in' }, 18.2);
+tl.to('#mark', { scale: 28, duration: .45, ease: 'expo.in', transformOrigin: '50% 57.7%' }, 18.25);
+set(['#mark', '#stagebg'], { opacity: 0 }, 18.7);
+set('#iris', { opacity: 1, '--r': '0px' }, 18.7);
+tl.to('#iris', { '--r': '1400px', duration: .8, ease: 'expo.out' }, 18.7);
+set('#iris', { opacity: 0 }, 19.5);
+
+// ---- one photo per crate --------------------------------------------------------------------
+tl.to('#scrimB', { opacity: .9, duration: .4 }, 18.7);
+tl.fromTo('#vf', { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: .9 }, 18.75);
+set('#focus', { opacity: 1 }, 19.05);
+tl.fromTo('#focus', { scale: 1.5, opacity: 0 }, { scale: 1, opacity: 1, duration: .5, ease: 'expo.out' }, 19.05);
+tl.to('#focus', { opacity: .3, duration: .08, yoyo: true, repeat: 3, ease: 'none' }, 19.5);
+tl.to('#rec', { opacity: .2, duration: .25, yoyo: true, repeat: 5, ease: 'none' }, 18.8);
+lines('#t8', 19.08, 20.3, { times: [19.08, 19.7] });
+set('#flash', { opacity: .9 }, 19.88); tl.to('#flash', { opacity: 0, duration: .45, ease: 'power2.out' }, 19.88);
+tl.fromTo('#cam', { scale: 1.03 }, { scale: 1, duration: .5, ease: 'expo.out' }, 19.88);
+tl.to(['#vf', '#focus'], { opacity: 0, duration: .3, ease: 'power2.in' }, 20.2);
+
+// ---- AI: draw a box around every apple, count, grade -------------------------------------------
+const apples = [[440,820,660,1040,'A',.97],[670,770,900,940,'A',.95],[670,900,860,1090,'A',.96],[800,1020,976,1160,'A',.93],[24,950,250,1150,'A',.94],
+  [290,1030,484,1220,'B',.88],[4,1144,160,1310,'B',.86],[164,1140,380,1340,'A',.95],[426,1120,644,1336,'A',.97],[644,1150,940,1470,'B',.91],
+  [104,1340,340,1580,'A',.96],[330,1336,700,1620,'A',.94],[270,1490,530,1730,'A',.93],[656,1530,940,1800,'A',.95],[870,1460,1080,1720,'A',.92],
+  [980,1220,1080,1440,'B',.84],[860,1160,1024,1290,'A',.9],[100,1580,270,1760,'A',.93],[0,1280,90,1480,'A',.91]];
+const nB = apples.filter(a => a[4] === 'B').length, nA = apples.length - nB;
+tl.fromTo('#cam', { scale: 1 }, { scale: 1.06, duration: 5.4, ease: 'sine.inOut' }, 20.45);
+set('#cam', { scale: 1 }, 25.9);
+tl.to('#scrimT', { opacity: 1, duration: .5 }, 20.45);
+set('#scan', { opacity: 1, y: 500 }, 20.5); tl.to('#scan', { y: 1700, duration: 1.0, ease: 'power1.inOut' }, 20.5); set('#scan', { opacity: 0 }, 21.5);
+const NS = 'http://www.w3.org/2000/svg';
+apples.forEach(([x1, y1, x2, y2, g, c], i) => {
+  const r = document.createElementNS(NS, 'rect'); const pad = 6;
+  Object.entries({ x: x1 + pad, y: y1 + pad, width: x2 - x1 - pad * 2, height: y2 - y1 - pad * 2, rx: 22, class: 'box', pathLength: 100 }).forEach(([k, v]) => r.setAttribute(k, v));
+  r.style.strokeDasharray = '0 100'; $('#det').appendChild(r);
+  const p = document.createElement('div'); p.className = 'pill'; p.textContent = `${g} ${c.toFixed(2)}`;
+  Object.assign(p.style, { left: (x1 + pad + 10) + 'px', top: (y1 + pad - 18) + 'px', background: g === 'A' ? 'var(--a)' : 'var(--b)' });
+  $('#pills').appendChild(p);
+  const t = 20.62 + (y1 - 770) / 1030 * .8 + (i % 3) * .04;
+  tl.fromTo(r, { strokeDasharray: '0 100', opacity: 1 }, { strokeDasharray: '100 0', duration: .5, ease: 'power2.inOut' }, t);
+  const tg = g === 'A' ? 22.86 + i * .025 : 24.28 + i * .02, col = g === 'A' ? '#4ade80' : '#fbbf24';
+  tl.to(r, { stroke: col, duration: .3 }, tg);
+  tl.fromTo(p, { opacity: 0, y: 8, scale: .8 }, { opacity: 1, y: 0, scale: 1, duration: .45, ease: 'back.out(2)' }, tg);
+  tl.to([r, p], { opacity: 0, duration: .25 }, 25.7);
+});
+set('#sDet', { opacity: 1 }, 20.6); tl.fromTo('#sDet', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: .7 }, 20.6);
+count('#nDet', apples.length, 20.62, 1.3);
+tl.fromTo('#sA', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: .7 }, 22.8); count('#nA', nA, 22.86, .9);
+tl.fromTo('#sB', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: .7 }, 24.2); count('#nB', nB, 24.28, .6);
+tl.to(['#sDet', '#sA', '#sB'], { opacity: 0, duration: .3, ease: 'power2.in' }, 25.65);
+lines('#t9', 20.6, 22.45, { times: [20.6, 21.28] });
+lines('#t10', 22.86, 25.55, { times: [22.86, 24.0] });
+lines('#t11', 24.64, 25.55, { dur: 1.1 });
+
+// ---- results ---------------------------------------------------------------------------------------
+set('#res', { opacity: 1 }, 25.9);
+tl.fromTo('#res > *', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: .8, stagger: .08 }, 25.95);
+count('#rTot', 128, 26.0, 1.3);
+count('#rA', 86.7, 26.15, 1.3, 1, '%'); count('#rB', 13.3, 26.25, 1.3, 1, '%');
+tl.fromTo('#mA', { width: '0%' }, { width: '86.7%', duration: 1.3, ease: 'power3.out' }, 26.15);
+tl.fromTo('#mB', { width: '0%' }, { width: '13.3%', duration: 1.3, ease: 'power3.out' }, 26.25);
+tl.to('#res', { opacity: 0, y: -20, duration: .3, ease: 'power2.in' }, 27.7);
+lines('#t12', 26.88, 27.7);
+set('#wts', { opacity: 1 }, 27.85);
+tl.fromTo('#wts > *', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: .8, stagger: .08 }, 27.9);
+count('#wA', 34.8, 27.95, 1.1, 1); count('#wB', 5.2, 28.05, 1.1, 1, ' kg'); count('#wT', 40, 28.1, 1.1, 1, ' kg');
+tl.fromTo('#mwB', { width: '0%' }, { width: '13%', duration: 1.1, ease: 'power3.out' }, 28.05);
+tl.fromTo('#mwT', { width: '0%' }, { width: '100%', duration: 1.1, ease: 'power3.out' }, 28.1);
+tl.to('#wts', { opacity: 0, y: -20, duration: .3, ease: 'power2.in' }, 29.25);
+lines('#t13', 27.94, 29.25);
+tl.to('#scrimT', { opacity: .6, duration: .4 }, 29.3);
+
+// ---- report ----------------------------------------------------------------------------------------
+tl.fromTo('#paper', { opacity: 0, y: 900, rotationX: 50, rotation: -8, transformPerspective: 1800 }, { opacity: 1, y: 0, rotationX: 0, rotation: -3, duration: 1.1, ease: 'expo.out' }, 29.42);
+tl.to('#paper', { rotation: 2, y: -20, duration: 1.2, ease: 'sine.inOut' }, 30.5);
+tl.fromTo('#sharepill', { opacity: 0, y: 30, scale: .85 }, { opacity: 1, y: 0, scale: 1, duration: .6, ease: 'back.out(2)' }, 30.3);
+tl.to(['#paper', '#sharepill'], { y: '-=1300', rotation: 10, duration: .55, ease: 'expo.in' }, 31.3);
+lines('#t14', 29.5, 31.35, { times: [29.5, 30.2] });
+lines('#t15', 31.62, 33.25, { times: [31.62, 31.9] });
+// montage: quick light cuts
+[34.1, 34.8, 35.5].forEach(t => { set('#flash', { opacity: .18 }, t); tl.to('#flash', { opacity: 0, duration: .25 }, t); });
+lines('#t16', 33.54, 36.2, { times: [33.54, 34.95] });
+tl.to('#black', { opacity: 1, duration: .25, ease: 'power2.in' }, 36.15);
+tl.to(['#scrimB', '#scrimT'], { opacity: 0, duration: .2 }, 36.35);
+
+// ---- end stage -------------------------------------------------------------------------------------
+set('#black', { opacity: 0 }, 36.4); set('#stagebg', { opacity: 1 }, 36.4);
+set('#endmark', { opacity: 1 }, 36.42);
+svgT('#endmark .all', { s: .05 }, { s: 1 }, 36.42, 1.1, 'expo.out', [100, 127]);
+tl.fromTo('#endmark .band', { attr: { x: 100, width: 0 } }, { attr: { x: 0, width: 200 }, duration: .7, ease: 'expo.inOut' }, 36.5);
+tl.fromTo('#endmark .lens', { attr: { r: 0 } }, { attr: { r: 32 }, duration: .8 }, 36.6);
+tl.fromTo('#endmark .hl', { attr: { r: 0 } }, { attr: { r: 8.5 }, duration: .5, ease: 'back.out(3)' }, 36.9);
+tl.fromTo('#endmark .sweep', { attr: { x: -140 } }, { attr: { x: 300 }, duration: 1.1, ease: 'power2.inOut' }, 37.3);
+lines('#endword', 36.5, null, { stagger: .1 });
+lines('#endtag', 37.66, null, { times: [37.66, 38.76], dur: 1.2 });
+tl.fromTo('#cta', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: .9 }, 40.3);
+tl.fromTo('#stagebg', { backgroundPosition: '0 0' }, { backgroundPosition: '0 -60px', duration: 7, ease: 'none' }, 36.4);
+tl.to('#black', { opacity: 1, duration: 1.0, ease: 'power1.in' }, 42.4);
+tl.set({}, {}, TOTAL);
+
+// ---- frame driver ------------------------------------------------------------------------------------
+const img = $('#bg'), cold = $('#cold');
+window.__duration = TOTAL;
+window.__seek = async (t, frame) => {
+  const src = `frames/${String(frame).padStart(5, '0')}.jpg`;
+  if (!img.src.endsWith(src)) { img.src = src; await img.decode().catch(() => {}); }
+  if (t >= 9.9 && t < 11.05) cold.style.backgroundImage = `url(${src})`;
+  tl.seek(t, false);
+};
+window.__ready = Promise.all([document.fonts.ready, ...[...document.images].map(i => i.decode().catch(() => {}))]);
+</script>
+</body>
+</html>

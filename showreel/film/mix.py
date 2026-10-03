@@ -5,7 +5,7 @@ from edl import SHOTS, SRC
 
 A = 'audio/'
 DUR = 43.4
-VO_AT = 2.52
+VO_AT = 1.76
 inp = ['-i', 'out/film-silent.mp4', '-i', A + 'vo.mp3', '-i', A + 'music.mp3']
 fc = [
     f"[1:a]highpass=f=70,acompressor=threshold=-20dB:ratio=3:attack=5:release=150,volume=1.5,adelay={int(VO_AT*1000)}:all=1,apad=whole_dur={DUR}[vo]",
@@ -23,9 +23,9 @@ for t0, t1, clip, sin, speed, *_ in SHOTS:
     fc.append(f"[{k}:a]atrim=0:{d:.3f},asetpts=PTS-STARTPTS,highpass=f=90,volume={lvl},afade=t=in:d=0.08,afade=t=out:st={d-.12:.3f}:d=0.12,adelay={int(t0*1000)}:all=1[n{k}]")
     nat.append(f'[n{k}]'); k += 1
 fc.append(f"{''.join(nat)}amix=inputs={len(nat)}:normalize=0,volume=0.8[nat]")
-sfx = [('whoosh', 16.45, .9), ('impact', 17.0, 1.0), ('shutter', 20.1, .8), ('scan', 21.5, .7), ('scan', 21.95, .5),
-       ('pop', 23.5, .35), ('pop', 24.62, .35), ('whoosh', 26.75, .55), ('pop', 27.0, .3), ('pop', 29.0, .3),
-       ('whoosh', 30.2, .45), ('pop', 30.9, .3), ('whoosh', 36.45, .5), ('impact', 36.62, .55), ('pop', 41.0, .35)]
+sfx = [('whoosh', 10.5, .5), ('whoosh', 16.45, .8), ('impact', 17.0, 1.0), ('whoosh', 18.22, .6), ('shutter', 19.86, .8),
+       ('scan', 20.5, .7), ('scan', 20.95, .5), ('pop', 22.86, .3), ('pop', 24.28, .3), ('whoosh', 25.85, .45),
+       ('whoosh', 29.42, .45), ('pop', 30.3, .3), ('whoosh', 31.3, .4), ('impact', 36.42, .5), ('pop', 40.3, .25)]
 files = sorted({f for f, _, _ in sfx}); idx = {}
 for f in files: inp += ['-i', A + f + '.mp3']; idx[f] = k; k += 1
 lab = []

@@ -8,7 +8,7 @@ const FPS = 30;
 const b = await chromium.launch();
 const p = await b.newPage({ viewport: { width: 1080, height: 1920 } });
 p.on('pageerror', e => console.log('pageerror', e.message));
-await p.goto('http://localhost:8777/film/overlay.html'); await p.evaluate(() => window.__ready);
+await p.goto('http://localhost:8777/film/' + (process.env.PAGE || 'overlay2.html')); await p.evaluate(() => window.__ready);
 const seek = (t) => p.evaluate(([t, f]) => window.__seek(t, f), [t, Math.min(1301, Math.round(t * FPS))]);
 if (process.argv[2] === 'stills') {
   const ts = process.argv.slice(3);
