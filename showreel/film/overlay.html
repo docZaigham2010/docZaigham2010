@@ -1,0 +1,352 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Malus Lens Film</title>
+<link rel="stylesheet" href="../reel/fonts/fonts.css">
+<style>
+  @font-face{font-family:'Inter';font-weight:400;src:url(../reel/fonts/Inter-400.woff2) format('woff2');}
+  @font-face{font-family:'Inter';font-weight:500;src:url(../reel/fonts/Inter-500.woff2) format('woff2');}
+  @font-face{font-family:'Inter';font-weight:600;src:url(../reel/fonts/Inter-600.woff2) format('woff2');}
+  @font-face{font-family:'Inter';font-weight:700;src:url(../reel/fonts/Inter-700.woff2) format('woff2');}
+  @font-face{font-family:'Montserrat';font-weight:800;src:url(../reel/fonts/Montserrat-800.woff2) format('woff2');}
+  @font-face{font-family:'JetBrains Mono';font-weight:500;src:url(../reel/fonts/JetBrainsMono-500.woff2) format('woff2');}
+  :root { --red: #e0262f; --a: #34d27b; --b: #f5a524; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: Inter, sans-serif; color: #fff; }
+  #cam { position: absolute; inset: 0; transform-origin: 50% 55%; }
+  #bg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .layer { position: absolute; inset: 0; }
+  .fade { position: absolute; inset: 0; background: #000; opacity: 0; }
+  #shade { position: absolute; left: 0; right: 0; bottom: 0; height: 900px; opacity: 0;
+    background: linear-gradient(0deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.45) 38%, transparent 100%); }
+  #shadeTop { position: absolute; left: 0; right: 0; top: 0; height: 520px; opacity: 0; background: linear-gradient(180deg, rgba(0,0,0,.55), transparent); }
+
+  /* kinetic statements */
+  .say { position: absolute; left: 80px; right: 80px; top: 1180px; font-weight: 700; font-size: 92px; line-height: 1.02; letter-spacing: -.035em; }
+  .say .w { display: inline-block; opacity: 0; will-change: transform, filter; }
+  .say .soft { color: rgba(255,255,255,.62); }
+  .say .warm { color: #ffb38a; }
+  .say .red { color: var(--red); }
+  .say.small { font-size: 60px; font-weight: 600; letter-spacing: -.02em; }
+  .say.center { text-align: center; }
+
+  /* glass */
+  .glass { position: absolute; border-radius: 36px; background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.28);
+    backdrop-filter: blur(34px) saturate(1.6); -webkit-backdrop-filter: blur(34px) saturate(1.6);
+    box-shadow: 0 30px 80px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.35); overflow: hidden; }
+  .glass::before { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,.22), transparent 45%); pointer-events: none; }
+  .chip { position: absolute; display: flex; align-items: center; gap: 16px; padding: 18px 30px 18px 22px; border-radius: 60px; font: 600 30px Inter; letter-spacing: .02em; white-space: nowrap; }
+  .chip svg { width: 34px; height: 34px; }
+  .mono { font-family: 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase; }
+
+  /* opener */
+  #opener { position: absolute; left: 0; right: 0; top: 860px; text-align: center; }
+  #opener .k { font: 500 26px 'JetBrains Mono'; letter-spacing: .5em; color: rgba(255,255,255,.75); }
+  #opener .line { height: 2px; width: 0; margin: 26px auto; background: linear-gradient(90deg, transparent, #fff, transparent); }
+  #opener .t { font: 600 40px Inter; letter-spacing: .02em; color: rgba(255,255,255,.9); }
+
+  /* logo */
+  #logo { position: absolute; left: 0; right: 0; top: 640px; text-align: center; opacity: 0; }
+  #logo svg { width: 300px; height: 330px; overflow: visible; filter: drop-shadow(0 30px 60px rgba(0,0,0,.5)); }
+  #logo .word { font: 800 132px Montserrat; letter-spacing: -.04em; margin-top: 18px; }
+  #logo .word span { display: inline-block; }
+  #logo .sweep { position: absolute; top: 0; bottom: 0; width: 220px; left: -300px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent); mix-blend-mode: overlay; transform: skewX(-18deg); }
+  #blurbg { position: absolute; inset: 0; opacity: 0; backdrop-filter: blur(26px) brightness(.55) saturate(1.2); -webkit-backdrop-filter: blur(26px) brightness(.55) saturate(1.2); }
+  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+
+  /* viewfinder */
+  #vf .br { position: absolute; width: 120px; height: 120px; border: 7px solid #fff; border-radius: 6px; opacity: .95; }
+  #vf .pill { left: 50%; top: 250px; transform: translateX(-50%); }
+  #shutter { position: absolute; left: 50%; bottom: 420px; width: 150px; height: 150px; margin-left: -75px; border-radius: 50%; border: 8px solid #fff; }
+  #shutter i { position: absolute; inset: 10px; border-radius: 50%; background: #fff; }
+
+  /* detection */
+  .box { position: absolute; opacity: 0; }
+  .box .c { position: absolute; width: 30%; height: 30%; min-width: 22px; min-height: 22px; border-color: #fff; border-style: solid; border-width: 0; filter: drop-shadow(0 0 10px rgba(255,255,255,.7)); }
+  .box .c1 { left: 0; top: 0; border-left-width: 6px; border-top-width: 6px; border-top-left-radius: 18px; }
+  .box .c2 { right: 0; top: 0; border-right-width: 6px; border-top-width: 6px; border-top-right-radius: 18px; }
+  .box .c3 { left: 0; bottom: 0; border-left-width: 6px; border-bottom-width: 6px; border-bottom-left-radius: 18px; }
+  .box .c4 { right: 0; bottom: 0; border-right-width: 6px; border-bottom-width: 6px; border-bottom-right-radius: 18px; }
+  .box .tag { position: absolute; left: 50%; top: 50%; width: 64px; height: 64px; margin: -32px; border-radius: 50%; display: grid; place-items: center;
+    font: 800 34px Montserrat; color: #fff; opacity: 0; box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+  #scan { position: absolute; left: 0; right: 0; height: 4px; top: 0; background: #fff; opacity: 0; box-shadow: 0 0 30px 8px rgba(255,255,255,.7); }
+  #scan::after { content: ""; position: absolute; left: 0; right: 0; bottom: 4px; height: 340px; background: linear-gradient(0deg, rgba(255,255,255,.22), transparent); }
+  #counter { left: 80px; top: 230px; width: 420px; height: 170px; padding: 28px 34px; opacity: 0; }
+  #counter .l { font-size: 22px; color: rgba(255,255,255,.75); }
+  #counter .n { font: 700 84px Inter; letter-spacing: -.04em; margin-top: 4px; }
+  #grades { right: 80px; top: 230px; width: 420px; height: 170px; padding: 28px 34px; opacity: 0; display: flex; gap: 30px; }
+  #grades div { flex: 1; }
+  #grades .l { font-size: 22px; }
+  #grades .n { font: 700 84px Inter; letter-spacing: -.04em; margin-top: 4px; }
+
+  /* result cards */
+  .card { width: 760px; left: 160px; padding: 44px 48px; opacity: 0; }
+  .card h5 { font: 500 24px 'JetBrains Mono'; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.75); }
+  .card .big { font: 700 120px Inter; letter-spacing: -.045em; margin: 10px 0 6px; }
+  .card .row { display: flex; justify-content: space-between; align-items: baseline; font: 600 38px Inter; margin-top: 26px; }
+  .card .row b { font-weight: 700; }
+  .card .bar { height: 16px; border-radius: 10px; background: rgba(255,255,255,.18); margin-top: 12px; overflow: hidden; }
+  .card .bar i { display: block; height: 100%; width: 0; border-radius: 10px; }
+  .card .note { margin-top: 26px; font: 500 20px 'JetBrains Mono'; letter-spacing: .14em; color: rgba(255,255,255,.55); text-transform: uppercase; }
+  #report { position: absolute; left: 250px; top: 300px; width: 580px; height: 780px; border-radius: 28px; background: #f7f4ef; color: #111; padding: 40px; opacity: 0;
+    box-shadow: 0 50px 120px rgba(0,0,0,.55); }
+  #report img { height: 64px; }
+  #report .hr { height: 5px; background: var(--red); margin: 22px 0 26px; border-radius: 3px; }
+  #report h4 { font: 700 46px Inter; letter-spacing: -.03em; }
+  #report p { font: 500 22px Inter; color: #777; margin-top: 6px; }
+  #report .r { display: flex; justify-content: space-between; font: 600 27px Inter; padding: 15px 0; border-bottom: 1.5px solid #e6e1d9; }
+  #report .bars { display: flex; gap: 12px; align-items: flex-end; height: 120px; margin-top: 24px; }
+  #report .bars i { flex: 1; border-radius: 10px 10px 4px 4px; }
+  #share { left: 50%; top: 190px; transform: translateX(-50%); opacity: 0; }
+
+  /* end card */
+  #end { position: absolute; inset: 0; opacity: 0; }
+  #end .mark { position: absolute; left: 0; right: 0; top: 520px; text-align: center; }
+  #end .mark svg { width: 230px; height: 253px; overflow: visible; filter: drop-shadow(0 26px 50px rgba(0,0,0,.55)); }
+  #end .word { position: absolute; left: 0; right: 0; top: 820px; text-align: center; font: 800 128px Montserrat; letter-spacing: -.04em; }
+  #end .tag { position: absolute; left: 80px; right: 80px; top: 1010px; text-align: center; font-size: 76px; }
+  #cta { left: 50%; top: 1290px; transform: translateX(-50%); padding: 30px 64px; border-radius: 80px; font: 700 42px Inter; opacity: 0;
+    background: rgba(224,38,47,.78); border-color: rgba(255,255,255,.45); }
+  #by { position: absolute; left: 0; right: 0; top: 1440px; text-align: center; font: 500 26px 'JetBrains Mono'; letter-spacing: .2em; color: rgba(255,255,255,.75); opacity: 0; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="cam"><img id="bg" src="frames/00000.jpg"><div id="boxes" class="layer"></div><div id="scan"></div></div>
+  <div id="shadeTop"></div><div id="shade"></div>
+
+  <div id="opener"><div class="k">MALUS LENS</div><div class="line"></div><div class="t">A season in the cold store</div></div>
+
+  <div class="say" id="say1"><span class="w">Every</span> <span class="w">apple</span><br><span class="w soft">arrives</span> <span class="w soft">with</span> <span class="w soft">a</span> <span class="w warm">story.</span></div>
+  <div class="say" id="say2"><span class="w">Picked</span> <span class="w">at</span> <span class="w warm">dawn.</span></div>
+  <div class="say" id="say3"><span class="w">Driven</span> <span class="w">through</span><br><span class="w">the</span> <span class="w soft">night.</span></div>
+  <div class="say" id="say4"><span class="w">Stacked</span> <span class="w">by</span><br><span class="w">the</span> <span class="w warm">thousand.</span></div>
+  <div class="say" id="say5"><span class="w soft">In</span> <span class="w soft">the</span> <span class="w">cold.</span></div>
+  <div class="say" id="say6"><span class="w soft">For</span> <span class="w soft">years,</span> <span class="w soft">every</span> <span class="w soft">grade</span><br><span class="w soft">came</span> <span class="w soft">down</span> <span class="w soft">to</span></div>
+  <div class="say" id="say7"><span class="w warm">tired</span> <span class="w warm">hands,</span><br><span class="w">and</span> <span class="w">a</span> <span class="w">long</span> <span class="w">shift.</span></div>
+  <div class="chip glass" id="chip1" style="left:80px;top:250px"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M3 18h18M6 18a6 6 0 0 1 12 0M12 5v3M4.2 10.2l2 1.4M19.8 10.2l-2 1.4"/></svg>DAWN · THE ORCHARD</div>
+  <div class="chip glass" id="chip2" style="left:80px;top:250px"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M2 16V7h11v9M13 10h4l3 3v3h-7M6 19a2 2 0 1 0 0-.1M17 19a2 2 0 1 0 0-.1"/></svg>NIGHT · ON THE ROAD</div>
+  <div class="chip glass" id="chip3" style="left:80px;top:250px"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 2v20M4 7l16 10M20 7L4 17M9 3l3 3 3-3M9 21l3-3 3 3"/></svg>THE COLD STORE</div>
+  <div class="chip glass" id="chip4" style="left:80px;top:250px"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M7 11V7a2 2 0 0 1 4 0v4M11 10V5a2 2 0 0 1 4 0v6M15 10V8a2 2 0 0 1 4 0v6a7 7 0 0 1-7 7h-1a7 7 0 0 1-6-3.5L3 14a2 2 0 0 1 3.4-2L7 13"/></svg>GRADED BY HAND</div>
+
+  <div id="blurbg"></div>
+  <div id="logo">
+    <svg viewBox="0 0 200 220"><use href="#apple"/></svg>
+    <div class="word"><span class="m">Malus</span> <span class="l" style="color:var(--red)">Lens</span></div>
+    <div class="sweep"></div>
+  </div>
+  <div class="say center" id="say8" style="top:1260px"><span class="w soft">changes</span> <span class="w">that.</span></div>
+
+  <div id="vf" class="layer" style="opacity:0">
+    <div class="br" style="left:70px;top:420px;border-right:0;border-bottom:0;border-top-left-radius:36px"></div>
+    <div class="br" style="right:70px;top:420px;border-left:0;border-bottom:0;border-top-right-radius:36px"></div>
+    <div class="br" style="left:70px;top:1380px;border-right:0;border-top:0;border-bottom-left-radius:36px"></div>
+    <div class="br" style="right:70px;top:1380px;border-left:0;border-top:0;border-bottom-right-radius:36px"></div>
+    <div class="chip glass pill mono" style="font-size:26px">CRATE 01 · LOT 2410</div>
+    <div id="shutter"><i></i></div>
+  </div>
+  <div class="say" id="say9" style="top:1580px;font-size:80px"><span class="w">One</span> <span class="w">photo</span> <span class="w soft">per</span> <span class="w soft">crate.</span></div>
+
+  <div class="glass" id="counter"><div class="l mono">Apples detected</div><div class="n" id="cnt">0</div></div>
+  <div class="glass" id="grades"><div><div class="l mono" style="color:var(--a)">Grade A</div><div class="n" id="ga">0</div></div><div><div class="l mono" style="color:var(--b)">Grade B</div><div class="n" id="gb">0</div></div></div>
+  <div class="say" id="say10" style="top:450px"><span class="w">Every</span> <span class="w">apple,</span> <span class="w soft">counted.</span></div>
+  <div class="say" id="say11" style="top:450px"><span class="w" style="color:var(--a)">Grade</span> <span class="w" style="color:var(--a)">A.</span> <span class="w" style="color:var(--b)">Grade</span> <span class="w" style="color:var(--b)">B.</span></div>
+  <div class="say" id="say12" style="top:450px"><span class="w">In</span> <span class="w red">seconds.</span></div>
+
+  <div class="glass card" id="counts" style="top:300px">
+    <h5>Lot 2410 · Results</h5>
+    <div class="big"><span id="ctot">0</span> <span style="font-size:44px;font-weight:600;letter-spacing:-.01em;color:rgba(255,255,255,.75)">apples graded</span></div>
+    <div class="row"><span style="color:var(--a)">Grade A</span><b><span id="ca">0</span> · <span id="cap">0.0</span>%</b></div><div class="bar"><i id="barA" style="background:var(--a)"></i></div>
+    <div class="row"><span style="color:var(--b)">Grade B</span><b><span id="cb">0</span> · <span id="cbp">0.0</span>%</b></div><div class="bar"><i id="barB" style="background:var(--b)"></i></div>
+    <div class="note">Sample results shown</div>
+  </div>
+  <div class="glass card" id="weights" style="top:300px">
+    <h5>Estimated weights</h5>
+    <div class="big"><span id="wtot">0.0</span> <span style="font-size:44px;font-weight:600;letter-spacing:-.01em;color:rgba(255,255,255,.75)">kg sampled</span></div>
+    <div class="row"><span style="color:var(--a)">Grade A</span><b><span id="wa">0.0</span> kg</b></div><div class="bar"><i id="bwA" style="background:var(--a)"></i></div>
+    <div class="row"><span style="color:var(--b)">Grade B</span><b><span id="wb">0.0</span> kg</b></div><div class="bar"><i id="bwB" style="background:var(--b)"></i></div>
+    <div class="note">2 crates × 20 kg · sample results</div>
+  </div>
+  <div class="say" id="say13"><span class="w">Clear</span> <span class="w">counts.</span></div>
+  <div class="say" id="say14"><span class="w">Real</span> <span class="w">weights.</span></div>
+  <div id="report">
+    <img src="../reel/img/app-logo.png"><div class="hr"></div>
+    <h4>Lot 2410</h4><p>Quality check report · 2 crates</p>
+    <div class="r" style="margin-top:22px"><span>Total apples</span><b>128</b></div>
+    <div class="r"><span style="color:#15803d">Grade A</span><b>111 · 86.7%</b></div>
+    <div class="r"><span style="color:#b45309">Grade B</span><b>17 · 13.3%</b></div>
+    <div class="r"><span>Est. A weight</span><b>34.8 kg</b></div>
+    <div class="bars"><i style="height:92%;background:#34d27b"></i><i style="height:16%;background:#f5a524"></i><i style="height:80%;background:#34d27b"></i><i style="height:24%;background:#f5a524"></i><i style="height:100%;background:#e0262f"></i></div>
+  </div>
+  <div class="chip glass" id="share"><svg viewBox="0 0 24 24" fill="#fff"><path d="M18 16.1c-.8 0-1.4.3-2 .8l-7.1-4.2c.1-.2.1-.5.1-.7s0-.5-.1-.7L16 7.2c.5.5 1.2.8 2 .8 1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3c0 .2 0 .5.1.7L8 9.8C7.5 9.3 6.8 9 6 9c-1.7 0-3 1.3-3 3s1.3 3 3 3c.8 0 1.5-.3 2-.8l7.1 4.2c-.1.2-.1.4-.1.6 0 1.6 1.3 2.9 2.9 2.9s2.9-1.3 2.9-2.9-1.2-2.9-2.8-2.9z"/></svg>PDF report · Shared</div>
+  <div class="say" id="say15"><span class="w">A</span> <span class="w">report</span> <span class="w">you</span> <span class="w">can</span> <span class="w red">share.</span></div>
+  <div class="say" id="say16"><span class="w soft">Before</span> <span class="w soft">the</span> <span class="w soft">next</span><br><span class="w">truck</span> <span class="w">arrives.</span></div>
+  <div class="say" id="say17"><span class="w soft">Built</span> <span class="w soft">for</span> <span class="w soft">the</span> <span class="w">people</span><br><span class="w soft">who</span> <span class="w soft">keep</span> <span class="w soft">it</span> <span class="w warm">running.</span></div>
+
+  <div id="end">
+    <div class="mark"><svg viewBox="0 0 200 220"><use href="#apple"/></svg></div>
+    <div class="word"><span>Malus</span> <span style="color:var(--red)">Lens</span></div>
+    <div class="say center tag" id="say18" style="font-size:72px;top:1010px;left:60px;right:60px"><span class="w">Apple</span> <span class="w">quality,</span><br><span class="w soft">assessed</span> <span class="w soft">in</span> <span class="w red">seconds.</span></div>
+    <div class="glass" id="cta">Book a demo</div>
+    <div id="by">BY CNEL INDIA · CNELINDIA.COM</div>
+  </div>
+
+  <div id="flash"></div>
+  <div class="fade" id="black"></div>
+</div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <clipPath id="appleclip"><path d="M100 62 C86 48 58 44 40 58 C18 76 18 118 30 146 C42 176 64 200 84 200 C92 200 95 196 100 196 C105 196 108 200 116 200 C136 200 158 176 170 146 C182 118 182 76 160 58 C142 44 114 48 100 62 Z"/></clipPath>
+    <linearGradient id="appleg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f04048"/><stop offset=".6" stop-color="#d3202a"/><stop offset="1" stop-color="#9c0f17"/></linearGradient>
+    <g id="apple">
+      <path d="M100 64 C100 50 98 40 93 30" fill="none" stroke="#5a3a1a" stroke-width="7" stroke-linecap="round"/>
+      <path d="M104 52 C108 30 126 16 150 14 C146 38 128 52 104 52 Z" fill="#2fae47"/>
+      <path d="M100 62 C86 48 58 44 40 58 C18 76 18 118 30 146 C42 176 64 200 84 200 C92 200 95 196 100 196 C105 196 108 200 116 200 C136 200 158 176 170 146 C182 118 182 76 160 58 C142 44 114 48 100 62 Z" fill="url(#appleg)"/>
+      <path d="M52 78 C46 92 44 108 46 122" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="7" stroke-linecap="round"/>
+      <rect x="0" y="121" width="200" height="13" fill="#fff" clip-path="url(#appleclip)"/>
+      <circle cx="100" cy="127" r="41" fill="#fff"/><circle cx="100" cy="127" r="32" fill="#0b0b0c"/><circle cx="113" cy="114" r="8.5" fill="#fff"/>
+    </g>
+  </defs>
+</svg>
+
+<script src="../node_modules/gsap/dist/gsap.min.js"></script>
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+$$('svg use[href="#apple"]').forEach(u => { u.outerHTML = $('#apple').innerHTML; });
+const tl = gsap.timeline({ paused: true });
+const TOTAL = 43.4;
+gsap.defaults({ ease: 'power3.out' });
+const set = (s, v, t) => tl.set(s, v, t);
+
+// words blur into focus on their spoken times; whole statement leaves at `out`
+function say(sel, times, out, { y = 34, blur = 14 } = {}) {
+  const ws = $$(`${sel} .w`);
+  ws.forEach((w, i) => tl.fromTo(w, { opacity: 0, y, filter: `blur(${blur}px)` }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: .55, ease: 'expo.out' }, times[Math.min(i, times.length - 1)] + (i >= times.length ? (i - times.length + 1) * .08 : 0)));
+  if (out) tl.to(ws, { opacity: 0, y: -24, filter: 'blur(10px)', duration: .35, ease: 'power2.in', stagger: .02 }, out);
+}
+function glassIn(sel, t, out, from = { y: 60, scale: .96 }) {
+  tl.fromTo(sel, { opacity: 0, ...from, filter: 'blur(10px)' }, { opacity: 1, y: 0, x: 0, scale: 1, filter: 'blur(0px)', duration: .7, ease: 'expo.out' }, t);
+  if (out) tl.to(sel, { opacity: 0, y: -30, filter: 'blur(8px)', duration: .35, ease: 'power2.in' }, out);
+}
+function count(el, to, t, d, dec = 0) { const o = { v: 0 }; tl.to(o, { v: to, duration: d, ease: 'power2.out', onUpdate: () => { $(el).textContent = o.v.toFixed(dec); } }, t); }
+
+// ---- opener 0–2.5 --------------------------------------------------------------
+tl.fromTo('#black', { opacity: 1 }, { opacity: 0, duration: 1.4, ease: 'power1.inOut' }, 0);
+tl.fromTo('#opener .k', { opacity: 0, letterSpacing: '1em' }, { opacity: 1, letterSpacing: '.5em', duration: 1.4 }, .3);
+tl.to('#opener .line', { width: 520, duration: 1.2, ease: 'expo.inOut' }, .5);
+tl.fromTo('#opener .t', { opacity: 0, y: 16, filter: 'blur(8px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: .9 }, .9);
+tl.to('#opener', { opacity: 0, filter: 'blur(10px)', duration: .45, ease: 'power2.in' }, 2.05);
+tl.to('#shade', { opacity: 1, duration: .6 }, 2.2);
+
+// ---- the journey 2.5–16.3 --------------------------------------------------------
+say('#say1', [2.52, 2.78, 3.7, 4.08, 4.38, 4.46], 5.05);
+say('#say2', [5.36, 5.66, 5.8], 6.45);
+glassIn('#chip1', 5.3, 6.45, { x: -40 });
+say('#say3', [6.66, 6.9, 7.3, 7.46], 8.15);
+glassIn('#chip2', 6.62, 8.15, { x: -40 });
+say('#say4', [8.38, 8.52, 8.9, 9.06], 9.95);
+glassIn('#chip3', 8.32, 11.1, { x: -40 });
+say('#say5', [9.95, 10.0, 10.18], 11.05);
+tl.to('#shadeTop', { opacity: 1, duration: .5 }, 5.2);
+say('#say6', [11.28, 11.52, 12.62, 12.72, 13.04, 13.38, 13.7], 13.82);
+glassIn('#chip4', 11.25, 15.9, { x: -40 });
+say('#say7', [13.9, 14.14, 14.68, 15.08, 15.22, 15.48], 16.0, { blur: 18 });
+tl.to('#black', { opacity: 1, duration: .55, ease: 'power2.in' }, 15.8);
+tl.to(['#shade', '#shadeTop'], { opacity: 0, duration: .3 }, 16.2);
+
+// ---- the drop 17.0: Malus Lens ---------------------------------------------------
+set('#black', { opacity: 0 }, 17.0);
+set('#blurbg', { opacity: 1 }, 17.0);
+set('#flash', { opacity: .9 }, 17.0); tl.to('#flash', { opacity: 0, duration: .5, ease: 'power2.out' }, 17.0);
+tl.fromTo('#logo', { opacity: 0, scale: 1.35, filter: 'blur(24px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: .9, ease: 'expo.out' }, 17.0);
+tl.fromTo('#logo .m', { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: .7, ease: 'expo.out' }, 17.12);
+tl.fromTo('#logo .l', { x: 60, opacity: 0 }, { x: 0, opacity: 1, duration: .7, ease: 'expo.out' }, 17.22);
+tl.to('#logo .sweep', { left: 1200, duration: .9, ease: 'power2.inOut' }, 17.45);
+say('#say8', [17.52, 18.26], 18.75);
+tl.to('#logo', { scale: .92, opacity: 0, filter: 'blur(14px)', duration: .4, ease: 'power2.in' }, 18.65);
+tl.to('#blurbg', { opacity: 0, duration: .35 }, 18.75);
+
+// ---- one photo per crate 19.0–21.45 -----------------------------------------------
+tl.to('#shade', { opacity: .8, duration: .4 }, 19.0);
+tl.fromTo('#vf', { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: .6, ease: 'expo.out' }, 19.0);
+say('#say9', [19.02, 19.36, 19.7, 20.12], 21.3);
+tl.to('#shutter i', { scale: .82, duration: .1, yoyo: true, repeat: 1 }, 20.1);
+set('#flash', { opacity: .85 }, 20.14); tl.to('#flash', { opacity: 0, duration: .4 }, 20.14);
+tl.to('#vf', { opacity: 0, scale: 1.06, duration: .35, ease: 'power2.in' }, 21.1);
+
+// ---- AI: count and grade every apple 21.45–26.9 --------------------------------------
+// apple boxes measured on the frozen frame (px in the 1080x1920 frame) and their grade
+const apples = [[440,820,660,1040,'A'],[670,770,900,940,'A'],[670,900,860,1090,'A'],[800,1020,976,1160,'A'],[24,950,250,1150,'A'],
+  [290,1030,484,1220,'B'],[4,1144,160,1310,'B'],[164,1140,380,1340,'A'],[426,1120,644,1336,'A'],[644,1150,940,1470,'B'],
+  [104,1340,340,1580,'A'],[330,1336,700,1620,'A'],[270,1490,530,1730,'A'],[656,1530,940,1800,'A'],[870,1460,1080,1720,'A'],
+  [980,1220,1080,1440,'B'],[860,1160,1024,1290,'A'],[100,1580,270,1760,'A'],[0,1280,90,1480,'A']];
+const nB = apples.filter(a => a[4] === 'B').length, nA = apples.length - nB;
+tl.fromTo('#cam', { scale: 1 }, { scale: 1.07, duration: 5.4, ease: 'sine.inOut' }, 21.45);
+tl.to('#cam', { scale: 1, duration: 0.01 }, 26.9);
+set('#scan', { opacity: 1, y: 700 }, 21.5); tl.to('#scan', { y: 1880, duration: .8, ease: 'power1.inOut' }, 21.5); set('#scan', { opacity: 0 }, 22.32);
+apples.forEach(([x1, y1, x2, y2, g], i) => {
+  const b = document.createElement('div'); b.className = 'box';
+  Object.assign(b.style, { left: x1 + 'px', top: y1 + 'px', width: (x2 - x1) + 'px', height: (y2 - y1) + 'px' });
+  b.innerHTML = '<i class="c c1"></i><i class="c c2"></i><i class="c c3"></i><i class="c c4"></i>' + `<div class="tag" style="background:${g === 'A' ? 'rgba(52,210,123,.92)' : 'rgba(245,165,36,.95)'}">${g}</div>`;
+  $('#boxes').appendChild(b);
+  const t = 21.62 + i * .055 + (y1 - 800) / 1000 * .3;
+  tl.fromTo(b, { opacity: 0, scale: 1.35 }, { opacity: 1, scale: 1, duration: .35, ease: 'back.out(2)' }, t);
+  const tg = g === 'A' ? 23.5 + i * .03 : 24.62 + i * .02, col = g === 'A' ? '#34d27b' : '#f5a524';
+  tl.to(b.querySelectorAll('.c'), { borderColor: col, duration: .25 }, tg);
+  tl.fromTo(b.querySelector('.tag'), { opacity: 0, scale: .3 }, { opacity: 1, scale: 1, duration: .4, ease: 'back.out(2.5)' }, tg);
+  tl.to(b, { opacity: 0, duration: .25 }, 26.7);
+});
+glassIn('#counter', 21.6, 26.6, { y: -40 });
+count('#cnt', apples.length, 21.65, 1.2);
+glassIn('#grades', 23.4, 26.6, { y: -40 });
+count('#ga', nA, 23.5, .9); count('#gb', nB, 24.62, .6);
+say('#say10', [21.5, 21.68, 22.08], 23.3);
+say('#say11', [23.5, 23.58, 24.62, 24.94], 25.9);
+say('#say12', [25.38, 26.16], 26.75);
+
+// ---- results 26.9–33.6 ------------------------------------------------------------------
+glassIn('#counts', 26.95, 28.85);
+count('#ctot', 128, 27.1, 1.1); count('#ca', 111, 27.2, 1.1); count('#cap', 86.7, 27.2, 1.1, 1); count('#cb', 17, 27.3, 1.1); count('#cbp', 13.3, 27.3, 1.1, 1);
+tl.fromTo('#barA', { width: '0%' }, { width: '86.7%', duration: 1.1, ease: 'power3.out' }, 27.2);
+tl.fromTo('#barB', { width: '0%' }, { width: '13.3%', duration: 1.1, ease: 'power3.out' }, 27.3);
+say('#say13', [27.62, 27.66], 28.85);
+glassIn('#weights', 28.98, 30.15);
+count('#wtot', 40, 29.05, .9, 1); count('#wa', 34.8, 29.1, .9, 1); count('#wb', 5.2, 29.15, .9, 1);
+tl.fromTo('#bwA', { width: '0%' }, { width: '87%', duration: .9 }, 29.1);
+tl.fromTo('#bwB', { width: '0%' }, { width: '13%', duration: .9 }, 29.15);
+say('#say14', [28.96, 28.98], 30.1);
+tl.fromTo('#report', { opacity: 0, y: 260, rotateX: 35, rotate: -6, transformPerspective: 1600 }, { opacity: 1, y: 0, rotateX: 0, rotate: -2, duration: .9, ease: 'expo.out' }, 30.25);
+glassIn('#share', 30.9, 31.95);
+tl.to('#report', { y: -900, rotate: 8, opacity: 0, duration: .5, ease: 'power2.in' }, 31.85);
+say('#say15', [30.22, 30.34, 30.62, 30.88, 31.06], 31.9);
+say('#say16', [31.32, 31.68, 31.84, 32.04, 32.3], 33.45);
+say('#say17', [33.62, 33.72, 33.94, 34.04, 34.32, 34.5, 34.7, 34.86], 36.4);
+
+// ---- end card 36.6–43.4 ----------------------------------------------------------------
+tl.to('#shade', { opacity: 1, duration: .4 }, 36.4);
+set('#end', { opacity: 1 }, 36.6);
+set('#blurbg', { opacity: 1 }, 36.6);
+tl.fromTo('#blurbg', { opacity: 0 }, { opacity: 1, duration: .8 }, 36.6);
+tl.fromTo('#end .mark', { opacity: 0, scale: .6, y: 40, filter: 'blur(16px)' }, { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)', duration: 1.0, ease: 'expo.out' }, 36.64);
+tl.fromTo('#end .word', { opacity: 0, y: 40, filter: 'blur(14px)', letterSpacing: '.04em' }, { opacity: 1, y: 0, filter: 'blur(0px)', letterSpacing: '-.04em', duration: 1.1, ease: 'expo.out' }, 36.8);
+say('#say18', [38.24, 38.6, 39.24, 39.7, 40.44]);
+tl.fromTo('#cta', { opacity: 0, y: 40, scale: .9 }, { opacity: 1, y: 0, scale: 1, duration: .7, ease: 'back.out(1.6)' }, 41.0);
+tl.to('#by', { opacity: 1, duration: .6 }, 41.3);
+tl.to('#black', { opacity: 1, duration: 1.0, ease: 'power1.in' }, 42.4);
+tl.set({}, {}, TOTAL);
+
+// ---- frame driver ----------------------------------------------------------------------------
+const img = $('#bg');
+window.__duration = TOTAL;
+window.__seek = async (t, frame) => {
+  const src = `frames/${String(frame).padStart(5, '0')}.jpg`;
+  if (!img.src.endsWith(src)) { img.src = src; await img.decode().catch(() => {}); }
+  tl.seek(t, false);
+};
+window.__ready = Promise.all([document.fonts.ready, ...[...document.images].map(i => i.decode().catch(() => {}))]);
+</script>
+</body>
+</html>
