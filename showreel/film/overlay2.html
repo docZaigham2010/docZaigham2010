@@ -125,6 +125,7 @@
   <div class="blk shadow" id="t6" style="top:1330px"><span class="ln serif" style="font-size:170px"><span>tired hands,</span></span></div>
   <div class="blk shadow" id="t7" style="top:1510px"><span class="ln sans" style="font-size:72px"><span>and a long shift.</span></span></div>
 
+  <div class="blk shadow" id="t4b" style="top:1330px"><span class="ln serif" style="font-size:170px"><span>in the cold.</span></span></div>
   <!-- cold -->
   <div id="coldwrap" class="full"><div id="cold">cold.</div><div id="coldlbl" class="abs mono soft">In the cold</div></div>
 
@@ -264,16 +265,11 @@ chapter('#ch1', 4.85, 6.1); tl.to('#scrimT', { opacity: 1, duration: .5 }, 4.75)
 lines('#t2', 4.9, 6.05, { dur: 1.2 });
 chapter('#ch2', 6.4, 7.95);
 lines('#t3', 6.48, 7.9, { times: [6.48, 7.0] });
-chapter('#ch3', 8.15, 9.8);
-lines('#t4', 8.26, 9.75, { times: [8.26, 8.75] });
-// "cold." — the cold store, seen through the letters, then dive through them
-set('#coldwrap', { opacity: 1 }, 9.95);
-tl.fromTo('#cold', { scale: 1.18, opacity: 0 }, { scale: 1, opacity: 1, duration: .7, ease: 'expo.out' }, 9.95);
-tl.fromTo('#coldlbl', { opacity: 0, y: 14 }, { opacity: .8, y: 0, duration: .6 }, 10.1);
-tl.to('#coldlbl', { opacity: 0, duration: .2 }, 10.55);
-tl.to('#cold', { scale: 14, duration: .45, ease: 'expo.in' }, 10.55);
-tl.to('#coldwrap', { backgroundColor: 'rgba(5,5,5,0)', duration: .3, ease: 'power2.in' }, 10.7);
-set('#coldwrap', { opacity: 0 }, 11.0);
+chapter('#ch3', 8.15, 10.85);
+lines('#t4', 8.26, 9.45, { times: [8.26, 8.75] });
+// "in the cold." — the cold store, plainly
+lines('#t4b', 10.08, 10.55, { dur: .45 });
+set('#t4b', { opacity: 0 }, 11.02);
 chapter('#ch4', 11.05, 15.9);
 lines('#t5', 11.06, 13.75, { times: [11.06, 12.64] });
 lines('#t6', 13.9, 15.95, { dur: 1.3 });
@@ -409,7 +405,6 @@ window.__duration = TOTAL;
 window.__seek = async (t, frame) => {
   const src = `frames/${String(frame).padStart(5, '0')}.jpg`;
   if (!img.src.endsWith(src)) { img.src = src; await img.decode().catch(() => {}); }
-  if (t >= 9.9 && t < 11.05) cold.style.backgroundImage = `url(${src})`;
   tl.seek(t, false);
 };
 window.__ready = Promise.all([document.fonts.ready, ...[...document.images].map(i => i.decode().catch(() => {}))]);
