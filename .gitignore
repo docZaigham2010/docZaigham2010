@@ -5,3 +5,5 @@ showreel/film/frames/
 showreel/film/out/
 showreel/film/grade/*.png
 deliverables/MalusLens_BrandFilm.mp4
+showreel/film/*.png
+__pycache__/
