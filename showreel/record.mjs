@@ -7,7 +7,8 @@
 //
 // Optional: APP_NAME, MAX_SCENES (default 7), ROUTES (JSON [{"route":"#/x","label":"X"}]),
 // HEADED=1 to watch it run.
-import { chromium } from '/opt/node22/lib/node_modules/playwright/index.mjs';
+// Uses the project's Playwright when installed (npm install), else the cloud container's copy.
+const { chromium } = await import('playwright').catch(() => import('/opt/node22/lib/node_modules/playwright/index.mjs'));
 import fs from 'node:fs';
 import path from 'node:path';
 

@@ -10,6 +10,20 @@ APP_EMAIL='…' APP_PASSWORD='…' node record.mjs   # films the clips into out/
 node build.mjs                                    # cuts out/showreel.mp4
 ```
 
+## Run it on your own computer
+
+You need Node 18+ and ffmpeg (`brew install ffmpeg` on a Mac, `winget install ffmpeg` on Windows).
+
+```bash
+cd showreel
+npm install
+npm run setup                     # downloads the browser it films with
+APP_URL='https://ahmad.readyforyourreview.com/#/authentication/sign-in' \
+APP_EMAIL='…' APP_PASSWORD='…' npm run reel
+```
+
+The finished video lands in `showreel/out/showreel.mp4`. Add `HEADED=1` to watch the browser while it films.
+
 Options:
 - `MAX_SCENES` sets how many screens to film (default 7).
 - `ROUTES='[{"route":"#/dashboard","label":"Dashboard"}]'` picks the chapters yourself.
