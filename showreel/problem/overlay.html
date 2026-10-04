@@ -1,0 +1,447 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Malus Lens — The Intake Problem</title>
+<link rel="stylesheet" href="../film/fonts/fonts.css">
+<style>
+
+  @font-face{font-family:'Montserrat';font-weight:800;src:url(../reel/fonts/Montserrat-800.woff2) format('woff2');}
+  :root { --white: #f6f3ee; --red: #e3262f; --a: #4ade80; --b: #fbbf24; --mono: 'Geist Mono', monospace; --sans: 'Inter Tight', sans-serif; --serif: 'Instrument Serif', serif; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; color: var(--white); font-family: var(--sans); }
+  #cam { position: absolute; inset: 0; transform-origin: 50% 58%; }
+  #bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .abs { position: absolute; }
+  .full { position: absolute; inset: 0; }
+  #scrimB { left: 0; right: 0; bottom: 0; height: 1000px; opacity: 0; background: linear-gradient(0deg, rgba(0,0,0,.62), rgba(0,0,0,.32) 45%, transparent); }
+  #scrimT { left: 0; right: 0; top: 0; height: 760px; opacity: 0; background: linear-gradient(180deg, rgba(0,0,0,.6), rgba(0,0,0,.25) 55%, transparent); }
+
+  /* type system */
+  .blk { position: absolute; left: 72px; right: 72px; }
+  .ln { display: block; overflow: hidden; padding: .04em 0 .14em; margin-bottom: -.12em; }
+  .ln > span { display: inline-block; will-change: transform; }
+  .sans { font-family: var(--sans); font-weight: 650; font-weight: 600; letter-spacing: -.045em; line-height: .98; }
+  .serif { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -.02em; line-height: .95; }
+  .mono { font-family: var(--mono); font-weight: 500; letter-spacing: .28em; text-transform: uppercase; }
+  .soft { color: rgba(246,243,238,.62); }
+  .shadow { text-shadow: 0 2px 40px rgba(0,0,0,.35); }
+
+  /* chapter label */
+  .chap { position: absolute; left: 72px; top: 300px; display: flex; align-items: center; gap: 20px; font-size: 24px; opacity: 0; }
+  .chap i { width: 12px; height: 12px; border-radius: 50%; background: var(--red); box-shadow: 0 0 18px rgba(227,38,47,.8); }
+  .chap b { font-weight: 500; }
+  .chap u { display: block; height: 1.5px; width: 140px; background: rgba(246,243,238,.55); transform-origin: 0 50%; }
+
+  /* opener */
+  #opener { left: 0; right: 0; top: 820px; text-align: center; }
+  #opener .k { font-size: 24px; letter-spacing: .6em; padding-left: .6em; }
+  #opener .t { font-size: 84px; margin-top: 26px; }
+  #opener .rule { width: 1px; height: 90px; margin: 30px auto 0; background: linear-gradient(180deg, rgba(246,243,238,.8), transparent); transform-origin: 50% 0; }
+
+  /* cold */
+  #coldwrap { opacity: 0; background: #050505; }
+  #cold { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-style: italic; font-size: 560px; letter-spacing: -.04em;
+    color: transparent; -webkit-background-clip: text; background-clip: text; background-size: 1080px 1920px; background-position: 0 0; transform-origin: 47% 52%; }
+  #coldlbl { left: 0; right: 0; top: 1300px; text-align: center; font-size: 24px; opacity: 0; }
+
+  /* stage */
+  #stagebg { opacity: 0; background: radial-gradient(900px 700px at 50% 42%, rgba(160,18,26,.32), transparent 70%), #050505; }
+  #beam { left: 50%; top: 960px; height: 2px; width: 0; transform: translateX(-50%); background: linear-gradient(90deg, transparent, #fff, transparent); box-shadow: 0 0 24px rgba(255,255,255,.8); opacity: 0; }
+  #dot { left: 540px; top: 960px; width: 20px; height: 20px; margin: -10px; border-radius: 50%; background: var(--red); box-shadow: 0 0 40px 10px rgba(227,38,47,.6); opacity: 0; }
+  #mark { left: 340px; top: 470px; width: 400px; height: 440px; overflow: visible; opacity: 0; }
+  #wordmark { left: 0; right: 0; top: 960px; text-align: center; font: 800 150px Montserrat; letter-spacing: -.045em; }
+  #wordmark .ln > span { padding: 0 .02em; }
+  #changes { left: 0; right: 0; top: 1170px; text-align: center; font-size: 110px; }
+  #iris { opacity: 0; background: #000; --r: 0px; -webkit-mask-image: radial-gradient(circle at 50% 46%, transparent var(--r), #000 calc(var(--r) + 2px)); mask-image: radial-gradient(circle at 50% 46%, transparent var(--r), #000 calc(var(--r) + 2px)); }
+
+  /* viewfinder */
+  #vf { opacity: 0; }
+  #vf .c { position: absolute; width: 56px; height: 56px; border: 0 solid rgba(255,255,255,.95); }
+  #focus { left: 400px; top: 940px; width: 300px; height: 300px; border: 2.5px solid rgba(255,255,255,.95); border-radius: 22px; opacity: 0; box-shadow: 0 0 30px rgba(255,255,255,.35); }
+  #vflabel { left: 0; right: 0; top: 230px; text-align: center; font-size: 22px; }
+  #rec { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--red); margin-right: 14px; vertical-align: 2px; }
+  #flash { background: #fff; opacity: 0; }
+
+  /* detection */
+  #det { overflow: visible; }
+  #det rect.box { fill: none; stroke: rgba(255,255,255,.92); stroke-width: 3; filter: drop-shadow(0 0 8px rgba(255,255,255,.55)); }
+  .pill { position: absolute; padding: 6px 12px 5px; border-radius: 10px; font: 500 20px var(--mono); letter-spacing: .06em; color: #0b0b0b; opacity: 0; white-space: nowrap; }
+  #scan { left: 0; right: 0; height: 420px; top: 0; opacity: 0; background: linear-gradient(180deg, transparent, rgba(255,255,255,.18) 85%, rgba(255,255,255,.75) 99%, transparent); mix-blend-mode: screen; }
+  .stat { position: absolute; top: 290px; }
+  .stat .l { font-size: 21px; }
+  .stat .n { font-family: var(--sans); font-weight: 300; font-size: 170px; letter-spacing: -.06em; line-height: .9; margin-top: 8px; font-variant-numeric: tabular-nums; }
+
+  /* results */
+  #res, #wts { left: 72px; right: 72px; top: 290px; opacity: 0; }
+  .big { font-family: var(--sans); font-weight: 200; font-size: 300px; letter-spacing: -.07em; line-height: .85; font-variant-numeric: tabular-nums; }
+  .big em { font-family: var(--serif); font-style: italic; font-size: 110px; letter-spacing: -.02em; margin-left: 18px; }
+  .meter { margin-top: 34px; }
+  .meter .top { display: flex; justify-content: space-between; font-size: 21px; }
+  .meter .rail { height: 3px; background: rgba(246,243,238,.25); margin-top: 14px; border-radius: 2px; }
+  .meter .rail i { display: block; height: 100%; width: 0; border-radius: 2px; }
+  .foot { margin-top: 30px; font-size: 18px; color: rgba(246,243,238,.5); }
+
+  /* report */
+  #paper { left: 230px; top: 300px; width: 620px; height: 860px; border-radius: 18px; background: #f8f6f1; color: #111; padding: 44px; opacity: 0;
+    box-shadow: 0 80px 140px rgba(0,0,0,.6), 0 10px 30px rgba(0,0,0,.3); transform-origin: 50% 100%; }
+  #paper img { height: 64px; }
+  #paper .hr { height: 4px; background: var(--red); margin: 22px 0 28px; border-radius: 2px; }
+  #paper h4 { font: 600 52px var(--sans); letter-spacing: -.04em; }
+  #paper p { font: 500 22px var(--sans); color: #777; margin-top: 6px; }
+  #paper .r { display: flex; justify-content: space-between; font: 500 28px var(--sans); padding: 16px 0; border-bottom: 1.5px solid #e8e3db; }
+  #paper .bars { display: flex; gap: 12px; align-items: flex-end; height: 150px; margin-top: 30px; }
+  #paper .bars i { flex: 1; border-radius: 8px 8px 3px 3px; }
+  #sharepill { left: 50%; top: 1200px; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; padding: 18px 30px; border-radius: 60px; background: #f8f6f1; color: #111; font: 600 28px var(--sans); opacity: 0; box-shadow: 0 20px 50px rgba(0,0,0,.4); }
+
+  /* end */
+  #endmark { left: 410px; top: 430px; width: 260px; height: 286px; overflow: visible; opacity: 0; }
+  #endword { left: 0; right: 0; top: 790px; text-align: center; font: 800 132px Montserrat; letter-spacing: -.045em; }
+  #endtag { left: 72px; right: 72px; top: 1020px; text-align: center; }
+  #cta { left: 50%; top: 1350px; transform: translateX(-50%); padding: 26px 56px; border: 2px solid rgba(246,243,238,.85); border-radius: 80px; font: 600 38px var(--sans); letter-spacing: -.01em; opacity: 0; white-space: nowrap; }
+  #black { background: #000; }
+
+  /* --- problem reel additions --- */
+  .bigN { font-family: var(--sans); font-weight: 200; letter-spacing: -.07em; line-height: .85; font-variant-numeric: tabular-nums; }
+  .bigN em { font-family: var(--serif); font-style: italic; letter-spacing: -.02em; font-weight: 400; }
+  #dim { background: #000; opacity: 0; }
+  #grid { left: 120px; top: 360px; width: 840px; height: 1000px; opacity: 0; }
+  #grid i { position: absolute; width: 64px; height: 50px; border-radius: 8px; border: 2px solid rgba(246,243,238,.55); }
+  #gridN { left: 72px; right: 72px; top: 1380px; opacity: 0; }
+  #dots { left: 0; top: 330px; width: 1080px; height: 900px; opacity: 0; }
+  #lossbox { left: 72px; right: 72px; top: 640px; text-align: left; }
+  #lossbox .rule { height: 2px; width: 0; background: var(--red); margin: 28px 0; }
+  #phone { left: 300px; top: 300px; width: 480px; height: 1040px; border-radius: 74px; background: #0c0c0d; padding: 16px; opacity: 0;
+    box-shadow: 0 0 0 3px #2b2b2f, 0 70px 140px rgba(0,0,0,.65); }
+  #phone img { width: 100%; height: 100%; object-fit: cover; border-radius: 60px; display: block; }
+  #phone .isl { position: absolute; left: 50%; top: 32px; width: 120px; height: 36px; margin-left: -60px; border-radius: 20px; background: #000; }
+  .acc { left: 72px; right: 72px; top: 300px; opacity: 0; }
+  .acc .bigN { font-size: 330px; }
+  .acc .bigN em { font-size: 150px; margin-left: 6px; }
+  #testedrule { height: 1.5px; background: rgba(246,243,238,.6); width: 0; margin-top: 26px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="cam"><img id="bg" src="frames/00000.jpg"><svg id="det" class="full" viewBox="0 0 1080 1920"></svg><div id="pills" class="full"></div><div id="scan" class="abs"></div></div>
+  <div id="scrimT" class="abs"></div><div id="scrimB" class="abs"></div>
+  <div id="dim" class="full"></div>
+
+  <!-- opener -->
+  <div id="opener" class="abs"><div class="k mono"><span>Malus Lens</span></div><div class="t serif shadow"><span class="ln"><span>The intake problem</span></span></div><div class="rule"></div></div>
+
+  <!-- chapters -->
+  <div class="chap mono" id="ch1"><i></i><b>01 — The scale</b><u></u></div>
+  <div class="chap mono" id="ch2"><i></i><b>02 — The gate</b><u></u></div>
+  <div class="chap mono" id="ch3"><i></i><b>03 — The guess</b><u></u></div>
+  <div class="chap mono" id="ch4"><i></i><b>04 — The cost</b><u></u></div>
+  <div class="chap mono" id="ch5"><i></i><b>05 — The fix</b><u></u></div>
+
+  <!-- 01 scale -->
+  <div class="blk shadow" id="tScale" style="top:1120px">
+    <span class="ln mono soft" style="font-size:22px;letter-spacing:.3em"><span>Jammu &amp; Kashmir</span></span>
+    <span class="ln bigN" style="font-size:250px;margin-top:10px"><span>20<em style="font-size:150px"> lakh</em></span></span>
+    <span class="ln sans" style="font-size:64px;margin-top:6px"><span>tonnes of apples. Every year.</span></span>
+  </div>
+  <div class="blk shadow" id="tHalf" style="top:1300px"><span class="ln sans" style="font-size:100px"><span>Nearly half the valley</span></span><span class="ln serif" style="font-size:132px"><span>lives on them.</span></span></div>
+  <!-- 02 gate -->
+  <div class="blk shadow" id="tGate" style="top:1300px"><span class="ln sans" style="font-size:96px"><span>Every apple passes</span></span><span class="ln serif" style="font-size:140px"><span>through one gate.</span></span></div>
+  <div class="blk shadow" id="tDec1" style="top:1150px"><span class="ln mono soft" style="font-size:24px"><span>One decision</span></span></div>
+  <div class="blk shadow" id="tDec2" style="top:1210px"><span class="ln serif" style="font-size:176px"><span>Good enough</span></span><span class="ln serif" style="font-size:176px"><span>to store?</span></span></div>
+  <!-- 03 guess -->
+  <div class="blk shadow" id="tHand" style="top:1300px"><span class="ln sans" style="font-size:100px"><span>That call rests</span></span><span class="ln serif" style="font-size:150px"><span>on a handful.</span></span></div>
+  <div id="grid" class="abs"></div>
+  <div id="gridN" class="abs shadow"><div class="bigN" style="font-size:260px"><span id="g5">5</span><em style="font-size:110px;margin-left:16px">of 150 crates</em></div><div class="mono soft" style="font-size:22px;margin-top:18px">Hand-inspected per truckload</div></div>
+  <canvas id="dots" class="abs" width="1080" height="900"></canvas>
+  <div class="blk shadow" id="tApples" style="top:1290px"><span class="ln bigN" style="font-size:200px"><span>400<em style="font-size:96px"> apples,</em></span></span><span class="ln sans" style="font-size:64px"><span>checked by hand,</span></span></div>
+  <div class="blk shadow" id="tThousands" style="top:1560px"><span class="ln serif" style="font-size:130px"><span>to judge thousands.</span></span></div>
+  <div class="blk shadow" id="tRush" style="top:1300px"><span class="ln sans" style="font-size:92px"><span>In the peak-season rush,</span></span></div>
+  <div class="blk shadow" id="tNot" style="top:1420px"><span class="ln serif" style="font-size:150px"><span>often, not even that.</span></span></div>
+  <!-- 04 cost -->
+  <div class="blk shadow" id="tRain" style="top:1250px"><span class="ln mono soft" style="font-size:24px"><span>2024 — 25 season</span></span><span class="ln serif" style="font-size:140px;margin-top:14px"><span>Rain shut the highway.</span></span></div>
+  <div class="blk shadow" id="tRushed" style="top:1330px"><span class="ln sans" style="font-size:100px"><span>Fruit rushed</span></span><span class="ln serif" style="font-size:140px"><span>into storage.</span></span></div>
+  <div class="blk shadow" id="tChecks" style="top:1330px"><span class="ln sans" style="font-size:96px"><span>The checks</span></span><span class="ln serif" style="font-size:140px"><span>couldn't catch it.</span></span></div>
+  <div class="blk shadow" id="tMonths" style="top:1240px"><span class="ln sans" style="font-size:96px"><span>Months later,</span></span></div>
+  <div class="blk shadow" id="tShriv" style="top:1360px"><span class="ln serif" style="font-size:150px"><span>shrivelled.</span></span><span class="ln serif" style="font-size:150px;color:#ff8a7a"><span>scalded.</span></span></div>
+  <div id="lossbox" class="abs">
+    <div class="ln mono soft" style="font-size:22px"><span>Estimated industry loss · 2024–25</span></div>
+    <div class="ln bigN" style="font-size:280px;margin-top:20px"><span>₹<span id="lossN">0</span></span></div>
+    <div class="ln serif" style="font-size:150px"><span>crore.</span></div>
+    <div class="rule"></div>
+    <div class="ln serif" style="font-size:150px;color:var(--red)" id="lostW"><span>lost.</span></div>
+  </div>
+
+  <!-- stage + mark -->
+  <div id="stagebg" class="full"></div>
+  <div id="beam" class="abs"></div><div id="dot" class="abs"></div>
+  <svg id="mark" class="abs" viewBox="0 0 200 220"></svg>
+  <div id="wordmark" class="abs"><span class="ln" style="display:inline-block"><span>Malus</span></span> <span class="ln" style="display:inline-block;color:var(--red)"><span>Lens</span></span></div>
+  <div id="changes" class="abs serif"><span class="ln"><span>changes that.</span></span></div>
+  <div id="iris" class="full"></div>
+
+  <!-- 05 fix -->
+  <div id="vf" class="full">
+    <div class="c" style="left:72px;top:380px;border-left-width:3px;border-top-width:3px;border-top-left-radius:18px"></div>
+    <div class="c" style="right:72px;top:380px;border-right-width:3px;border-top-width:3px;border-top-right-radius:18px"></div>
+    <div class="c" style="left:72px;top:1500px;border-left-width:3px;border-bottom-width:3px;border-bottom-left-radius:18px"></div>
+    <div class="c" style="right:72px;top:1500px;border-right-width:3px;border-bottom-width:3px;border-bottom-right-radius:18px"></div>
+    <div id="vflabel" class="abs mono"><span id="rec"></span>Crate 01 · Intake gate</div>
+  </div>
+  <div id="focus" class="abs"></div>
+  <div class="blk shadow" id="tPhoto" style="top:1600px"><span class="ln sans" style="font-size:96px;display:inline-block"><span>One photo</span></span> <span class="ln serif" style="font-size:110px;display:inline-block"><span>per crate.</span></span></div>
+  <div class="stat" id="sDet" style="left:72px;opacity:0"><div class="l mono soft">Apples detected</div><div class="n" id="nDet">0</div></div>
+  <div class="stat" id="sA" style="left:540px;opacity:0"><div class="l mono" style="color:var(--a)">Grade A</div><div class="n" id="nA">0</div></div>
+  <div class="stat" id="sB" style="left:810px;opacity:0"><div class="l mono" style="color:var(--b)">Grade B</div><div class="n" id="nB">0</div></div>
+  <div class="blk shadow" id="tDetect" style="top:1600px"><span class="ln sans" style="font-size:96px;display:inline-block"><span>Every apple,</span></span> <span class="ln serif" style="font-size:110px;display:inline-block"><span>detected.</span></span></div>
+  <div class="blk shadow" id="tGrade" style="top:1430px"><span class="ln sans" style="font-size:96px;display:inline-block;color:var(--a);margin-right:.22em"><span>Grade A.</span></span> <span class="ln sans" style="font-size:96px;display:inline-block;color:var(--b)"><span>Grade B.</span></span></div>
+  <div class="blk shadow" id="tSecs" style="top:1560px"><span class="ln serif" style="font-size:150px"><span>in seconds.</span></span></div>
+  <div id="phone" class="abs"><img src="../reel/img/a3-photos-filled.png"><div class="isl"></div></div>
+  <div class="blk shadow" id="tPhone" style="top:1440px"><span class="ln sans" style="font-size:80px"><span>On the phone the storage</span></span><span class="ln serif" style="font-size:120px"><span>already owns.</span></span></div>
+  <div class="acc abs shadow" id="acc1"><div class="ln bigN"><span>99<em>%</em></span></div><div class="ln mono" style="font-size:24px;margin-top:20px"><span>Object detection accuracy</span></div></div>
+  <div class="acc abs shadow" id="acc2"><div class="ln bigN"><span>95<em>%</em></span></div><div class="ln mono" style="font-size:24px;margin-top:20px"><span>Grading accuracy</span></div></div>
+  <div class="blk shadow" id="tTested" style="top:1500px"><div id="testedrule"></div><span class="ln mono" style="font-size:24px;margin-top:22px"><span>Field-tested on real intake batches</span></span></div>
+  <div class="blk shadow" id="tClear" style="top:1240px"><span class="ln sans" style="font-size:96px"><span>A clear number,</span></span><span class="ln sans soft" style="font-size:96px"><span>at the gate,</span></span></div>
+  <div class="blk shadow" id="tBefore" style="top:1500px"><span class="ln serif" style="font-size:132px"><span>before the doors close.</span></span></div>
+
+  <!-- end -->
+  <svg id="endmark" class="abs" viewBox="0 0 200 220"></svg>
+  <div id="endword" class="abs"><span class="ln" style="display:inline-block"><span>Malus</span></span> <span class="ln" style="display:inline-block;color:var(--red)"><span>Lens</span></span></div>
+  <div id="endtag" class="abs"><span class="ln sans" style="font-size:84px"><span>Apple quality,</span></span><span class="ln serif" style="font-size:104px"><span>assessed in seconds.</span></span></div>
+  <div id="cta" class="abs">Book a demo &nbsp;→</div>
+
+  <div id="flash" class="full"></div>
+  <div id="black" class="full"></div>
+</div>
+
+<template id="appleT">
+  <defs>
+    <clipPath id="CLIPID"><path d="M100 62 C86 48 58 44 40 58 C18 76 18 118 30 146 C42 176 64 200 84 200 C92 200 95 196 100 196 C105 196 108 200 116 200 C136 200 158 176 170 146 C182 118 182 76 160 58 C142 44 114 48 100 62 Z"></path></clipPath>
+    <linearGradient id="GRADID" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f2444c"></stop><stop offset=".55" stop-color="#d81f29"></stop><stop offset="1" stop-color="#981018"></stop></linearGradient>
+    <linearGradient id="SWEEPID" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"></stop><stop offset=".5" stop-color="#fff" stop-opacity=".55"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+  </defs>
+  <g class="all">
+    <path class="stem" d="M100 64 C100 50 98 40 93 30" fill="none" stroke="#5a3a1a" stroke-width="7" stroke-linecap="round"></path>
+    <path class="leaf" d="M104 52 C108 30 126 16 150 14 C146 38 128 52 104 52 Z" fill="#30b04a"></path>
+    <path class="body" d="M100 62 C86 48 58 44 40 58 C18 76 18 118 30 146 C42 176 64 200 84 200 C92 200 95 196 100 196 C105 196 108 200 116 200 C136 200 158 176 170 146 C182 118 182 76 160 58 C142 44 114 48 100 62 Z" fill="url(#GRADID)"></path>
+    <g clip-path="url(#CLIPID)">
+      <rect class="band" x="0" y="121" width="200" height="13" fill="#fff"></rect>
+      <rect class="sweep" x="-140" y="0" width="90" height="220" fill="url(#SWEEPID)" transform="skewX(-18)"></rect>
+    </g>
+    <circle class="ring" cx="100" cy="127" r="41" fill="#fff"></circle>
+    <circle class="lens" cx="100" cy="127" r="32" fill="#0b0b0c"></circle>
+    <circle class="hl" cx="113" cy="114" r="8.5" fill="#fff"></circle>
+  </g>
+</template>
+
+<script src="../node_modules/gsap/dist/gsap.min.js"></script>
+<script>
+(async () => {
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const TL = await (await fetch('timeline.json')).json(), L = TL.lines;
+const S = n => L[n].s, E = n => L[n].e, C = (n, k) => L[n].cue[k];
+['mark', 'endmark'].forEach(id => { $('#' + id).innerHTML = $('#appleT').innerHTML.replaceAll('CLIPID', id + 'c').replaceAll('GRADID', id + 'g').replaceAll('SWEEPID', id + 's'); });
+const tl = gsap.timeline({ paused: true });
+const TOTAL = TL.dur;
+gsap.defaults({ ease: 'expo.out' });
+const set = (s, v, t) => tl.set(s, v, t);
+function lines(sel, tin, tout, { stagger = .12, dur = 1.0, times } = {}) {
+  const ls = $$(`${sel} .ln > span`);
+  set(sel, { opacity: 0 }, 0);              // hidden until its line, not just masked (glyph edges peek)
+  set(sel, { opacity: 1 }, tin - .01);
+  ls.forEach((l, i) => tl.fromTo(l, { yPercent: 115, rotate: 2.5 }, { yPercent: 0, rotate: 0, duration: Math.min(dur, Math.max(.3, (tout ?? 1e9) - (times ? times[i] : tin + i * stagger) - .1)), ease: 'expo.out' }, times ? times[i] : tin + i * stagger));
+  if (tout != null) { tl.to(ls, { yPercent: -115, duration: .3, ease: 'expo.in', stagger: .03 }, tout - .2); set(sel, { opacity: 0 }, tout + .25); }
+}
+function chapter(sel, tin, tout) {
+  set(sel, { opacity: 1 }, tin);
+  tl.fromTo(`${sel} i`, { scale: 0 }, { scale: 1, duration: .6, ease: 'back.out(3)' }, tin);
+  tl.fromTo(`${sel} b`, { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: .8 }, tin + .08);
+  tl.fromTo(`${sel} u`, { scaleX: 0 }, { scaleX: 1, duration: 1.2, ease: 'expo.inOut' }, tin + .15);
+  tl.to(sel, { opacity: 0, duration: .3, ease: 'power2.in' }, tout);
+}
+function svgT(sel, from, to, t, d, ease, [ox, oy]) {
+  const els = $$(sel), o = { ...from };
+  const apply = () => els.forEach(e => e.setAttribute('transform', `translate(${ox} ${oy}) rotate(${o.r || 0}) scale(${o.sx ?? o.s ?? 1} ${o.sy ?? o.s ?? 1}) translate(${-ox} ${-oy})`));
+  tl.fromTo(o, { ...from }, { ...to, duration: d, ease, onUpdate: apply, onStart: apply }, t); apply();
+}
+function count(el, to, t, d, fmt = v => Math.round(v)) { const o = { v: 0 }; tl.to(o, { v: to, duration: d, ease: 'power3.out', onUpdate: () => { $(el).textContent = fmt(o.v); } }, t); }
+
+// ---- opener -----------------------------------------------------------------------------------
+tl.fromTo('#black', { opacity: 1 }, { opacity: 0, duration: 1.4, ease: 'power2.inOut' }, .05);
+tl.fromTo('#opener .k span', { opacity: 0, letterSpacing: '1.1em' }, { opacity: .85, letterSpacing: '.6em', duration: 1.4 }, .15);
+lines('#opener .t', .45, S('scale') + 1.1, { dur: 1.2 });
+tl.fromTo('#opener .rule', { scaleY: 0 }, { scaleY: 1, duration: 1.1, ease: 'expo.inOut' }, .7);
+tl.to(['#opener .k', '#opener .rule'], { opacity: 0, duration: .35, ease: 'power2.in' }, S('scale') + 1.1);
+tl.to('#scrimB', { opacity: 1, duration: .8 }, S('scale') + .8);
+
+// ---- 01 the scale --------------------------------------------------------------------------------
+chapter('#ch1', S('scale') + 1.6, S('gate') - .2); tl.to('#scrimT', { opacity: .8, duration: .5 }, S('scale') + 1.5);
+lines('#tScale', C('scale', 'twenty') - .3, S('half') - .35, { times: [C('scale', 'twenty') - .3, C('scale', 'twenty'), C('scale', 'twenty') + .55] });
+lines('#tHalf', S('half') + .05, S('gate') - .3, { times: [S('half') + .05, S('half') + 1.1] });
+// ---- 02 the gate ---------------------------------------------------------------------------------
+chapter('#ch2', S('gate'), S('handful') - .2);
+lines('#tGate', S('gate') + .05, S('decision') - .25, { times: [S('gate') + .05, C('gate', 'gate') - .5] });
+lines('#tDec1', S('decision') + .3, S('handful') - .3);
+lines('#tDec2', C('decision', 'is this'), S('handful') - .3, { times: [C('decision', 'is this'), C('decision', 'is this') + .7] });
+// ---- 03 the guess --------------------------------------------------------------------------------
+chapter('#ch3', S('handful'), S('rain') - .2);
+lines('#tHand', S('handful') + .05, S('crates') - .3, { times: [S('handful') + .05, S('handful') + .9] });
+// 5 of 150: the crates of one truckload, only five ever opened
+{
+  const g = $('#grid'), cols = 10, rows = 15, lit = [23, 58, 81, 104, 137];
+  for (let i = 0; i < cols * rows; i++) { const d = document.createElement('i'); Object.assign(d.style, { left: (i % cols) * 84 + 'px', top: Math.floor(i / cols) * 66 + 'px' }); d.dataset.i = i; g.appendChild(d); }
+  const t0 = S('crates');
+  tl.to('#dim', { opacity: .72, duration: .5 }, t0 - .1);
+  set('#grid', { opacity: 1 }, t0);
+  tl.fromTo('#grid i', { opacity: 0, scale: .4 }, { opacity: 1, scale: 1, duration: .35, ease: 'back.out(2)', stagger: { each: .006, from: 'start' } }, t0);
+  const tc = C('crates', 'hundred') - .1;
+  tl.to([...g.children].filter(e => !lit.includes(+e.dataset.i)), { opacity: .16, duration: .5, ease: 'power2.out' }, tc);
+  tl.to([...g.children].filter(e => lit.includes(+e.dataset.i)), { borderColor: '#e3262f', backgroundColor: 'rgba(227,38,47,.85)', boxShadow: '0 0 24px rgba(227,38,47,.9)', duration: .4 }, tc);
+  tl.fromTo('#gridN', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: .7 }, t0 + .25);
+  tl.to(['#grid', '#gridN'], { opacity: 0, duration: .35, ease: 'power2.in' }, S('apples') - .35);
+}
+// 400 of thousands: a field of dim dots, a small cluster lit
+{
+  const cv = $('#dots'), g = cv.getContext('2d'), pts = [];
+  let seed = 7; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 4200; i++) pts.push([r() * 1040 + 20, r() * 860 + 20]);
+  const center = [540, 450];
+  pts.sort((a, b) => Math.hypot(a[0] - center[0], a[1] - center[1]) - Math.hypot(b[0] - center[0], b[1] - center[1]));
+  const st = { lit: 0, field: 0 };
+  const draw = () => { g.clearRect(0, 0, 1080, 900);
+    pts.forEach((p, i) => { const on = i < st.lit; g.fillStyle = on ? 'rgba(246,243,238,.95)' : `rgba(246,243,238,${.22 * st.field})`; g.beginPath(); g.arc(p[0], p[1], on ? 3.4 : 2.2, 0, 7); g.fill(); }); };
+  const t0 = S('apples');
+  set('#dots', { opacity: 1 }, t0); tl.to('#dim', { opacity: .6, duration: .3 }, t0);
+  tl.to(st, { lit: 400, duration: 1.2, ease: 'power2.out', onUpdate: draw }, t0 + .1);
+  tl.to(st, { field: 1, duration: .8, ease: 'power2.out', onUpdate: draw }, C('apples', 'thousands') - .3);
+  tl.to('#dots', { opacity: 0, duration: .3 }, S('rush') - .2); tl.to('#dim', { opacity: 0, duration: .3 }, S('rush') - .2);
+}
+lines('#tApples', S('apples') + .05, S('rush') - .3, { times: [S('apples') + .05, S('apples') + 1.0] });
+lines('#tThousands', C('apples', 'thousands') - .2, S('rush') - .3);
+lines('#tRush', S('rush') + .05, S('rain') - .3);
+lines('#tNot', C('rush', 'not even') - .45, S('rain') - .3);
+[1, 2, 3].forEach(k => { const t = S('rush') + k * (S('rain') - S('rush')) / 4; set('#flash', { opacity: .14 }, t); tl.to('#flash', { opacity: 0, duration: .2 }, t); });
+// ---- 04 the cost -----------------------------------------------------------------------------------
+chapter('#ch4', S('rain') + .1, S('loss') - .2);
+lines('#tRain', S('rain') + .05, S('rushed') - .25, { times: [S('rain') + .05, S('rain') + .7] });
+lines('#tRushed', S('rushed') + .05, S('checks') - .25, { times: [S('rushed') + .05, S('rushed') + .6] });
+lines('#tChecks', S('checks') + .05, S('months') - .25, { times: [S('checks') + .05, S('checks') + .55] });
+lines('#tMonths', S('months') + .05, S('loss') - .35);
+lines('#tShriv', C('months', 'shrivelled') - .05, S('loss') - .35, { times: [C('months', 'shrivelled') - .05, C('months', 'shrivelled') + .65] });
+tl.to(['#scrimB', '#scrimT'], { opacity: 0, duration: .3 }, S('loss') - .2);
+// the loss, alone on black
+set('#black', { opacity: 0 }, S('loss') - .02);
+{ const ls = $$('#lossbox .ln > span'); ls.forEach(l => set(l, { yPercent: 115 }, 0));
+  tl.to(ls[0], { yPercent: 0, duration: .9 }, S('loss') + .05);
+  tl.to(ls[1], { yPercent: 0, duration: 1.0 }, S('loss') + .25);
+  tl.to(ls[2], { yPercent: 0, duration: 1.0 }, S('loss') + .6);
+  count('#lossN', 2000, S('loss') + .3, Math.max(1.2, C('loss', 'lost') - S('loss') - .8), v => Math.round(v).toLocaleString('en-IN'));
+  tl.to('#lossbox .rule', { width: 420, duration: .8, ease: 'expo.inOut' }, C('loss', 'lost') - .4);
+  tl.to(ls[3], { yPercent: 0, duration: .9 }, C('loss', 'lost') - .05);
+  tl.to('#lossbox', { opacity: 0, duration: .3, ease: 'power2.in' }, S('drop') - .45); }
+// ---- the mark, on the drop ---------------------------------------------------------------------------
+const D = S('drop');
+set('#stagebg', { opacity: 1 }, D - .55); tl.fromTo('#stagebg', { opacity: 0 }, { opacity: 1, duration: .2 }, D - .55);
+set('#beam', { opacity: 1 }, D - .5); tl.fromTo('#beam', { width: 0 }, { width: 760, duration: .3, ease: 'expo.out' }, D - .5);
+tl.to('#beam', { width: 0, duration: .18, ease: 'expo.in' }, D - .25);
+set('#dot', { opacity: 1 }, D - .12); tl.fromTo('#dot', { scale: 0 }, { scale: 1, duration: .1 }, D - .12); set('#beam', { opacity: 0 }, D - .05);
+set('#dot', { opacity: 0 }, D);
+set('#flash', { opacity: .5 }, D); tl.to('#flash', { opacity: 0, duration: .5, ease: 'power2.out' }, D);
+set('#mark', { opacity: 1 }, D);
+svgT('#mark .all', { s: .05 }, { s: 1 }, D, 1.0, 'expo.out', [100, 127]);
+tl.fromTo('#mark .band', { attr: { x: 100, width: 0 } }, { attr: { x: 0, width: 200 }, duration: .7, ease: 'expo.inOut' }, D + .12);
+tl.fromTo('#mark .ring', { attr: { r: 0 } }, { attr: { r: 41 }, duration: .7 }, D + .2);
+tl.fromTo('#mark .lens', { attr: { r: 0 } }, { attr: { r: 32 }, duration: .8 }, D + .3);
+tl.fromTo('#mark .hl', { attr: { r: 0 } }, { attr: { r: 8.5 }, duration: .5, ease: 'back.out(3)' }, D + .6);
+svgT('#mark .leaf', { s: .001, r: -40 }, { s: 1, r: 0 }, D + .3, .8, 'back.out(2.2)', [104, 52]);
+svgT('#mark .stem', { sx: 1, sy: .001 }, { sx: 1, sy: 1 }, D + .25, .5, 'expo.out', [100, 64]);
+tl.fromTo('#mark .sweep', { attr: { x: -140 } }, { attr: { x: 300 }, duration: 1.0, ease: 'power2.inOut' }, D + .55);
+lines('#wordmark', D + .15, null, { stagger: .1 });
+lines('#changes', C('drop', 'changes'), null);
+const P = S('photo') - .3;
+tl.to(['#wordmark', '#changes'], { opacity: 0, y: -30, duration: .3, ease: 'power2.in' }, P - .5);
+tl.to('#mark', { scale: 28, duration: .45, ease: 'expo.in', transformOrigin: '50% 57.7%' }, P - .45);
+set(['#mark', '#stagebg'], { opacity: 0 }, P);
+set('#iris', { opacity: 1, '--r': '0px' }, P); tl.to('#iris', { '--r': '1400px', duration: .8, ease: 'expo.out' }, P); set('#iris', { opacity: 0 }, P + .8);
+// ---- 05 the fix -------------------------------------------------------------------------------------
+chapter('#ch5', P + .3, S('detect') - .2);
+tl.to('#scrimB', { opacity: .9, duration: .4 }, P);
+tl.fromTo('#vf', { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: .9 }, P + .05);
+set('#focus', { opacity: 1 }, S('photo') + .1); tl.fromTo('#focus', { scale: 1.5, opacity: 0 }, { scale: 1, opacity: 1, duration: .5 }, S('photo') + .1);
+tl.to('#focus', { opacity: .3, duration: .08, yoyo: true, repeat: 3, ease: 'none' }, S('photo') + .55);
+lines('#tPhoto', S('photo'), S('detect') - .2, { times: [S('photo'), S('photo') + .55] });
+set('#flash', { opacity: .9 }, E('photo') - .1); tl.to('#flash', { opacity: 0, duration: .45 }, E('photo') - .1);
+tl.to(['#vf', '#focus'], { opacity: 0, duration: .3, ease: 'power2.in' }, S('detect') - .25);
+// detection on the frozen crate (same measured boxes as the brand film)
+const apples = [[440,820,660,1040,'A',.97],[670,770,900,940,'A',.95],[670,900,860,1090,'A',.96],[800,1020,976,1160,'A',.93],[24,950,250,1150,'A',.94],
+  [290,1030,484,1220,'B',.88],[4,1144,160,1310,'B',.86],[164,1140,380,1340,'A',.95],[426,1120,644,1336,'A',.97],[644,1150,940,1470,'B',.91],
+  [104,1340,340,1580,'A',.96],[330,1336,700,1620,'A',.94],[270,1490,530,1730,'A',.93],[656,1530,940,1800,'A',.95],[870,1460,1080,1720,'A',.92],
+  [980,1220,1080,1440,'B',.84],[860,1160,1024,1290,'A',.9],[100,1580,270,1760,'A',.93],[0,1280,90,1480,'A',.91]];
+const nB = apples.filter(a => a[4] === 'B').length, nA = apples.length - nB, T0 = S('detect'), TB = C('grade', 'B'), TE = S('phone');
+tl.fromTo('#cam', { scale: 1 }, { scale: 1.06, duration: TE - T0, ease: 'sine.inOut' }, T0); set('#cam', { scale: 1 }, TE);
+tl.to('#scrimT', { opacity: 1, duration: .5 }, T0);
+set('#scan', { opacity: 1, y: 500 }, T0 + .05); tl.to('#scan', { y: 1700, duration: 1.0, ease: 'power1.inOut' }, T0 + .05); set('#scan', { opacity: 0 }, T0 + 1.05);
+const NS = 'http://www.w3.org/2000/svg';
+apples.forEach(([x1, y1, x2, y2, g, c], i) => {
+  const r = document.createElementNS(NS, 'rect'), pad = 6;
+  Object.entries({ x: x1 + pad, y: y1 + pad, width: x2 - x1 - pad * 2, height: y2 - y1 - pad * 2, rx: 22, class: 'box', pathLength: 100 }).forEach(([k, v]) => r.setAttribute(k, v));
+  r.style.strokeDasharray = '0 100'; $('#det').appendChild(r);
+  const p = document.createElement('div'); p.className = 'pill'; p.textContent = `${g} ${c.toFixed(2)}`;
+  Object.assign(p.style, { left: (x1 + pad + 10) + 'px', top: (y1 + pad - 18) + 'px', background: g === 'A' ? 'var(--a)' : 'var(--b)' }); $('#pills').appendChild(p);
+  const t = T0 + .15 + (y1 - 770) / 1030 * .8 + (i % 3) * .04;
+  tl.fromTo(r, { strokeDasharray: '0 100', opacity: 1 }, { strokeDasharray: '100 0', duration: .5, ease: 'power2.inOut' }, t);
+  const tg = g === 'A' ? S('grade') + .1 + i * .025 : TB + i * .02;
+  tl.to(r, { stroke: g === 'A' ? '#4ade80' : '#fbbf24', duration: .3 }, tg);
+  tl.fromTo(p, { opacity: 0, y: 8, scale: .8 }, { opacity: 1, y: 0, scale: 1, duration: .45, ease: 'back.out(2)' }, tg);
+  tl.to([r, p], { opacity: 0, duration: .25 }, TE - .25);
+});
+tl.fromTo('#sDet', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: .7 }, T0 + .1); count('#nDet', apples.length, T0 + .15, 1.2);
+tl.fromTo('#sA', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: .7 }, S('grade')); count('#nA', nA, S('grade') + .05, .9);
+tl.fromTo('#sB', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: .7 }, TB - .1); count('#nB', nB, TB, .6);
+tl.to(['#sDet', '#sA', '#sB'], { opacity: 0, duration: .3, ease: 'power2.in' }, TE - .3);
+lines('#tDetect', T0 + .05, S('grade') - .2, { times: [T0 + .05, T0 + .6] });
+lines('#tGrade', S('grade') + .05, TE - .3, { times: [S('grade') + .05, TB - .25] });
+lines('#tSecs', C('grade', 'seconds') - .35, TE - .3);
+// the phone the storage already owns
+tl.fromTo('#phone', { opacity: 0, y: 700, rotation: -8 }, { opacity: 1, y: 0, rotation: -3, duration: 1.0 }, S('phone') + .05);
+tl.to('#phone', { rotation: 2, y: -16, duration: 2.5, ease: 'sine.inOut' }, S('phone') + 1.0);
+tl.to('#phone', { y: -1400, rotation: 8, duration: .5, ease: 'expo.in' }, S('acc1') - .45);
+lines('#tPhone', S('phone') + .1, S('acc1') - .3, { times: [S('phone') + .1, S('phone') + .9] });
+// accuracy
+tl.to('#scrimT', { opacity: 1, duration: .4 }, S('acc1') - .2);
+lines('#acc1', S('acc1') + .02, S('acc2') - .25, { times: [S('acc1') + .02, S('acc1') + .4] });
+lines('#acc2', S('acc2') + .02, S('clear') - .25, { times: [S('acc2') + .02, S('acc2') + .4] });
+set('#tTested', { opacity: 1 }, S('tested')); tl.fromTo('#testedrule', { width: 0 }, { width: 520, duration: 1.0, ease: 'expo.inOut' }, S('tested'));
+lines('#tTested', S('tested') + .15, S('clear') - .25);
+lines('#tClear', S('clear') + .05, S('end') - .3, { times: [S('clear') + .05, S('clear') + .9] });
+lines('#tBefore', C('clear', 'before') - .1, S('end') - .3);
+tl.to('#black', { opacity: 1, duration: .25, ease: 'power2.in' }, S('end') - .3);
+tl.to(['#scrimB', '#scrimT'], { opacity: 0, duration: .2 }, S('end') - .1);
+// ---- end stage ---------------------------------------------------------------------------------------
+const N = S('end');
+set('#black', { opacity: 0 }, N); set('#stagebg', { opacity: 1 }, N);
+set('#endmark', { opacity: 1 }, N + .02);
+svgT('#endmark .all', { s: .05 }, { s: 1 }, N + .02, 1.1, 'expo.out', [100, 127]);
+tl.fromTo('#endmark .band', { attr: { x: 100, width: 0 } }, { attr: { x: 0, width: 200 }, duration: .7, ease: 'expo.inOut' }, N + .1);
+tl.fromTo('#endmark .lens', { attr: { r: 0 } }, { attr: { r: 32 }, duration: .8 }, N + .2);
+tl.fromTo('#endmark .hl', { attr: { r: 0 } }, { attr: { r: 8.5 }, duration: .5, ease: 'back.out(3)' }, N + .5);
+tl.fromTo('#endmark .sweep', { attr: { x: -140 } }, { attr: { x: 300 }, duration: 1.1, ease: 'power2.inOut' }, N + .9);
+lines('#endword', N + .1, null, { stagger: .1 });
+lines('#endtag', C('end', 'Apple'), null, { times: [C('end', 'Apple'), C('end', 'assessed')], dur: 1.2 });
+tl.fromTo('#cta', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: .9 }, E('end') + .8);
+tl.to('#black', { opacity: 1, duration: 1.0, ease: 'power1.in' }, TOTAL - 1.0);
+tl.set({}, {}, TOTAL);
+
+const img = $('#bg');
+window.__duration = TOTAL;
+window.__seek = async (t, frame) => {
+  const src = `frames/${String(frame).padStart(5, '0')}.jpg`;
+  if (!img.src.endsWith(src)) { img.src = src; await img.decode().catch(() => {}); }
+  tl.seek(t, false);
+};
+window.__readyFlag = true;
+})();
+window.__ready = new Promise(res => { const w = () => window.__readyFlag ? Promise.all([document.fonts.ready, ...[...document.images].map(i => i.decode().catch(() => {}))]).then(res) : setTimeout(w, 50); w(); });
+</script>
+</body>
+</html>
