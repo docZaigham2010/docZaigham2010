@@ -15,3 +15,6 @@ showreel/problem/frames/
 showreel/problem/out/
 showreel/problem/*.png
 showreel/problem/vo.wav
+showreel/doc/frames/
+showreel/doc/out/
+showreel/doc/vo.wav

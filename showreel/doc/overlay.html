@@ -1,0 +1,511 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Malus Lens — Before the Door Shuts</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+  @font-face{font-family:'Montserrat';font-weight:800;src:url(../reel/fonts/Montserrat-800.woff2) format('woff2');}
+  :root { --paper: #f4efe6; --amber: #f2b544; --loss: #ff5a4e; --good: #3ddc84; --brand: #e3262f;
+          --cond: 'Barlow Condensed', sans-serif; --serif: 'Newsreader', serif; --mono: 'JetBrains Mono', monospace; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; color: var(--paper); font-family: var(--cond); }
+  #cam { position: absolute; inset: 0; transform-origin: 50% 55%; }
+  #bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .abs { position: absolute; } .full { position: absolute; inset: 0; }
+  .mono { font-family: var(--mono); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; }
+  .cond { font-family: var(--cond); font-weight: 800; text-transform: uppercase; letter-spacing: -.005em; line-height: .9; }
+  .serif { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -.015em; line-height: 1.02; }
+  .sh { text-shadow: 0 4px 40px rgba(0,0,0,.55), 0 1px 3px rgba(0,0,0,.4); }
+  .blk { position: absolute; left: 80px; right: 80px; }
+  .ln { display: block; overflow: hidden; padding: .06em 0 .12em; margin-bottom: -.1em; }
+  .ln > span { display: inline-block; }
+  .w { display: inline-block; overflow: hidden; vertical-align: top; padding: .06em .02em .1em; margin: 0 -.02em -.1em; }
+  .w > span { display: inline-block; }
+
+  /* scrims under type */
+  #scrimB { left: 0; right: 0; bottom: 0; height: 1100px; opacity: 0; background: linear-gradient(0deg, rgba(0,0,0,.75), rgba(0,0,0,.4) 50%, transparent); }
+  #scrimT { left: 0; right: 0; top: 0; height: 900px; opacity: 0; background: linear-gradient(180deg, rgba(0,0,0,.7), rgba(0,0,0,.3) 55%, transparent); }
+
+  /* cinema bars carrying field-file metadata */
+  .bar { left: 0; right: 0; height: 150px; background: #000; z-index: 20; }
+  #barT { top: 0; transform-origin: 50% 0; } #barB { bottom: 0; transform-origin: 50% 100%; }
+  .bar .meta { position: absolute; font-size: 20px; color: rgba(244,239,230,.62); }
+  #barT .l { left: 60px; bottom: 34px; } #barT .r { right: 60px; bottom: 34px; font-variant-numeric: tabular-nums; }
+  #barB .l { left: 60px; top: 36px; color: rgba(244,239,230,.85); } #barB .r { right: 60px; top: 36px; }
+  .rec { display: inline-block; width: 11px; height: 11px; border-radius: 50%; background: var(--loss); margin-right: 12px; vertical-align: 1px; }
+  .slug { position: absolute; left: 0; top: 0; white-space: nowrap; opacity: 0; }
+
+  /* hook counter */
+  #hookN { left: 80px; top: 1030px; font-family: var(--cond); font-weight: 800; font-size: 236px; line-height: .8; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  #hookN small { font-size: 96px; margin-left: 16px; letter-spacing: .01em; }
+  #hookPre { left: 84px; top: 905px; font-size: 26px; color: var(--amber); }
+
+  /* calendar strip */
+  #cal { left: 80px; right: 80px; top: 300px; opacity: 0; }
+  #cal .m { display: inline-block; width: 12.5%; text-align: center; font-size: 26px; color: rgba(244,239,230,.45); padding: 16px 0; }
+  #cal .track { position: relative; height: 4px; background: rgba(244,239,230,.2); border-radius: 4px; }
+  #cal .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--amber); border-radius: 4px; box-shadow: 0 0 18px rgba(242,181,68,.7); }
+  #cal .tag { margin-top: 22px; font-size: 22px; color: var(--amber); }
+
+  /* doors */
+  .door { top: 0; bottom: 0; width: 541px; background: linear-gradient(90deg, #0b0c0d, #16181a 60%, #0d0e0f); z-index: 5; }
+  .door::after { content: ''; position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(244,239,230,.18); }
+  #doorL { left: 0; } #doorL::after { right: 0; } #doorR { right: 0; } #doorR::after { left: 0; }
+  .door .ribs { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0 118px, rgba(255,255,255,.035) 118px 120px); }
+  #lock { left: 470px; top: 720px; width: 140px; height: 170px; z-index: 6; opacity: 0; }
+  #sealTxt { z-index: 6; top: 960px; text-align: center; opacity: 0; }
+  #o2 { left: 0; right: 0; top: 1300px; text-align: center; font-size: 24px; color: rgba(244,239,230,.7); z-index: 6; opacity: 0; }
+  #o2 b { color: var(--amber); font-weight: 500; }
+  #flip { left: 0; right: 0; top: 760px; text-align: center; z-index: 6; opacity: 0; font-family: var(--mono); font-weight: 500; font-size: 150px; letter-spacing: .06em; }
+  #flipSub { left: 0; right: 0; top: 960px; text-align: center; z-index: 6; opacity: 0; font-size: 24px; color: rgba(244,239,230,.6); }
+
+  /* gate target */
+  #target { left: 230px; top: 520px; width: 620px; height: 560px; opacity: 0; }
+  #target i { position: absolute; width: 70px; height: 70px; border: 0 solid var(--amber); }
+  #target .a { left: 0; top: 0; border-left-width: 4px; border-top-width: 4px; } #target .b { right: 0; top: 0; border-right-width: 4px; border-top-width: 4px; }
+  #target .c { left: 0; bottom: 0; border-left-width: 4px; border-bottom-width: 4px; } #target .d { right: 0; bottom: 0; border-right-width: 4px; border-bottom-width: 4px; }
+  #target .lab { position: absolute; left: 0; top: -54px; font-size: 22px; color: var(--amber); white-space: nowrap; }
+
+  /* decision */
+  #choice { left: 80px; right: 80px; top: 1440px; display: flex; gap: 28px; opacity: 0; }
+  .pill { flex: 1; text-align: center; padding: 26px 0; border-radius: 80px; font: 700 50px var(--cond); letter-spacing: .06em; border: 3px solid; background: rgba(0,0,0,.35); backdrop-filter: blur(6px); }
+  #pStore { border-color: var(--good); color: var(--good); } #pReject { border-color: var(--loss); color: var(--loss); }
+  #cursor { left: 0; top: 1500px; width: 46px; height: 46px; z-index: 8; opacity: 0; }
+  #scrib { left: 70px; top: 1300px; width: 600px; height: 70px; overflow: visible; }
+
+  /* crate grid */
+  #grid { left: 120px; top: 300px; width: 840px; height: 580px; opacity: 0; }
+  #grid i { position: absolute; width: 46px; height: 32px; border-radius: 5px; background: rgba(244,239,230,.3); border: 2px solid rgba(244,239,230,.75); box-shadow: 0 2px 10px rgba(0,0,0,.35); }
+  #grid i.on { background: var(--amber); border-color: var(--amber); box-shadow: 0 0 22px rgba(242,181,68,.9); }
+  #gridK { left: 120px; top: 230px; font-size: 22px; color: rgba(244,239,230,.8); opacity: 0; }
+  .stat { font-family: var(--cond); font-weight: 800; font-size: 210px; line-height: .82; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .stat small { font-size: 66px; letter-spacing: .02em; margin-left: 14px; }
+
+  /* map */
+  #map { left: 90px; top: 250px; width: 900px; height: 720px; opacity: 0; overflow: visible; }
+  #map .route { fill: none; stroke: var(--paper); stroke-width: 5; stroke-linecap: round; }
+  #map .road2 { fill: none; stroke: rgba(244,239,230,.25); stroke-width: 2; stroke-dasharray: 6 10; }
+  #map .node { fill: var(--paper); } #map text { font: 500 24px var(--mono); letter-spacing: .14em; fill: var(--paper); }
+  #map .x { stroke: var(--loss); stroke-width: 9; stroke-linecap: round; }
+  #date { left: 80px; top: 1010px; font-family: var(--mono); font-weight: 500; font-size: 64px; letter-spacing: .08em; color: var(--amber); opacity: 0; }
+  #rain { opacity: 0; }
+
+  /* chamber + particles */
+  #flow { opacity: 0; }
+
+  /* fix */
+  #fixMark { left: 476px; top: 330px; width: 128px; height: 141px; overflow: visible; opacity: 0; }
+  #fixWord { left: 0; right: 0; top: 500px; text-align: center; font: 800 112px Montserrat; letter-spacing: -.045em; }
+  #fixTag { left: 0; right: 0; top: 640px; text-align: center; }
+  #leak { opacity: 0; mix-blend-mode: screen; background: radial-gradient(700px 900px at 85% 20%, rgba(255,150,60,.55), transparent 60%), radial-gradient(600px 600px at 10% 90%, rgba(255,90,40,.3), transparent 60%); }
+
+  /* viewfinder + detection */
+  #vf { opacity: 0; z-index: 3; }
+  #vf .c { position: absolute; width: 64px; height: 64px; border: 0 solid rgba(255,255,255,.95); }
+  #vfLab { left: 0; right: 0; top: 200px; text-align: center; font-size: 22px; color: rgba(255,255,255,.9); }
+  #det rect.box { fill: none; stroke: rgba(255,255,255,.92); stroke-width: 3.5; filter: drop-shadow(0 0 8px rgba(255,255,255,.55)); }
+  .tagA { position: absolute; padding: 4px 10px; border-radius: 6px; font: 500 20px var(--mono); color: #06120a; letter-spacing: .04em; }
+  #panel { left: 80px; right: 80px; top: 230px; display: flex; gap: 18px; opacity: 0; }
+  .card { flex: 1; padding: 20px 24px; border-radius: 22px; background: rgba(10,10,10,.55); border: 1.5px solid rgba(244,239,230,.18); backdrop-filter: blur(10px); }
+  .card .k { font-size: 18px; color: rgba(244,239,230,.65); }
+  .card .v { font: 800 92px var(--cond); line-height: 1; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  #bars2 { left: 80px; right: 80px; top: 470px; opacity: 0; }
+  #bars2 .row { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; font-size: 20px; }
+  #bars2 .tr { flex: 1; height: 14px; border-radius: 10px; background: rgba(244,239,230,.15); overflow: hidden; }
+  #bars2 .fl { height: 100%; width: 0; border-radius: 10px; }
+  #timer { right: 80px; top: 160px; font-size: 22px; color: var(--good); opacity: 0; }
+
+  /* end */
+  #stagebg { opacity: 0; background: radial-gradient(900px 760px at 50% 40%, rgba(170,20,28,.30), transparent 70%), #060606; }
+  #endmark { left: 410px; top: 420px; width: 260px; height: 286px; overflow: visible; opacity: 0; }
+  #endword { left: 0; right: 0; top: 780px; text-align: center; font: 800 132px Montserrat; letter-spacing: -.045em; }
+  #endtag { left: 0; right: 0; top: 960px; text-align: center; font-size: 26px; color: rgba(244,239,230,.75); }
+  #btn { left: 50%; top: 1150px; width: 560px; margin-left: -280px; padding: 34px 0; text-align: center; border-radius: 100px; background: var(--brand);
+         font: 800 60px var(--cond); letter-spacing: .06em; color: #fff; box-shadow: 0 24px 70px rgba(227,38,47,.45); opacity: 0; }
+  #ripple { left: 540px; top: 1214px; width: 40px; height: 40px; margin: -20px; border-radius: 50%; border: 3px solid #fff; opacity: 0; }
+  #bio { left: 0; right: 0; top: 1330px; text-align: center; font-size: 24px; color: rgba(244,239,230,.7); opacity: 0; }
+  #tap { left: 600px; top: 1250px; width: 70px; height: 70px; opacity: 0; z-index: 8; }
+
+  #flash { background: #fff; opacity: 0; z-index: 30; }
+  #black { background: #000; z-index: 31; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="cam"><img id="bg" src="frames/00000.jpg"><svg id="det" class="full" viewBox="0 0 1080 1920"></svg><div id="tags" class="full"></div></div>
+  <canvas id="rain" class="full" width="1080" height="1920"></canvas>
+  <div id="leak" class="full"></div>
+  <div id="scrimT" class="abs"></div><div id="scrimB" class="abs"></div><div id="dim" class="full" style="background:#000;opacity:0"></div>
+
+  <!-- 1 hook -->
+  <div id="hookPre" class="abs mono sh">Last year · Kashmir lost</div>
+  <div id="hookN" class="abs sh">₹<span id="hookV">0</span><small>CRORE</small></div>
+  <div class="blk" id="tHook" style="top:1310px"><span class="ln serif sh" style="font-size:96px"><span>in apples.</span></span></div>
+  <div class="blk" id="tNobody" style="top:1180px"><span class="ln cond sh" style="font-size:150px"><span>Nobody saw</span></span><span class="ln cond sh" style="font-size:150px"><span>it coming.</span></span></div>
+  <div class="blk" id="tWhy" style="top:800px;text-align:center"><span class="ln cond sh" style="font-size:230px"><span>Here's why.</span></span></div>
+
+  <!-- 2 sealed for months -->
+  <div id="cal" class="abs mono">
+    <div><span class="m">Oct</span><span class="m">Nov</span><span class="m">Dec</span><span class="m">Jan</span><span class="m">Feb</span><span class="m">Mar</span><span class="m">Apr</span><span class="m">May</span></div>
+    <div class="track"><div class="fill"></div></div>
+    <div class="tag">Controlled-atmosphere storage · sealed</div>
+  </div>
+  <div class="blk" id="tSealed" style="top:1200px"><span class="ln cond sh" style="font-size:160px"><span>Sealed</span></span><span class="ln serif sh" style="font-size:110px"><span>for months.</span></span></div>
+
+  <!-- doors -->
+  <div id="doorL" class="abs door"><div class="ribs"></div></div><div id="doorR" class="abs door"><div class="ribs"></div></div>
+  <svg id="lock" class="abs" viewBox="0 0 140 170"><path class="sh" d="M32 74 V50 a38 38 0 0 1 76 0 V74" fill="none" stroke="#f2b544" stroke-width="12" stroke-linecap="round"/><rect x="10" y="72" width="120" height="92" rx="16" fill="#f2b544"/><circle cx="70" cy="112" r="11" fill="#111"/><rect x="65" y="114" width="10" height="26" rx="4" fill="#111"/></svg>
+  <div class="blk" id="sealTxt"><span class="ln cond" style="font-size:118px"><span>Nobody can</span></span><span class="ln cond" style="font-size:118px"><span>check again.</span></span></div>
+  <div id="o2" class="abs mono">Oxygen inside &nbsp;<b id="o2v">21.0%</b></div>
+  <div id="flip" class="abs">OCT</div>
+  <div id="flipSub" class="abs mono">Months later</div>
+
+  <!-- 3 the gate -->
+  <div class="blk" id="tMoment" style="top:1250px"><span class="ln cond sh" style="font-size:160px"><span>One moment.</span></span></div>
+  <div id="target" class="abs"><i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i><div class="lab mono">Intake gate · truck 04</div></div>
+  <div class="blk" id="tGate" style="top:1250px"><span class="ln cond sh" style="font-size:160px;color:var(--amber)"><span>At the gate.</span></span></div>
+  <div class="blk" id="tQuestion" style="top:1080px"><span class="ln serif sh" style="font-size:100px"><span>Is this fruit good</span></span><span class="ln serif sh" style="font-size:100px"><span>enough to store?</span></span></div>
+  <div id="choice" class="abs"><div id="pStore" class="pill">STORE</div><div id="pReject" class="pill">REJECT</div></div>
+  <svg id="cursor" class="abs" viewBox="0 0 46 46"><path d="M6 4 L38 24 L24 27 L32 42 L26 44 L18 29 L8 38 Z" fill="#fff" stroke="#000" stroke-width="2"/></svg>
+  <div class="blk" id="tGuess" style="top:1150px"><span class="ln cond sh" style="font-size:150px"><span>Mostly a</span></span><span class="ln cond sh" style="font-size:210px;color:var(--amber)"><span>guess.</span></span></div>
+  <svg id="scrib" class="abs" viewBox="0 0 600 70"><path id="scribP" d="M8 40 C90 18 170 58 250 34 S410 20 480 38 S560 46 592 28" fill="none" stroke="#f2b544" stroke-width="9" stroke-linecap="round" pathLength="100" style="stroke-dasharray:0 100"/></svg>
+
+  <!-- 4 the sample -->
+  <div id="gridK" class="abs mono">One truckload</div>
+  <div id="grid" class="abs"></div>
+  <div class="blk" id="s150" style="top:1080px"><span class="ln stat sh"><span><span id="n150">0</span><small>CRATES</small></span></span></div>
+  <div class="blk" id="s5" style="top:1080px"><span class="ln stat sh" style="color:var(--amber)"><span>5<small>CHECKED</small></span></span><span class="ln mono sh" style="font-size:24px;margin-top:20px"><span>That's about 3% of the load</span></span></div>
+  <div class="blk" id="s0" style="top:1080px"><span class="ln stat sh" style="color:var(--loss)"><span>0<small>CHECKED</small></span></span><span class="ln serif sh" style="font-size:84px;margin-top:10px"><span>in the rush.</span></span></div>
+
+  <!-- 5 2024 -->
+  <svg id="map" class="abs" viewBox="0 0 900 720">
+    <path class="road2" d="M60 120 C200 160 300 90 430 150 S700 120 840 80"/>
+    <path class="route" id="route" pathLength="100" style="stroke-dasharray:0 100" d="M640 110 C600 230 520 260 500 360 S420 520 300 560 S180 640 160 660"/>
+    <circle class="node" id="nS" cx="640" cy="110" r="14"/><circle class="node" id="nJ" cx="160" cy="660" r="14"/>
+    <text id="tS" x="672" y="118">SRINAGAR</text><text id="tJ" x="196" y="668">JAMMU</text>
+    <g id="xmark"><line class="x" x1="440" y1="390" x2="510" y2="460"/><line class="x" x1="510" y1="390" x2="440" y2="460"/></g>
+    <text id="tX" x="540" y="436" style="fill:#ff5a4e">NH-44 · CLOSED</text>
+  </svg>
+  <div id="date" class="abs">OCT 2024</div>
+  <div class="blk" id="tRain" style="top:1230px"><span class="ln cond sh" style="font-size:150px"><span>Rain shut</span></span><span class="ln cond sh" style="font-size:150px"><span>the highway.</span></span></div>
+  <canvas id="flow" class="full" width="1080" height="1920"></canvas>
+  <div class="blk" id="tRushed" style="top:1250px"><span class="ln cond sh" style="font-size:140px"><span>Rushed in.</span></span></div>
+  <div class="blk" id="tUnripe" style="top:1180px"><span class="ln cond sh" style="font-size:120px;color:var(--amber)"><span>Unripe fruit</span></span><span class="ln serif sh" style="font-size:96px"><span>went in with the good.</span></span></div>
+  <div class="blk" id="tLater" style="top:1250px"><span class="ln serif sh" style="font-size:110px"><span>The doors opened…</span></span></div>
+  <div class="blk" id="tShriv" style="top:1120px"><span class="ln cond sh" style="font-size:180px;color:var(--loss)"><span>Shrivelled.</span></span><span class="ln cond sh" style="font-size:180px;color:var(--loss)"><span>Spoiled.</span></span><span class="ln mono sh" style="font-size:24px;margin-top:26px"><span>₹2,000 crore · one season</span></span></div>
+
+  <!-- 6 the fix -->
+  <svg id="fixMark" class="abs" viewBox="0 0 200 220"></svg>
+  <div id="fixWord" class="abs"><span class="ln" style="display:inline-block"><span>Malus</span></span> <span class="ln" style="display:inline-block;color:var(--brand)"><span>Lens</span></span></div>
+  <div id="fixTag" class="abs"><span class="ln serif sh" style="font-size:92px"><span>fixes that moment.</span></span></div>
+  <div id="vf" class="full"><div class="c" style="left:70px;top:190px;border-left-width:5px;border-top-width:5px"></div><div class="c" style="right:70px;top:190px;border-right-width:5px;border-top-width:5px"></div>
+    <div class="c" style="left:70px;bottom:190px;border-left-width:5px;border-bottom-width:5px"></div><div class="c" style="right:70px;bottom:190px;border-right-width:5px;border-bottom-width:5px"></div>
+    <div id="vfLab" class="abs mono">● One photo · one crate</div></div>
+  <div class="blk" id="tPhoto" style="top:1330px"><span class="ln cond sh" style="font-size:150px"><span>One photo.</span></span></div>
+  <div id="panel" class="abs"><div class="card"><div class="k mono">Apples</div><div class="v" id="nDet">0</div></div><div class="card"><div class="k mono" style="color:var(--good)">Grade A</div><div class="v" id="nA">0</div></div><div class="card"><div class="k mono" style="color:var(--amber)">Grade B</div><div class="v" id="nB">0</div></div></div>
+  <div id="timer" class="abs mono">● <span id="tv">0.0</span> s</div>
+  <div class="blk" id="tEvery" style="top:1360px"><span class="ln cond sh" style="font-size:132px"><span>Every apple,</span></span><span class="ln serif sh" style="font-size:104px"><span>graded in seconds.</span></span></div>
+  <div class="blk" id="tKnow" style="top:1180px"><span class="ln cond sh" style="font-size:150px"><span>Know what</span></span><span class="ln cond sh" style="font-size:150px"><span>goes in…</span></span></div>
+  <div class="blk" id="tBefore" style="top:1300px"><span class="ln serif sh" style="font-size:112px"><span>before the</span></span><span class="ln serif sh" style="font-size:112px"><span>door shuts.</span></span></div>
+
+  <!-- CTA -->
+  <div id="stagebg" class="full"></div>
+  <svg id="endmark" class="abs" viewBox="0 0 200 220"></svg>
+  <div id="endword" class="abs"><span class="ln" style="display:inline-block"><span>Malus</span></span> <span class="ln" style="display:inline-block;color:var(--brand)"><span>Lens</span></span></div>
+  <div id="endtag" class="abs mono"><span class="ln"><span>Apple quality · assessed in seconds</span></span></div>
+  <div id="btn" class="abs">BOOK A DEMO</div>
+  <div id="ripple" class="abs"></div>
+  <svg id="tap" class="abs" viewBox="0 0 70 70"><circle cx="35" cy="35" r="26" fill="rgba(255,255,255,.9)"/></svg>
+  <div id="bio" class="abs mono">Link in bio</div>
+
+  <!-- cinema bars -->
+  <div id="barT" class="abs bar"><div class="meta mono l">Malus Lens · Field notes</div><div class="meta mono r"><span class="rec"></span><span id="tc">00:00:00</span></div></div>
+  <div id="barB" class="abs bar"><div class="meta mono l" id="slugs"></div><div class="meta mono r">Kashmir · 2024–25</div></div>
+
+  <div id="flash" class="full"></div>
+  <div id="black" class="full"></div>
+</div>
+
+<template id="appleT">
+  <defs>
+    <clipPath id="CLIPID"><path d="M100 62 C86 48 58 44 40 58 C18 76 18 118 30 146 C42 176 64 200 84 200 C92 200 95 196 100 196 C105 196 108 200 116 200 C136 200 158 176 170 146 C182 118 182 76 160 58 C142 44 114 48 100 62 Z"></path></clipPath>
+    <linearGradient id="GRADID" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f2444c"></stop><stop offset=".55" stop-color="#d81f29"></stop><stop offset="1" stop-color="#981018"></stop></linearGradient>
+    <linearGradient id="SWEEPID" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"></stop><stop offset=".5" stop-color="#fff" stop-opacity=".55"></stop><stop offset="1" stop-color="#fff" stop-opacity="0"></stop></linearGradient>
+  </defs>
+  <g class="all">
+    <path class="stem" d="M100 64 C100 50 98 40 93 30" fill="none" stroke="#5a3a1a" stroke-width="7" stroke-linecap="round"></path>
+    <path class="leaf" d="M104 52 C108 30 126 16 150 14 C146 38 128 52 104 52 Z" fill="#30b04a"></path>
+    <path class="body" d="M100 62 C86 48 58 44 40 58 C18 76 18 118 30 146 C42 176 64 200 84 200 C92 200 95 196 100 196 C105 196 108 200 116 200 C136 200 158 176 170 146 C182 118 182 76 160 58 C142 44 114 48 100 62 Z" fill="url(#GRADID)"></path>
+    <g clip-path="url(#CLIPID)">
+      <rect class="band" x="0" y="121" width="200" height="13" fill="#fff"></rect>
+      <rect class="sweep" x="-140" y="0" width="90" height="220" fill="url(#SWEEPID)" transform="skewX(-18)"></rect>
+    </g>
+    <circle class="ring" cx="100" cy="127" r="41" fill="#fff"></circle>
+    <circle class="lens" cx="100" cy="127" r="32" fill="#0b0b0c"></circle>
+    <circle class="hl" cx="113" cy="114" r="8.5" fill="#fff"></circle>
+  </g>
+</template>
+
+<script src="../node_modules/gsap/dist/gsap.min.js"></script>
+<script>
+(async () => {
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const TL = await (await fetch('timeline.json')).json(), L = TL.lines;
+const S = n => L[n].s, E = n => L[n].e, C = (n, k) => L[n].cue[k];
+['fixMark', 'endmark'].forEach(id => { $('#' + id).innerHTML = $('#appleT').innerHTML.replaceAll('CLIPID', id + 'c').replaceAll('GRADID', id + 'g').replaceAll('SWEEPID', id + 's'); });
+const tl = gsap.timeline({ paused: true });
+const TOTAL = TL.dur;
+gsap.defaults({ ease: 'expo.out' });
+const set = (s, v, t) => tl.set(s, v, t);
+const NS = 'http://www.w3.org/2000/svg';
+
+// masked line reveal; the block stays fully hidden outside its window
+function lines(sel, tin, tout, { stagger = .1, dur = .9, times } = {}) {
+  const ls = $$(`${sel} .ln > span`);
+  set(sel, { opacity: 0 }, 0); set(sel, { opacity: 1 }, tin - .01);
+  ls.forEach((l, i) => tl.fromTo(l, { yPercent: 112 }, { yPercent: 0, duration: Math.min(dur, Math.max(.3, (tout ?? 1e9) - (times ? times[i] : tin + i * stagger) - .1)) }, times ? times[i] : tin + i * stagger));
+  if (tout != null) { tl.to(ls, { yPercent: -112, duration: .28, ease: 'expo.in', stagger: .03 }, tout - .3); set(sel, { opacity: 0 }, tout + .1); }
+}
+function show(sel, tin, tout, from = { opacity: 0, y: 30 }, to = { opacity: 1, y: 0, duration: .7 }) {
+  set(sel, { opacity: 0 }, 0); tl.fromTo(sel, from, { ...to }, tin);
+  if (tout != null) tl.to(sel, { opacity: 0, duration: .25, ease: 'power2.in' }, tout - .25);
+}
+function svgT(sel, from, to, t, d, ease, [ox, oy]) {
+  const els = $$(sel), o = { ...from };
+  const apply = () => els.forEach(e => e.setAttribute('transform', `translate(${ox} ${oy}) rotate(${o.r || 0}) scale(${o.s ?? 1}) translate(${-ox} ${-oy})`));
+  tl.fromTo(o, { ...from }, { ...to, duration: d, ease, onUpdate: apply, onStart: apply }, t); apply();
+}
+function count(el, to, t, d, fmt = v => Math.round(v), from = 0) { const o = { v: from }; tl.fromTo(o, { v: from }, { v: to, duration: d, ease: 'power3.out', onUpdate: () => { $(el).textContent = fmt(o.v); } }, t); }
+const scrims = (t0, t1, which = ['#scrimB']) => { tl.to(which, { opacity: 1, duration: .4, ease: 'power2.out' }, t0); if (t1 != null) tl.to(which, { opacity: 0, duration: .2, ease: 'power2.in' }, t1 - .25); };
+const flash = (t, a = .5, d = .35) => { set('#flash', { opacity: a }, t); tl.to('#flash', { opacity: 0, duration: d, ease: 'power2.out' }, t); };
+
+// ---- cinema bars, timecode, slugs ------------------------------------------------------------------
+set('#barT', { scaleY: 1 }, 0); set('#barB', { scaleY: 1 }, 0);
+{ const o = { t: 0 }; tl.to(o, { t: TOTAL, duration: TOTAL, ease: 'none', onUpdate: () => { const f = Math.floor(o.t * 25 % 25), s = Math.floor(o.t);
+    $('#tc').textContent = `00:${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}:${String(f).padStart(2, '0')}`; } }, 0); }
+const slugs = [[0, 'Kashmir valley · harvest season'], [S('sealed'), 'Inside a CA cold storage'], [S('moment'), 'The intake gate'],
+  [S('truck'), 'One truckload · 150 crates'], [S('rain'), 'Srinagar–Jammu highway · 2024'], [S('opened'), 'The chambers open'], [S('fix'), 'Malus Lens · at the gate']];
+slugs.forEach(([t, txt], i) => { const d = document.createElement('div'); d.className = 'slug'; d.textContent = txt; $('#slugs').appendChild(d);
+  const tEnd = slugs[i + 1] ? slugs[i + 1][0] : null; set(d, { opacity: 0 }, 0); tl.fromTo(d, { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: .6 }, t + .05);
+  if (tEnd != null) set(d, { opacity: 0 }, tEnd); });
+// the bars lift away when the fix arrives: the picture opens up
+tl.to(['#barT', '#barB'], { scaleY: 0, duration: .9, ease: 'expo.inOut' }, S('fix') - .2);
+
+// ---- 1 hook -------------------------------------------------------------------------------------------
+tl.fromTo('#black', { opacity: 1 }, { opacity: 0, duration: .5, ease: 'power2.out' }, 0);
+scrims(0, S('why') - .1);
+show('#hookPre', .15, S('nobody') - .05, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: .6 });
+show('#hookN', .2, S('nobody') - .05, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .8 });
+count('#hookV', 2000, .25, C('hook', 'two') - .1, v => Math.round(v).toLocaleString('en-IN'));
+tl.fromTo('#hookN', { scale: 1 }, { scale: 1.06, duration: .25, yoyo: true, repeat: 1, ease: 'power2.out', transformOrigin: '0% 100%' }, C('hook', 'two') + .1);
+lines('#tHook', S('hook') + 2.2, S('nobody') - .05);
+lines('#tNobody', S('nobody') + .02, S('why') - .05, { times: [S('nobody') + .02, S('nobody') + .4] });
+lines('#tWhy', S('why') - .05, S('sealed') - .1);
+tl.fromTo('#tWhy', { scale: 1.25 }, { scale: 1, duration: .8 }, S('why') - .05);
+set('#dim', { opacity: .6 }, S('why') - .06); set('#dim', { opacity: 0 }, S('sealed') - .08);
+flash(S('sealed') - .08, .35, .3);
+
+// ---- 2 sealed for months -------------------------------------------------------------------------------
+scrims(S('sealed'), S('shut') + .5, ['#scrimB', '#scrimT']);
+show('#cal', S('sealed') + .1, S('shut') + .6, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: .7 });
+tl.fromTo('#cal .fill', { width: '0%' }, { width: '100%', duration: C('sealed', 'months') - S('sealed') + .2, ease: 'power1.inOut' }, S('sealed') + .4);
+$$('#cal .m').forEach((m, i) => tl.to(m, { color: '#f4efe6', duration: .2 }, S('sealed') + .4 + i * (C('sealed', 'months') - S('sealed') + .2) / 8));
+lines('#tSealed', S('sealed') + .1, S('shut') - .05, { times: [S('sealed') + .1, C('sealed', 'months') - .15] });
+
+// the door: two panels shut across the frame, the lock snaps, oxygen drains away
+const tShut = S('shut') + .75;
+set(['#doorL', '#doorR'], { xPercent: 0 }, 0); set('#doorL', { xPercent: -101 }, 0); set('#doorR', { xPercent: 101 }, 0);
+tl.to('#doorL', { xPercent: 0, duration: .55, ease: 'power3.in' }, tShut); tl.to('#doorR', { xPercent: 0, duration: .55, ease: 'power3.in' }, tShut);
+tl.fromTo('#cam', { x: 0 }, { x: 8, duration: .05, yoyo: true, repeat: 3, ease: 'none' }, tShut + .55);
+flash(tShut + .55, .18, .25);
+set('#lock', { opacity: 0 }, 0); set('#lock', { opacity: 1 }, tShut + .6);
+tl.fromTo('#lock', { scale: .4, y: 30 }, { scale: 1, y: 0, duration: .6, ease: 'back.out(2.2)' }, tShut + .6);
+tl.fromTo('#lock path', { y: -22 }, { y: 0, duration: .25, ease: 'power4.in' }, tShut + .95);
+lines('#sealTxt', C('shut', 'nobody') - .05, S('moment') - .02, { times: [C('shut', 'nobody') - .05, C('shut', 'nobody') + .3] });
+show('#o2', tShut + .8, S('moment') - .02);
+count('#o2v', 1.5, tShut + .8, S('moment') - tShut - 1, v => v.toFixed(1) + '%', 21);
+set('#lock', { opacity: 0 }, S('moment') - .02);
+tl.to('#doorL', { xPercent: -101, duration: .5, ease: 'power3.inOut' }, S('moment') - .15); tl.to('#doorR', { xPercent: 101, duration: .5, ease: 'power3.inOut' }, S('moment') - .15);
+
+// ---- 3 the gate --------------------------------------------------------------------------------------------
+scrims(S('moment'), S('truck') - .1);
+lines('#tMoment', S('moment') + .15, C('moment', 'At') - .05);
+show('#target', C('moment', 'At') - .1, S('question') - .05, { opacity: 0, scale: 1.25 }, { opacity: 1, scale: 1, duration: .6 });
+tl.to('#target', { scale: .96, duration: .4, yoyo: true, repeat: 2, ease: 'sine.inOut' }, C('moment', 'At') + .5);
+lines('#tGate', C('moment', 'At') - .05, S('question') - .05);
+lines('#tQuestion', S('question') + .02, S('guess') - .05, { times: [S('question') + .02, S('question') + .35] });
+show('#choice', S('question') + .5, E('guess') + .3, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: .6 });
+// the pointer can't decide
+set('#cursor', { opacity: 0 }, 0); set('#cursor', { opacity: 1, x: 520, y: 0 }, S('question') + .9);
+tl.to('#cursor', { x: 300, duration: .45, ease: 'sine.inOut' }, S('question') + .95);
+tl.to('#cursor', { x: 760, duration: .6, ease: 'sine.inOut' }, S('question') + 1.45);
+tl.to('#cursor', { x: 330, duration: Math.min(.6, S('guess') + .15 - S('question') - 2.1), ease: 'sine.inOut' }, S('question') + 2.1);
+tl.to('#cursor', { x: 530, duration: .5, ease: 'sine.inOut' }, S('guess') + .2);
+set('#cursor', { opacity: 0 }, E('guess') + .3);
+lines('#tGuess', S('guess') + .02, S('truck') - .05, { times: [S('guess') + .02, C('guess', 'guess') - .1] });
+tl.fromTo('#scribP', { strokeDasharray: '0 100' }, { strokeDasharray: '100 0', duration: .5, ease: 'power2.inOut' }, C('guess', 'guess') + .25);
+set('#scrib', { opacity: 0 }, 0); set('#scrib', { opacity: 1 }, C('guess', 'guess') + .2); set('#scrib', { opacity: 0 }, S('truck') - .05);
+
+// ---- 4 the sample: 150 crates, 5 checked, then none -------------------------------------------------------
+scrims(S('truck'), S('rain') - .1, ['#scrimB', '#scrimT']);
+const lit = [17, 52, 88, 113, 141], cells = [];
+for (let i = 0; i < 150; i++) { const c = document.createElement('i'), col = i % 15, row = Math.floor(i / 15);
+  c.style.left = (col * 56) + 'px'; c.style.top = (row * 56) + 'px'; $('#grid').appendChild(c); cells.push(c); }
+show('#gridK', S('truck') + .05, S('rain') - .1, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: .5 });
+set('#grid', { opacity: 0 }, 0); set('#grid', { opacity: 1 }, S('truck'));
+cells.forEach((c, i) => tl.fromTo(c, { opacity: 0, scale: .2 }, { opacity: 1, scale: 1, duration: .35, ease: 'back.out(2)' }, S('truck') + .05 + (i % 15) * .03 + Math.floor(i / 15) * .05));
+lines('#s150', S('truck') + .1, C('truck', 'Only') - .1); count('#n150', 150, S('truck') + .1, 1.4);
+lit.forEach((k, j) => { set(cells[k], { attr: { class: 'on' } }, C('truck', 'Only') + .1 + j * .08);
+  tl.fromTo(cells[k], { scale: 1.8 }, { scale: 1, duration: .5, ease: 'back.out(3)' }, C('truck', 'Only') + .1 + j * .08); });
+tl.to(cells.filter((_, i) => !lit.includes(i)), { opacity: .5, duration: .4 }, C('truck', 'Only') + .1);
+lines('#s5', C('truck', 'Only') - .05, S('rush') - .05, { times: [C('truck', 'Only') - .05, C('truck', 'Only') + .5] });
+// rush: the five go dark one by one with every cut
+lit.forEach((k, j) => set(cells[k], { attr: { class: '' }, opacity: .35 }, S('rush') + .25 + j * .25));
+[1, 2, 3].forEach(k => flash(S('rush') + k * (S('rain') - S('rush')) / 4, .18, .18));
+lines('#s0', C('rush', 'none') - .3, S('rain') - .08, { times: [C('rush', 'none') - .3, C('rush', 'none') - .05] });
+tl.to('#grid', { opacity: 0, duration: .25 }, S('rain') - .15);
+
+// ---- 5 the 2024 season -------------------------------------------------------------------------------------
+scrims(S('rain'), S('fix') - .2, ['#scrimB', '#scrimT']);
+// rain: deterministic streaks drawn from the timeline clock
+{ const cv = $('#rain'), g = cv.getContext('2d'), R = Array.from({ length: 260 }, (_, i) => [(i * 733) % 1180 - 50, (i * 397) % 1920, 18 + (i * 13) % 26, .25 + (i % 7) / 18]);
+  const o = { t: 0 }; const draw = () => { g.clearRect(0, 0, 1080, 1920); g.lineCap = 'round';
+    R.forEach(([x, y, l, a]) => { const yy = (y + o.t * 2600) % 2000 - 60, xx = x - (yy * .18); g.strokeStyle = `rgba(220,230,240,${a})`; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(xx, yy); g.lineTo(xx - l * .18, yy + l * 2.2); g.stroke(); }); };
+  tl.fromTo(o, { t: 0 }, { t: S('rushed') - S('rain') + .4, duration: S('rushed') - S('rain') + .4, ease: 'none', onUpdate: draw }, S('rain') - .2);
+  set('#rain', { opacity: 0 }, 0); tl.to('#rain', { opacity: .75, duration: .4 }, S('rain') - .2); tl.to('#rain', { opacity: 0, duration: .4 }, S('rushed') + .1); }
+show('#date', S('rain') + .05, S('rushed') - .05, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: .6 });
+set('#map', { opacity: 0 }, 0); set('#map', { opacity: 1 }, S('rain'));
+['#nS', '#tS'].forEach(s => tl.fromTo(s, { opacity: 0 }, { opacity: 1, duration: .4 }, S('rain') + .1));
+tl.fromTo('#route', { strokeDasharray: '0 100' }, { strokeDasharray: '100 0', duration: 1.2, ease: 'power2.inOut' }, S('rain') + .2);
+['#nJ', '#tJ'].forEach(s => tl.fromTo(s, { opacity: 0 }, { opacity: 1, duration: .4 }, S('rain') + 1.25));
+set(['#xmark', '#tX'], { opacity: 0 }, 0);
+set('#xmark', { opacity: 1 }, C('rain', 'rain') + .5); svgT('#xmark', { s: 2.4 }, { s: 1 }, C('rain', 'rain') + .5, .45, 'back.out(2)', [475, 425]);
+tl.fromTo('#tX', { opacity: 0 }, { opacity: 1, duration: .4 }, C('rain', 'rain') + .8);
+tl.to('#route', { stroke: '#ff5a4e', duration: .3 }, C('rain', 'rain') + .55);
+tl.to('#map', { opacity: 0, duration: .3 }, S('rushed') - .1);
+lines('#tRain', S('rain') + .05, S('rushed') - .05, { times: [S('rain') + .05, C('rain', 'rain') + .1] });
+// rushed in: a stream of fruit pours into the chamber; amber ones are unripe
+{ const cv = $('#flow'), g = cv.getContext('2d'), N = 220, P = Array.from({ length: N }, (_, i) => ({ x: 140 + (i * 211) % 800, d: (i * 37 % 100) / 100 * 1.6, bad: (i * 7919) % 100 < 20 }));
+  const box = { x: 290, y: 330, w: 500, h: 420 };
+  const o = { t: 0 }, T = S('opened') - S('rushed');
+  const draw = () => { g.clearRect(0, 0, 1080, 1920);
+    g.strokeStyle = 'rgba(244,239,230,.85)'; g.lineWidth = 4; g.strokeRect(box.x, box.y, box.w, box.h);
+    g.font = '500 22px JetBrains Mono'; g.fillStyle = 'rgba(244,239,230,.8)'; g.fillText('CHAMBER 07', box.x, box.y - 22);
+    let inBad = 0, inAll = 0;
+    P.forEach((p, i) => { const k = Math.min(1, Math.max(0, (o.t - p.d) / 1.1)); if (k <= 0) return;
+      const e = 1 - Math.pow(1 - k, 3), sx = p.x, sy = 1250, tx = box.x + 30 + (i * 53) % (box.w - 60), ty = box.y + box.h - 30 - Math.floor(i / 9) * 17 % (box.h - 60);
+      const x = sx + (tx - sx) * e, y = sy + (ty - sy) * e - Math.sin(e * Math.PI) * 160;
+      if (k >= 1) { inAll++; if (p.bad) inBad++; }
+      const showBad = p.bad && o.t > (C('rushed', 'Unripe') - S('rushed'));
+      g.fillStyle = showBad ? '#f2b544' : 'rgba(244,239,230,.92)'; g.beginPath(); g.arc(x, y, showBad ? 9 : 7, 0, 7); g.fill();
+      if (showBad) { g.strokeStyle = 'rgba(242,181,68,.5)'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 15, 0, 7); g.stroke(); } });
+    g.fillStyle = 'rgba(244,239,230,.75)'; g.fillText(`IN: ${inAll}`, box.x + box.w - 120, box.y - 22); };
+  set('#flow', { opacity: 0 }, 0); tl.to('#flow', { opacity: 1, duration: .3 }, S('rushed'));
+  tl.fromTo(o, { t: 0 }, { t: T, duration: T, ease: 'none', onUpdate: draw }, S('rushed'));
+  tl.to('#flow', { opacity: 0, duration: .3 }, S('opened') - .35); }
+lines('#tRushed', S('rushed') + .05, C('rushed', 'Unripe') - .1);
+lines('#tUnripe', C('rushed', 'Unripe') - .05, S('opened') - .1, { times: [C('rushed', 'Unripe') - .05, C('rushed', 'Unripe') + .5] });
+// months later: shut doors, the calendar runs, then the doors open on the damage
+set('#doorL', { xPercent: 0 }, S('opened') - .25); set('#doorR', { xPercent: 0 }, S('opened') - .25);
+set(['#flip', '#flipSub'], { opacity: 0 }, 0); set(['#flip', '#flipSub'], { opacity: 1 }, S('opened') - .2);
+{ const M = ['OCT', 'NOV', 'DEC', 'JAN', 'FEB', 'MAR'], o = { i: 0 };
+  tl.fromTo(o, { i: 0 }, { i: M.length - .001, duration: M.length * .17, ease: 'none', onUpdate: () => { $('#flip').textContent = M[Math.floor(o.i)]; }, onStart: () => { $('#flip').textContent = M[0]; } }, S('opened') - .2);
+  M.forEach((m, i) => tl.fromTo('#flip', { y: -24 }, { y: 0, duration: .14, ease: 'power2.out' }, S('opened') - .2 + i * .17)); }
+const tOpen = S('opened') + .9;
+set(['#flip', '#flipSub'], { opacity: 0 }, tOpen);
+tl.to('#doorL', { xPercent: -101, duration: 1.1, ease: 'power2.inOut' }, tOpen); tl.to('#doorR', { xPercent: 101, duration: 1.1, ease: 'power2.inOut' }, tOpen);
+flash(tOpen, .25, .5);
+lines('#tLater', tOpen + .1, C('opened', 'shrivelled') - .05);
+lines('#tShriv', C('opened', 'shrivelled') - .05, S('fix') - .15, { times: [C('opened', 'shrivelled') - .05, C('opened', 'shrivelled') + .55, C('opened', 'shrivelled') + 1.1] });
+tl.fromTo('#cam', { scale: 1 }, { scale: 1.05, duration: S('fix') - C('opened', 'shrivelled'), ease: 'none' }, C('opened', 'shrivelled'));
+set('#cam', { scale: 1 }, S('fix'));
+set('#black', { opacity: 1 }, S('fix') - .12); set('#black', { opacity: 0 }, S('fix') + .02);
+
+// ---- 6 the fix (short) -------------------------------------------------------------------------------------
+tl.fromTo('#leak', { opacity: 0 }, { opacity: .8, duration: .6, ease: 'power2.out' }, S('fix'));
+tl.to('#leak', { opacity: 0, duration: .8 }, S('fix') + 1.2);
+scrims(S('fix'), S('photo') - .1, ['#scrimT']);
+tl.fromTo('#dim', { opacity: 0 }, { opacity: .55, duration: .4 }, S('fix')); tl.to('#dim', { opacity: 0, duration: .35 }, S('photo') - .3);
+set('#fixMark', { opacity: 0 }, 0); set('#fixMark', { opacity: 1 }, S('fix') + .02);
+svgT('#fixMark .all', { s: .1 }, { s: 1 }, S('fix') + .02, .9, 'expo.out', [100, 127]);
+tl.fromTo('#fixMark .sweep', { attr: { x: -140 } }, { attr: { x: 300 }, duration: 1, ease: 'power2.inOut' }, S('fix') + .5);
+lines('#fixWord', S('fix') + .1, S('photo') - .1, { stagger: .08 });
+lines('#fixTag', S('fix') + .55, S('photo') - .1);
+tl.to('#fixMark', { opacity: 0, duration: .25 }, S('photo') - .35);
+// one photo: viewfinder, focus, shutter
+const F = C('photo', 'Every') - .05;
+show('#vf', S('photo') - .05, F + .05, { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: .7 });
+lines('#tPhoto', S('photo') + .05, F - .05);
+scrims(S('photo'), null, ['#scrimB']);
+flash(F - .05, .9, .45);
+// detection on the frozen crate
+const apples = [[440,820,660,1040,'A',.97],[670,770,900,940,'A',.95],[670,900,860,1090,'A',.96],[800,1020,976,1160,'A',.93],[24,950,250,1150,'A',.94],
+  [290,1030,484,1220,'B',.88],[4,1144,160,1310,'B',.86],[164,1140,380,1340,'A',.95],[426,1120,644,1336,'A',.97],[644,1150,940,1470,'B',.91],
+  [104,1340,340,1580,'A',.96],[330,1336,700,1620,'A',.94],[270,1490,530,1730,'A',.93],[656,1530,940,1800,'A',.95],[870,1460,1080,1720,'A',.92],
+  [980,1220,1080,1440,'B',.84],[860,1160,1024,1290,'A',.9],[100,1580,270,1760,'A',.93],[0,1280,90,1480,'A',.91]];
+const nB = apples.filter(a => a[4] === 'B').length, nA = apples.length - nB, TE = S('know');
+apples.forEach(([x1, y1, x2, y2, g, c], i) => {
+  const r = document.createElementNS(NS, 'rect'), pad = 6;
+  Object.entries({ x: x1 + pad, y: y1 + pad, width: x2 - x1 - pad * 2, height: y2 - y1 - pad * 2, rx: 22, class: 'box', pathLength: 100 }).forEach(([k, v]) => r.setAttribute(k, v));
+  r.style.strokeDasharray = '0 100'; r.style.opacity = 0; $('#det').appendChild(r);
+  const p = document.createElement('div'); p.className = 'tagA'; p.textContent = `${g} ${c.toFixed(2)}`; p.style.opacity = 0;
+  Object.assign(p.style, { left: (x1 + pad + 10) + 'px', top: (y1 + pad - 16) + 'px', background: g === 'A' ? 'var(--good)' : 'var(--amber)' }); $('#tags').appendChild(p);
+  const t = F + .25 + (y1 - 770) / 1030 * .7 + (i % 3) * .04;
+  tl.fromTo(r, { strokeDasharray: '0 100', opacity: 1 }, { strokeDasharray: '100 0', duration: .45, ease: 'power2.inOut' }, t);
+  const tg = F + 1.1 + i * .035;
+  tl.to(r, { stroke: g === 'A' ? '#3ddc84' : '#f2b544', duration: .25 }, tg);
+  tl.fromTo(p, { opacity: 0, y: 8, scale: .8 }, { opacity: 1, y: 0, scale: 1, duration: .4, ease: 'back.out(2)' }, tg);
+  tl.to([r, p], { opacity: 0, duration: .25 }, TE - .25);
+});
+show('#panel', F + .2, TE, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: .6 });
+count('#nDet', apples.length, F + .25, 1.0); count('#nA', nA, F + 1.1, .8); count('#nB', nB, F + 1.2, .7);
+show('#timer', F + .2, TE);
+count('#tv', 2.8, F + .2, C('photo', 'seconds') - F + .2, v => v.toFixed(1));
+lines('#tEvery', F + .05, TE - .05, { times: [F + .05, C('photo', 'seconds') - .45] });
+tl.fromTo('#cam', { scale: 1 }, { scale: 1.05, duration: TE - F, ease: 'sine.inOut' }, F); set('#cam', { scale: 1 }, TE);
+// the payoff line
+scrims(S('know'), S('cta') - .2, ['#scrimB']);
+lines('#tKnow', S('know') + .03, C('know', 'before') - .1, { times: [S('know') + .03, S('know') + .45] });
+lines('#tBefore', C('know', 'before') - .1, S('cta') - .15, { times: [C('know', 'before') - .1, C('know', 'before') + .35] });
+
+// ---- CTA -------------------------------------------------------------------------------------------------------
+const N = S('cta') - .1;
+set('#stagebg', { opacity: 0 }, 0); tl.to('#stagebg', { opacity: 1, duration: .35, ease: 'power2.inOut' }, N - .2);
+set('#endmark', { opacity: 0 }, 0); set('#endmark', { opacity: 1 }, N + .05);
+svgT('#endmark .all', { s: .05 }, { s: 1 }, N + .05, 1.0, 'expo.out', [100, 127]);
+tl.fromTo('#endmark .band', { attr: { x: 100, width: 0 } }, { attr: { x: 0, width: 200 }, duration: .7, ease: 'expo.inOut' }, N + .15);
+tl.fromTo('#endmark .lens', { attr: { r: 0 } }, { attr: { r: 32 }, duration: .8 }, N + .25);
+tl.fromTo('#endmark .hl', { attr: { r: 0 } }, { attr: { r: 8.5 }, duration: .5, ease: 'back.out(3)' }, N + .5);
+tl.fromTo('#endmark .sweep', { attr: { x: -140 } }, { attr: { x: 300 }, duration: 1.1, ease: 'power2.inOut' }, N + .9);
+lines('#endword', N + .15, null, { stagger: .08 });
+lines('#endtag', N + .6, null);
+tl.fromTo('#btn', { opacity: 0, y: 40, scale: .9 }, { opacity: 1, y: 0, scale: 1, duration: .7, ease: 'back.out(1.6)' }, C('cta', 'Book') - .15);
+tl.fromTo('#bio', { opacity: 0 }, { opacity: 1, duration: .6 }, C('cta', 'Book') + .4);
+// a finger taps the button
+const TT = C('cta', 'Book') + 1.4;
+set('#tap', { opacity: 0 }, 0);
+tl.fromTo('#tap', { opacity: 0, x: 120, y: 160 }, { opacity: .9, x: 0, y: 0, duration: .6, ease: 'power3.out' }, TT - .6);
+tl.to('#tap', { scale: .8, duration: .1, yoyo: true, repeat: 1, ease: 'power2.inOut' }, TT);
+tl.to('#btn', { scale: .95, duration: .1, yoyo: true, repeat: 1, ease: 'power2.inOut' }, TT);
+set('#ripple', { opacity: 0 }, 0); tl.fromTo('#ripple', { opacity: .9, scale: 1 }, { opacity: 0, scale: 14, duration: .9, ease: 'power2.out' }, TT + .05);
+tl.to('#tap', { opacity: 0, duration: .4 }, TT + .5);
+tl.to('#btn', { boxShadow: '0 24px 110px rgba(227,38,47,.85)', duration: .8, yoyo: true, repeat: 3, ease: 'sine.inOut' }, TT + .4);
+tl.to('#black', { opacity: 1, duration: .6, ease: 'power1.in' }, TOTAL - .6);
+tl.set({}, {}, TOTAL);
+
+const img = $('#bg');
+window.__duration = TOTAL;
+window.__seek = async (t, frame) => {
+  const src = `frames/${String(frame).padStart(5, '0')}.jpg`;
+  if (!img.src.endsWith(src)) { img.src = src; await img.decode().catch(() => {}); }
+  tl.seek(t, false);
+};
+window.__readyFlag = true;
+})();
+window.__ready = new Promise(res => { const w = () => window.__readyFlag ? Promise.all([document.fonts.ready, ...[...document.images].map(i => i.decode().catch(() => {}))]).then(res) : setTimeout(w, 50); w(); });
+</script>
+</body>
+</html>
