@@ -290,7 +290,7 @@ lines('#tGrade', S('grade') + .05, TE - .3, { times: [S('grade') + .05, TB - .25
 lines('#tSecs', C('grade', 'seconds') - .35, TE - .3);
 // the phone the storage already owns
 tl.fromTo('#phone', { opacity: 0, y: 700, rotation: -8 }, { opacity: 1, y: 0, rotation: -3, duration: 1.0 }, S('phone') + .05);
-tl.to('#phone', { rotation: 2, y: -16, duration: 2.5, ease: 'sine.inOut' }, S('phone') + 1.0);
+tl.to('#phone', { rotation: 2, y: -16, duration: Math.max(.3, S('acc1') - .5 - (S('phone') + 1.0)), ease: 'sine.inOut' }, S('phone') + 1.0);  // ends before the exit, or it pins the phone
 tl.to('#phone', { y: -1400, rotation: 8, duration: .5, ease: 'expo.in' }, S('acc1') - .45);
 lines('#tPhone', S('phone') + .1, S('acc1') - .3, { times: [S('phone') + .1, S('phone') + .9] });
 // accuracy
