@@ -8,6 +8,9 @@ VO_AT = 1.2            # narration starts this far into the film
 TAIL = 6.0             # end card holds after the last word
 norm = lambda w: re.sub(r'[^a-z0-9]', '', w.lower().replace('malice', 'malus'))
 
+SPOKEN = {'20': ['twenty'], '150': ['hundred', 'and', 'fifty'], '400': ['four', 'hundred'], '99': ['ninety-nine'],
+          '95': ['ninety-five'], '%': ['percent'], '2,000': ['two', 'thousand'], '2000': ['two', 'thousand'], 'tons': ['tonnes']}
+
 def script_words():
     out = []
     for li, (name, text, _) in enumerate(LINES):
@@ -31,7 +34,12 @@ def from_vo(path):
     from faster_whisper import WhisperModel
     m = WhisperModel('base.en', device='cpu', compute_type='int8')
     segs, _ = m.transcribe(path, word_timestamps=True)
-    heard = [(w.word.strip(), w.start, w.end) for s in segs for w in s.words]
+    heard = []
+    for s in segs:
+        for w in s.words:   # Whisper writes numbers as digits: expand them back to the script's words
+            parts = SPOKEN.get(w.word.strip().strip('.,').lower(), [w.word.strip()])
+            step = (w.end - w.start) / len(parts)
+            heard += [(x, w.start + k * step, w.start + (k + 1) * step) for k, x in enumerate(parts)]
     sw = script_words()
     a = [norm(w) for _, w in sw]; b = [norm(w) for w, _, _ in heard]
     sm = difflib.SequenceMatcher(a=a, b=b, autojunk=False)
