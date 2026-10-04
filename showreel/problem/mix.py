@@ -46,11 +46,11 @@ if VO:
 
 # 3. the mix
 inp = ['-i', 'out/film-silent.mp4', '-i', 'out/score.wav']
-fc = [f"[1:a]volume=0.62,volume='if(between(t,{DROP},{DROP + 9}),0.8,0.72)':eval=frame,equalizer=f=2800:t=q:w=1.5:g=-3[mus]"]
+fc = [f"[1:a]volume=0.62,volume='if(between(t,{DROP},{DROP + 1.6}),0.8,if(gt(t,{DROP}),0.46,0.66))':eval=frame,equalizer=f=2800:t=q:w=1.5:g=-3[mus]"]
 if VO:
     inp += ['-i', 'out/vo_processed.wav']
     fc += [f"[2:a]asetpts=N/SR/TB,adelay={int(VO_AT * 1000)}:all=1,apad=whole_dur={DUR}[vo]", "[vo]asplit=2[vo1][vosc]",
-           "[mus][vosc]sidechaincompress=threshold=0.04:ratio=3:attack=30:release=600:makeup=1[duck]"]
+           "[mus][vosc]sidechaincompress=threshold=0.03:ratio=4:attack=25:release=500:makeup=1[duck]"]
 else:
     fc += ["[mus]anull[duck]"]
 nat, k = [], len(inp) // 2
