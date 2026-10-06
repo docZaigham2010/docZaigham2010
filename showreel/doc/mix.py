@@ -9,7 +9,7 @@ from edl import SHOTS, SRC, TL
 DUR = TL['dur']; VO_AT = TL['vo_at']; LN = TL['lines']
 CUT = 41.2                            # the score's own drop-out begins here (after the build)
 M_HIT = 45.0                          # where the score comes back in with a hit
-HIT_AT = LN['cta']['s'] - .15         # film time for that hit: just before "We're building a better way"
+HIT_AT = LN['late']['e'] + .12        # film time for that hit: in the breath after "too late to check"
 ECHO = (2.0, 9.0)                     # the opening drone, replayed quietly under the hardest lines
 OUT = os.environ.get('OUT', 'out/MalusLens_BeforeTheDoorShuts.mp4')
 def run(args): subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', *args], check=True)
@@ -20,10 +20,12 @@ run(['-i', 'vo.wav', '-af', "highpass=f=80,equalizer=f=3200:t=q:w=1.2:g=3,equali
 
 inp = ['-i', 'out/film-silent.mp4', '-i', 'music.mp3', '-i', 'out/vo_processed.wav']
 inp += ['-i', 'music.mp3', '-i', 'music.mp3']
-fc = [f"[1:a]atrim=0:{CUT},asetpts=PTS-STARTPTS,afade=t=in:st=0:d=0.6,afade=t=out:st={CUT - .5}:d=.5[m1]",
+fc = [f"[1:a]atrim=0:{CUT},asetpts=PTS-STARTPTS,afade=t=in:st=0:d=0.6,afade=t=out:st={CUT - .5}:d=0.5[m1]",
       f"[3:a]atrim={ECHO[0]}:{ECHO[1]},asetpts=PTS-STARTPTS,volume=0.45,afade=t=in:d=1.2,afade=t=out:st={ECHO[1] - ECHO[0] - 1.5}:d=1.5,adelay={int((CUT - .3) * 1000)}:all=1[m2]",
       f"[4:a]atrim={M_HIT},asetpts=PTS-STARTPTS,adelay={int(HIT_AT * 1000)}:all=1[m3]",
       f"[m1][m2][m3]amix=inputs=3:normalize=0,apad=whole_dur={DUR},atrim=0:{DUR},volume=0.5,"
+      f"volume='if(between(t,{LN['rain']['s'] - .2},{LN['rushed']['s']}),0.62,1)':eval=frame,"   # the build peaks under the rain line
+
       f"equalizer=f=2800:t=q:w=1.5:g=-3,afade=t=out:st={DUR - 2.5}:d=2.5[mus]",
       f"[2:a]asetpts=N/SR/TB,adelay={int(VO_AT * 1000)}:all=1,apad=whole_dur={DUR}[vo]", "[vo]asplit=2[vo1][vosc]",
       "[mus][vosc]sidechaincompress=threshold=0.03:ratio=4:attack=25:release=500:makeup=1[duck]"]
