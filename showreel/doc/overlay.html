@@ -103,7 +103,6 @@
   #btn { left: 50%; top: 1150px; width: 560px; margin-left: -280px; padding: 34px 0; text-align: center; border-radius: 100px; background: var(--brand);
          font: 800 60px var(--cond); letter-spacing: .06em; color: #fff; box-shadow: 0 24px 70px rgba(227,38,47,.45); opacity: 0; }
   #ripple { left: 540px; top: 1214px; width: 40px; height: 40px; margin: -20px; border-radius: 50%; border: 3px solid #fff; opacity: 0; }
-  #bio { left: 0; right: 0; top: 1330px; text-align: center; font-size: 24px; color: rgba(244,239,230,.7); opacity: 0; }
   #tap { left: 600px; top: 1250px; width: 70px; height: 70px; opacity: 0; z-index: 8; }
 
   #flash { background: #fff; opacity: 0; z-index: 30; }
@@ -117,7 +116,6 @@
   #years .y.now { color: var(--paper); }
   #lateTxt { z-index: 6; top: 960px; text-align: center; opacity: 0; }
   #endtag { left: 0; right: 0; top: 960px; text-align: center; }
-  #bio { left: 0; right: 0; top: 1330px; text-align: center; font-size: 22px; color: rgba(244,239,230,.7); opacity: 0; }
 </style>
 </head>
 <body>
@@ -201,7 +199,6 @@
   <div id="btn" class="abs">FOLLOW</div>
   <div id="ripple" class="abs"></div>
   <svg id="tap" class="abs" viewBox="0 0 70 70"><circle cx="35" cy="35" r="26" fill="rgba(255,255,255,.9)"/></svg>
-  <div id="bio" class="abs mono">Part 2 · how we fix it — <span style="color:var(--amber)">coming soon</span></div>
 
   <!-- cinema bars -->
   <div id="barT" class="abs bar"><div class="meta mono l">Malus Lens · Field notes</div><div class="meta mono r"><span class="rec"></span><span id="tc">00:00:00</span></div></div>
@@ -442,7 +439,6 @@ tl.fromTo('#endmark .sweep', { attr: { x: -140 } }, { attr: { x: 300 }, duration
 lines('#endtag', S('cta') + .05, null);
 lines('#endword', C('cta', 'Follow') - .2, null, { stagger: .08 });
 tl.fromTo('#btn', { opacity: 0, y: 40, scale: .9 }, { opacity: 1, y: 0, scale: 1, duration: .7, ease: 'back.out(1.6)' }, C('cta', 'Follow') - .05);
-tl.fromTo('#bio', { opacity: 0 }, { opacity: 1, duration: .6 }, C('cta', 'Follow') + .5);
 const TT = C('cta', 'Follow') + 1.5;
 set('#tap', { opacity: 0 }, 0);
 tl.fromTo('#tap', { opacity: 0, x: 120, y: 160 }, { opacity: .9, x: 0, y: 0, duration: .6, ease: 'power3.out' }, TT - .6);
