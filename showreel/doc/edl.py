@@ -43,13 +43,10 @@ def shots():
         (s('rushed'), c('rushed', 'Unripe') - .1, 2904, 10.5, 1.15, .50, 1.04, 1.10, 'dread', 'rushed in'),
         (c('rushed', 'Unripe') - .1, s('opened'), 2939, 8.0, 1.0, .50, 1.04, 1.12, 'dread', 'unripe fruit went in'),
         (s('opened'), c('opened', 'shrivelled') - .1, 2940, 24.0, .6, .50, 1.00, 1.10, 'dread', 'months later, doors opened'),
-        (c('opened', 'shrivelled') - .1, s('fix'), 2937, 12.6, .4, .28, 1.06, 1.18, 'dread', 'shrivelled, spoiled'),
-        (s('fix'), s('photo'), 2891, 1.0, 1.0, .50, 1.02, 1.08, 'warm', 'Malus Lens fixes that moment'),
-        (s('photo'), c('photo', 'Every') - .05, 2891, 6.0, 1.0, .72, 1.00, 1.04, 'warm', 'one photo of a crate'),
-        (c('photo', 'Every') - .05, s('know'), 2891, 7.7, 0.0, .72, 1.00, 1.00, 'warm', 'freeze: every apple graded'),
-        (s('know'), c('know', 'before') - .1, 2905, .5, 1.0, .55, 1.00, 1.08, 'warm', 'know what goes in'),
-        (c('know', 'before') - .1, s('cta'), 2936, 1.0, 1.0, .46, 1.04, 1.10, 'warm', 'before the door shuts'),
-        (s('cta'), TL['dur'], None, 0, 1, 0, 1, 1, '', 'black stage: CTA'),
+        (c('opened', 'shrivelled') - .1, s('every'), 2937, 12.6, .4, .28, 1.06, 1.18, 'dread', 'shrivelled, spoiled'),
+        (s('every'), s('late'), 2906, 1.0, .7, .50, 1.04, 1.12, 'dread', 'every single year: the full hall'),
+        (s('late'), s('cta'), 2938, 0.0, .3, .55, 1.06, 1.14, 'dread', 'too late to check: the door again'),
+        (s('cta'), TL['dur'], None, 0, 1, 0, 1, 1, '', 'black stage: follow'),
     ]
 SHOTS = shots()
 

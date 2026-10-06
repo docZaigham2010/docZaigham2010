@@ -1,4 +1,4 @@
-# The documentary reel: hook -> how CA storage works -> the gate guess -> 2024 -> the fix (short) -> CTA.
+# The documentary reel, problem only: hook -> how CA storage works -> the gate guess -> 2024 -> every year -> CTA.
 # "Malice Lens" is the spelling that makes the voice say MAL-us (like "palace").
 # (name, text, cue words)
 LINES = [
@@ -15,10 +15,9 @@ LINES = [
     ('rain',     "In 2024, rain shut the highway.", ['rain']),
     ('rushed',   "Growers rushed their apples in. Unripe fruit went in with the good.", ['Unripe']),
     ('opened',   "Months later, the doors opened... to shrivelled, spoiled apples.", ['shrivelled']),
-    ('fix',      "Malice Lens fixes that moment.", []),
-    ('photo',    "One photo of a crate. Every apple, graded in seconds.", ['Every', 'seconds']),
-    ('know',     "Know what goes in... before the door shuts.", ['before']),
-    ('cta',      "Malice Lens. Book a demo.", ['Book']),
+    ('every',    "And it happens, quietly, every single year.", ['every']),
+    ('late',     "Once the door shuts... it's too late to check.", ['late']),
+    ('cta',      "We're building a better way. Follow Malice Lens.", ['Follow']),
 ]
 def voice_text():
     return ' '.join(t for _, t, _ in LINES)
